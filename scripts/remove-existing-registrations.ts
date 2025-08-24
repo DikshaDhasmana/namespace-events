@@ -1,5 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Supabase configuration - replace with your actual credentials
+const SUPABASE_URL = "https://gvwkdvpdmjagdbincqmu.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2d2tkdnBkbWphZ2RiaW5jcW11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1OTI1MDAsImV4cCI6MjA3MTE2ODUwMH0.h-TgIiRzJWksdSmXPWZ1eGklLYe5yjJFaDda83VC_cs";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
 /**
  * Script to remove all existing event registrations
  * This should be run once to enforce the new profile completion requirement

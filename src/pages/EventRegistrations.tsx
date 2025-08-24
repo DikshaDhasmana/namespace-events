@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import EmailComposer from '@/components/EmailComposer';
 
 interface Registration {
   id: string;
@@ -37,6 +38,7 @@ const EventRegistrations = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const { eventId } = useParams<{ eventId: string }>();
   const { isAdminAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
@@ -117,9 +119,20 @@ const EventRegistrations = () => {
               <p className="text-muted-foreground">{event.name}</p>
             )}
           </div>
-          <Badge variant="secondary" className="ml-auto">
-            {registrations.length} registrations
-          </Badge>
+          <div className="ml-auto flex items-center gap-2">
+            <Badge variant="secondary">
+              {registrations.length} registrations
+            </Badge>
+            {registrations.length > 0 && (
+              <Button 
+                onClick={() => setIsEmailComposerOpen(true)}
+                className="ml-2"
+              >
+                <MailIcon className="h-4 w-4 mr-2" />
+                Email Applicants
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -251,6 +264,16 @@ const EventRegistrations = () => {
           </div>
         )}
       </div>
+
+      <EmailComposer 
+        isOpen={isEmailComposerOpen} 
+        onClose={() => setIsEmailComposerOpen(false)} 
+        recipients={registrations.map(reg => ({ 
+          email: reg.profiles.email, 
+          name: reg.profiles.full_name || 'Applicant'
+        }))}
+        eventName={event?.name}
+      />
     </div>
   );
 };

@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 .env
 TODO.md
+.env
+.env.example
+.env
+.env
+.env
