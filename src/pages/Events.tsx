@@ -78,6 +78,23 @@ export default function Events() {
       return;
     }
 
+    // Check if user has completed their profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('profile_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile?.profile_completed) {
+      toast({
+        variant: "destructive",
+        title: "Profile Incomplete",
+        description: "Please complete your profile before registering for events",
+      });
+      navigate('/profile');
+      return;
+    }
+    
     const { error } = await supabase
       .from('registrations')
       .insert([{ user_id: user.id, event_id: eventId }]);

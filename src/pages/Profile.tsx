@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Calendar } from 'lucide-react';
+import { User, Mail, Calendar, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +17,12 @@ interface Profile {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  phone_number: string | null;
+  date_of_birth: string | null;
+  academic_info: string | null;
+  tech_stack: string[] | null;
+  skills: string[] | null;
+  profile_completed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -53,12 +61,16 @@ export default function Profile() {
           email: user.email || '',
           full_name: user.user_metadata?.full_name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
-        };
-        setProfile({
-          ...newProfile,
+          phone_number: null,
+          date_of_birth: null,
+          academic_info: null,
+          tech_stack: null,
+          skills: null,
+          profile_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        });
+        };
+        setProfile(newProfile);
       }
     } else {
       setProfile(data);
@@ -74,6 +86,14 @@ export default function Profile() {
 
     const formData = new FormData(e.currentTarget);
     const fullName = formData.get('fullName') as string;
+    const phoneNumber = formData.get('phoneNumber') as string;
+    const dateOfBirth = formData.get('dateOfBirth') as string;
+    const academicInfo = formData.get('academicInfo') as string;
+    const techStack = (formData.get('techStack') as string).split(',').map(s => s.trim()).filter(s => s);
+    const skills = (formData.get('skills') as string).split(',').map(s => s.trim()).filter(s => s);
+
+    // Check if profile is completed (all required fields filled)
+    const isProfileCompleted = !!fullName && !!phoneNumber && !!dateOfBirth && !!academicInfo && techStack.length > 0 && skills.length > 0;
 
     const { error } = await supabase
       .from('profiles')
@@ -82,6 +102,13 @@ export default function Profile() {
         email: profile.email,
         full_name: fullName,
         avatar_url: profile.avatar_url,
+        phone_number: phoneNumber || null,
+        date_of_birth: dateOfBirth || null,
+        academic_info: academicInfo || null,
+        tech_stack: techStack.length > 0 ? techStack : null,
+        skills: skills.length > 0 ? skills : null,
+        profile_completed: isProfileCompleted,
+        updated_at: new Date().toISOString(),
       });
 
     if (error) {
@@ -93,9 +120,19 @@ export default function Profile() {
     } else {
       toast({
         title: "Success",
-        description: "Profile updated successfully",
+        description: isProfileCompleted ? "Profile completed successfully!" : "Profile updated successfully",
       });
-      setProfile(prev => prev ? { ...prev, full_name: fullName } : null);
+      setProfile(prev => prev ? { 
+        ...prev, 
+        full_name: fullName,
+        phone_number: phoneNumber || null,
+        date_of_birth: dateOfBirth || null,
+        academic_info: academicInfo || null,
+        tech_stack: techStack.length > 0 ? techStack : null,
+        skills: skills.length > 0 ? skills : null,
+        profile_completed: isProfileCompleted,
+        updated_at: new Date().toISOString(),
+      } : null);
     }
 
     setSaving(false);
@@ -176,6 +213,75 @@ export default function Profile() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <div className="flex items-center space-x-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  defaultValue={profile.phone_number || ''}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <div className="flex items-center space-x-2">
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  type="date"
+                  defaultValue={profile.date_of_birth || ''}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="academicInfo">Academic Information</Label>
+              <div className="flex items-center space-x-2">
+                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                <Textarea
+                  id="academicInfo"
+                  name="academicInfo"
+                  defaultValue={profile.academic_info || ''}
+                  placeholder="Enter your academic background (degree, institution, etc.)"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="techStack">Tech Stack (comma-separated)</Label>
+              <div className="flex items-center space-x-2">
+                <Code className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="techStack"
+                  name="techStack"
+                  type="text"
+                  defaultValue={profile.tech_stack?.join(', ') || ''}
+                  placeholder="e.g., React, Node.js, Python, JavaScript"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="skills">Skills (comma-separated)</Label>
+              <div className="flex items-center space-x-2">
+                <Award className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="skills"
+                  name="skills"
+                  type="text"
+                  defaultValue={profile.skills?.join(', ') || ''}
+                  placeholder="e.g., Leadership, Communication, Problem Solving"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label>Member Since</Label>
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
@@ -188,6 +294,12 @@ export default function Profile() {
                 </span>
               </div>
             </div>
+
+            {profile.profile_completed && (
+              <Badge variant="secondary" className="w-full justify-center">
+                ✓ Profile Completed
+              </Badge>
+            )}
 
             <Button type="submit" disabled={saving} className="w-full">
               {saving ? 'Saving...' : 'Save Changes'}

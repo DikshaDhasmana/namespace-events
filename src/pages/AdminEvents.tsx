@@ -87,7 +87,13 @@ const AdminEvents = () => {
   };
 
   const getRegistrationCount = (event: Event): number => {
-    return event.registrations?.[0]?.count || 0;
+    // Handle different possible response formats from Supabase
+    if (Array.isArray(event.registrations)) {
+      // If registrations is an array of objects with count property
+      const countObj = event.registrations[0] as { count: number };
+      return countObj?.count || 0;
+    }
+    return 0;
   };
 
   if (!isAdminAuthenticated) {

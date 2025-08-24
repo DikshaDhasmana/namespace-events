@@ -32,9 +32,9 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const [usersResponse, eventsResponse, registrationsResponse] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact' }),
-        supabase.from('events').select('id', { count: 'exact' }),
-        supabase.from('registrations').select('id', { count: 'exact' })
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('events').select('*', { count: 'exact', head: true }),
+        supabase.from('registrations').select('*', { count: 'exact', head: true })
       ]);
 
       setStats({

@@ -23,9 +23,10 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
   const adminLogin = async (username: string, password: string): Promise<boolean> => {
     try {
-      // For demo purposes, using hardcoded credentials
-      // In production, this should verify against the database via an edge function
-      if (username === 'admin' && password === 'admin123') {
+      const adminUsername = import.meta.env.VITE_ADMIN_USERNAME;
+      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+
+      if (username === adminUsername && password === adminPassword) {
         localStorage.setItem('admin_token', 'admin_authenticated');
         setIsAdminAuthenticated(true);
         toast({
