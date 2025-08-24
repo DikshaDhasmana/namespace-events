@@ -139,10 +139,10 @@ export default function Events() {
   };
 
   const EventCard = ({ event }: { event: Event }) => (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col rounded-xl shadow-medium hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg line-clamp-2">{event.name}</CardTitle>
+          <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
           <Badge 
             variant="secondary" 
             className={eventTypeColors[event.event_type as keyof typeof eventTypeColors]}
@@ -150,7 +150,7 @@ export default function Events() {
             {event.event_type}
           </Badge>
         </div>
-        <CardDescription className="line-clamp-3">
+        <CardDescription className="line-clamp-3 text-muted-foreground">
           {event.description}
         </CardDescription>
       </CardHeader>
@@ -173,13 +173,13 @@ export default function Events() {
         </div>
         
         {registeredEvents.has(event.id) ? (
-          <Button disabled className="w-full">
+          <Button disabled className="w-full bg-muted text-muted-foreground">
             Registered ✓
           </Button>
         ) : (
           <Button 
             onClick={() => handleRegister(event.id)}
-            className="w-full"
+            className="w-full bg-primary hover:bg-primary/90 transition-colors"
           >
             {user ? 'Register' : 'Sign in to Register'}
           </Button>
@@ -199,7 +199,7 @@ export default function Events() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Upcoming Events</h1>
+        <h1 className="text-3xl font-bold mb-2 font-heading">Upcoming Events</h1>
         <p className="text-muted-foreground">
           Discover and register for exciting tech events
         </p>

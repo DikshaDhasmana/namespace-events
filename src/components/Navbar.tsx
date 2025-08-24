@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, User, LogOut, BarChart3 } from 'lucide-react';
+import { Calendar, User, LogOut, BarChart3, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,10 +11,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSignOut = async () => {
     await signOut();
@@ -22,25 +24,38 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-soft">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/极" className="flex items-center space-x-2">
           <Calendar className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">EventHub</span>
+          <span className="text-xl font-bold font-heading">EventHub</span>
         </Link>
 
         <div className="flex items-center space-x-4">
+          <Button 
+            onClick={toggleTheme} 
+            variant="ghost" 
+            size="icon"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+          
           <Link to="/events">
-            <Button variant="ghost">Events</Button>
+            <Button variant="ghost" className="text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Events</Button>
           </Link>
 
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-muted transition-colors">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-primary text-primary-foreground">
                       {user.email?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -49,23 +64,23 @@ export function Navbar() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">{user.user_metadata?.full_name || 'User'}</p>
+                    <p className="font-medium font-heading">{user.user_metadata?.full_name || 'User'}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Dashboard
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
@@ -73,7 +88,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Link to="/auth">
-              <Button>Sign In</Button>
+              <Button className="bg-primary hover:bg-primary/90 transition-colors">Sign In</Button>
             </Link>
           )}
         </div>
