@@ -14,8 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_credentials: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          username?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
+          banner_url: string | null
           created_at: string
           date: string
           description: string | null
@@ -27,6 +49,7 @@ export type Database = {
           venue: string
         }
         Insert: {
+          banner_url?: string | null
           created_at?: string
           date: string
           description?: string | null
@@ -38,6 +61,7 @@ export type Database = {
           venue: string
         }
         Update: {
+          banner_url?: string | null
           created_at?: string
           date?: string
           description?: string | null
@@ -52,27 +76,45 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_info: string | null
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
           email: string
           full_name: string | null
           id: string
+          phone_number: string | null
+          profile_completed: boolean | null
+          skills: string[] | null
+          tech_stack: string[] | null
           updated_at: string
         }
         Insert: {
+          academic_info?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email: string
           full_name?: string | null
           id: string
+          phone_number?: string | null
+          profile_completed?: boolean | null
+          skills?: string[] | null
+          tech_stack?: string[] | null
           updated_at?: string
         }
         Update: {
+          academic_info?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          phone_number?: string | null
+          profile_completed?: boolean | null
+          skills?: string[] | null
+          tech_stack?: string[] | null
           updated_at?: string
         }
         Relationships: []
