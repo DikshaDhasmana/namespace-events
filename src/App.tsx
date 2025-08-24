@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { Navbar } from "@/components/Navbar";
-import Index from "./pages/Index";
+// Removed Index import
 import Events from "./pages/Events";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -31,7 +31,7 @@ const App = () => (
           <BrowserRouter>
             <div className="min-h-screen bg-background">
               <Routes>
-                <Route path="/" element={<><Navbar /><Index /></>} />
+<Route path="/" element={<><Navbar /><Events /></>} />
                 <Route path="/events" element={<><Navbar /><Events /></>} />
                 <Route path="/auth" element={<><Navbar /><Auth /></>} />
                 <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
