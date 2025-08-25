@@ -1,8 +1,4 @@
-import { Resend } from 'resend';
-
-// Initialize Resend with API key from environment variables
-
-const resend = new Resend("re_gfzQEFX8_PTqaSXU8cvsshxKFK2ttpujs");
+import { supabase } from '@/integrations/supabase/client';
 
 export interface EmailOptions {
   to: string | string[];
@@ -22,11 +18,13 @@ export interface EmailTemplateData {
 export class EmailService {
   static async sendEmail(options: EmailOptions) {
     try {
-      const { data, error } = await resend.emails.send({
-        from: options.from || 'Site Shine <dikshadhasmana230204@gmail.com>',
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: options.to,
+          subject: options.subject,
+          html: options.html,
+          from: options.from,
+        },
       });
 
       if (error) {
@@ -127,38 +125,25 @@ export class EmailService {
     htmlTemplate: string,
     from?: string
   ) {
-    const results = [];
-    
-    for (const recipient of recipients) {
-      try {
-        const personalizedHtml = htmlTemplate
-          .replace(/{{name}}/g, recipient.name)
-          .replace(/{{email}}/g, recipient.email);
-
-        const result = await this.sendEmail({
-          to: recipient.email,
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: {
+          recipients,
           subject,
-          html: personalizedHtml,
+          htmlTemplate,
           from,
-        });
+        },
+      });
 
-        results.push({
-          email: recipient.email,
-          status: 'success',
-          data: result,
-        });
-      } catch (error) {
-        results.push({
-          email: recipient.email,
-          status: 'error',
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
+      if (error) {
+        console.error('Error sending bulk emails:', error);
+        throw new Error(`Failed to send bulk emails: ${error.message}`);
       }
 
-      // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 100));
+      return data.results;
+    } catch (error) {
+      console.error('Bulk email service error:', error);
+      throw error;
     }
-
-    return results;
   }
 }

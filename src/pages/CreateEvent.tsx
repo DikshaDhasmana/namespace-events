@@ -5,11 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import WebinarForm from '@/components/forms/WebinarForm';
+import HackathonForm from '@/components/forms/HackathonForm';
+import MeetupForm from '@/components/forms/MeetupForm';
+import ContestForm from '@/components/forms/ContestForm';
 
 const CreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +21,24 @@ const CreateEvent = () => {
     event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | '',
     date: '',
     venue: '',
-    max_participants: ''
+    max_participants: '',
+    // Additional fields for different event types
+    end_date: '',
+    speaker: '',
+    prerequisites: '',
+    team_size: '',
+    prizes: '',
+    tech_stack: '',
+    judging_criteria: '',
+    duration: '',
+    networking: '',
+    speakers: '',
+    topics: '',
+    refreshments: '',
+    contest_type: '',
+    rules: '',
+    eligibility: '',
+    submission_format: ''
   });
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>('');
@@ -92,9 +112,29 @@ const CreateEvent = () => {
         }
       }
 
+      // Create additional data object for event-specific fields
+      const additionalData = {
+        ...(formData.end_date && { end_date: formData.end_date }),
+        ...(formData.speaker && { speaker: formData.speaker }),
+        ...(formData.prerequisites && { prerequisites: formData.prerequisites }),
+        ...(formData.team_size && { team_size: parseInt(formData.team_size) }),
+        ...(formData.prizes && { prizes: formData.prizes }),
+        ...(formData.tech_stack && { tech_stack: formData.tech_stack }),
+        ...(formData.judging_criteria && { judging_criteria: formData.judging_criteria }),
+        ...(formData.duration && { duration: parseFloat(formData.duration) }),
+        ...(formData.networking && { networking: formData.networking }),
+        ...(formData.speakers && { speakers: formData.speakers }),
+        ...(formData.topics && { topics: formData.topics }),
+        ...(formData.refreshments && { refreshments: formData.refreshments }),
+        ...(formData.contest_type && { contest_type: formData.contest_type }),
+        ...(formData.rules && { rules: formData.rules }),
+        ...(formData.eligibility && { eligibility: formData.eligibility }),
+        ...(formData.submission_format && { submission_format: formData.submission_format })
+      };
+
       const eventData = {
         name: formData.name,
-        description: formData.description,
+        description: formData.description + (Object.keys(additionalData).length > 0 ? '\n\n' + JSON.stringify(additionalData, null, 2) : ''),
         event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest',
         date: formData.date,
         venue: formData.venue,
@@ -149,34 +189,10 @@ const CreateEvent = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Event Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter event name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe your event"
-                  rows={4}
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="event_type">Event Type</Label>
                 <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest') => setFormData(prev => ({ ...prev, event_type: value }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select event type" />
+                    <SelectValue placeholder="Select event type first" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="webinar">Webinar</SelectItem>
@@ -187,43 +203,22 @@ const CreateEvent = () => {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date & Time</Label>
-                  <Input
-                    id="date"
-                    name="date"
-                    type="datetime-local"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="max_participants">Max Participants (Optional)</Label>
-                  <Input
-                    id="max_participants"
-                    name="max_participants"
-                    type="number"
-                    value={formData.max_participants}
-                    onChange={handleInputChange}
-                    placeholder="Leave empty for unlimited"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="venue">Venue</Label>
-                <Input
-                  id="venue"
-                  name="venue"
-                  value={formData.venue}
-                  onChange={handleInputChange}
-                  placeholder="Enter venue location"
-                  required
-                />
-              </div>
+              {formData.event_type && (
+                <>
+                  {formData.event_type === 'webinar' && (
+                    <WebinarForm formData={formData} onInputChange={handleInputChange} />
+                  )}
+                  {formData.event_type === 'hackathon' && (
+                    <HackathonForm formData={formData} onInputChange={handleInputChange} />
+                  )}
+                  {formData.event_type === 'meetup' && (
+                    <MeetupForm formData={formData} onInputChange={handleInputChange} />
+                  )}
+                  {formData.event_type === 'contest' && (
+                    <ContestForm formData={formData} onInputChange={handleInputChange} />
+                  )}
+                </>
+              )}
 
               <div className="space-y-2">
                 <Label>Event Banner</Label>
