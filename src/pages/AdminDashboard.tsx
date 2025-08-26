@@ -23,7 +23,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
-      navigate('/admin/login');
+      navigate('https://events.namespace.world/admin/login');
       return;
     }
     fetchStats();
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     adminLogout();
-    navigate('/admin/login');
+    navigate('https://events.namespace.world/admin/login');
   };
 
   if (!isAdminAuthenticated) {
