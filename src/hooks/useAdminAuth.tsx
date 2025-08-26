@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 
 interface AdminAuthContextType {
@@ -24,11 +25,21 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
   const adminLogin = async (username: string, password: string): Promise<boolean> => {
     try {
-      // Use demo credentials for admin access
-      const adminUsername = 'admin';
-      const adminPassword = 'admin123';
+      // Call the admin-login edge function
+      const { data, error } = await supabase.functions.invoke('admin-login', {
+        body: { username, password }
+      });
 
-      if (username === adminUsername && password === adminPassword) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Login failed. Please try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (data.success) {
         localStorage.setItem('admin_token', 'admin_authenticated');
         setIsAdminAuthenticated(true);
         toast({
@@ -39,7 +50,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         toast({
           title: "Error",
-          description: "Invalid admin credentials",
+          description: data.error || "Invalid admin credentials",
           variant: "destructive",
         });
         return false;
