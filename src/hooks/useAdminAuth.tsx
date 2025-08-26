@@ -24,8 +24,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
   const adminLogin = async (username: string, password: string): Promise<boolean> => {
     try {
-      const adminUsername = process.env.VITE_ADMIN_USERNAME;
-      const adminPassword = process.env.VITE_ADMIN_PASSWORD;
+      // Use demo credentials for admin access
+      const adminUsername = 'admin';
+      const adminPassword = 'admin123';
 
       if (username === adminUsername && password === adminPassword) {
         localStorage.setItem('admin_token', 'admin_authenticated');
