@@ -20,7 +20,7 @@ const AdminLogin = () => {
 
     const success = await adminLogin(username, password);
     if (success) {
-      navigate('https://events.namespace.world/admin');
+      navigate('/admin');
     }
 
     setLoading(false);
