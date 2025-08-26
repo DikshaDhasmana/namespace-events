@@ -34,19 +34,19 @@ const App = () => (
             <BrowserRouter>
               <div className="min-h-screen bg-background">
                 <Routes>
-                  <Route path="https://events.namespace.world/" element={<><Navbar /><Events /></>} />
-                  <Route path="https://events.namespace.world/" element={<><Navbar /><Events /></>} />
-                  <Route path="https://events.namespace.world/:eventId" element={<><Navbar /><EventDetail /></>} />
-                  <Route path="https://events.namespace.world/auth" element={<><Navbar /><Auth /></>} />
-                  <Route path="https://events.namespace.world/dashboard" element={<><Navbar /><Dashboard /></>} />
-                  <Route path="https://events.namespace.world/profile" element={<><Navbar /><Profile /></>} />
-                  <Route path="https://events.namespace.world/admin/login" element={<AdminLogin />} />
-                  <Route path="https://events.namespace.world/admin" element={<AdminDashboard />} />
-                  <Route path="https://events.namespace.world/admin/events" element={<AdminEvents />} />
-                  <Route path="https://events.namespace.world/admin/events/create" element={<CreateEvent />} />
-                  <Route path="https://events.namespace.world/admin/events/:eventId/edit" element={<CreateEvent />} />
-                  <Route path="https://events.namespace.world/admin/events/:eventId/registrations" element={<EventRegistrations />} />
-                  <Route path="https://events.namespace.world/admin/users" element={<AdminUsers />} />
+                  <Route path="/" element={<><Navbar /><Events /></>} />
+                  <Route path="/events" element={<><Navbar /><Events /></>} />
+                  <Route path="/events/:eventId" element={<><Navbar /><EventDetail /></>} />
+                  <Route path="/auth" element={<><Navbar /><Auth /></>} />
+                  <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
+                  <Route path="/profile" element={<><Navbar /><Profile /></>} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/events" element={<AdminEvents />} />
+                  <Route path="/admin/events/create" element={<CreateEvent />} />
+                  <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
+                  <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="*" element={<><Navbar /><NotFound /></>} />
                 </Routes>
               </div>
