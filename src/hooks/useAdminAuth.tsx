@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+
 interface AdminAuthContextType {
   isAdminAuthenticated: boolean;
   adminLogin: (username: string, password: string) => Promise<boolean>;
@@ -23,8 +24,8 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
   const adminLogin = async (username: string, password: string): Promise<boolean> => {
     try {
-      const adminUsername = import.meta.env.VITE_ADMIN_USERNAME;
-      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+      const adminUsername = process.env.VITE_ADMIN_USERNAME;
+      const adminPassword = process.env.VITE_ADMIN_PASSWORD;
 
       if (username === adminUsername && password === adminPassword) {
         localStorage.setItem('admin_token', 'admin_authenticated');
