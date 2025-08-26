@@ -17,6 +17,7 @@ interface Event {
   date: string;
   venue: string;
   max_participants: number;
+  banner_url: string | null;
 }
 
 const eventTypeColors = {
@@ -140,20 +141,34 @@ export default function Events() {
 
   const EventCard = ({ event }: { event: Event }) => (
     <Card className="h-full flex flex-col rounded-xl shadow-medium hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
+      {/* Event Banner */}
+      <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+        <img
+          src={event.banner_url || '/placeholder.svg'}
+          alt={event.name}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.svg';
+          }}
+        />
+        <div className="absolute top-3 right-3">
           <Badge 
             variant="secondary" 
-            className={eventTypeColors[event.event_type as keyof typeof eventTypeColors]}
+            className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]} shadow-sm`}
           >
-            {event.event_type}
+            {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
           </Badge>
         </div>
+      </div>
+      
+      <CardHeader>
+        <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
         <CardDescription className="line-clamp-3 text-muted-foreground">
-          {event.description}
+          {event.description || 'No description available'}
         </CardDescription>
       </CardHeader>
+      
       <CardContent className="flex-1 flex flex-col justify-between">
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-muted-foreground">
@@ -172,18 +187,19 @@ export default function Events() {
           )}
         </div>
         
-        {registeredEvents.has(event.id) ? (
-          <Button disabled className="w-full bg-muted text-muted-foreground">
-            Registered ✓
-          </Button>
-        ) : (
+        <div className="space-y-2">
           <Button 
-            onClick={() => handleRegister(event.id)}
+            onClick={() => navigate(`/events/${event.id}`)}
             className="w-full bg-primary hover:bg-primary/90 transition-colors"
           >
-            {user ? 'Register' : 'Sign in to Register'}
+            View Details
           </Button>
-        )}
+          {registeredEvents.has(event.id) && (
+            <div className="text-xs text-center text-muted-foreground bg-green-50 py-1 px-2 rounded border border-green-200">
+              ✓ Registered
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
