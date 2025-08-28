@@ -27,7 +27,7 @@ export function Navbar() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-soft">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <img src="/Logo.png" alt="EventHub Logo" className="h-8 w-8" />
+          <img src="/Logo.png" alt="EventHub Logo" className="h-8 w-auto" />
         </Link>
 
         <div className="flex items-center space-x-4">
