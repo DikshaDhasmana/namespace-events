@@ -24,7 +24,7 @@ export default {
 			},
 			colors: {
 				border: 'hsl(var(--border))',
-				input: '极hsl(var(--input))',
+				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
@@ -46,7 +46,7 @@ export default {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'h极sl(var(--accent-foreground))'
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',

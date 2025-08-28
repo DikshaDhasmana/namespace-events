@@ -21,7 +21,7 @@ All colors MUST be HSL.
 
     /* Card Colors */
     --card: 0 0% 100%;
-    --极card-foreground: 240 10% 4%;
+    --card-foreground: 240 10% 4%;
 
     /* Popover Colors */
     --popover: 0 0% 100%;
@@ -37,7 +37,7 @@ All colors MUST be HSL.
 
     /* Accent Colors */
     --accent: 270 52% 28%;
-    --accent-foreground: 0 极0% 100%;
+    --accent-foreground: 0 0% 100%;
 
     /* Destructive Colors */
     --destructive: 0 84% 60%;
@@ -79,14 +79,14 @@ All colors MUST be HSL.
     --secondary: 240 6% 16%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 极6% 16%;
+    --muted: 240 6% 16%;
     --muted-foreground: 240 5% 65%;
 
     --accent: 270 67% 75%;
     --accent-foreground: 240 10% 4%;
 
     --destructive: 0 63% 31%;
-    --destructive-foreground: 极0 0% 100%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 240 6% 16%;
     --input: 240 6% 16%;
