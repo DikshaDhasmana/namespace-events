@@ -140,7 +140,7 @@ const AdminDashboard = () => {
                 View Users
               </Button>
               <Button 
-                onClick={() => navigate('/admin/registrations')}
+                onClick={() => navigate('/admin/events')}
                 variant="outline"
                 className="h-auto py-4 flex flex-col gap-2"
               >
