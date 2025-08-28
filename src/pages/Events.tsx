@@ -1,13 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Calendar, MapPin, Users, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+
 
 interface Event {
   id: string;
@@ -31,6 +38,7 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [registeredEvents, setRegisteredEvents] = useState<Set<string>>(new Set());
+  const [selectedType, setSelectedType] = useState('all');
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -221,25 +229,54 @@ export default function Events() {
         </p>
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="all">All Events</TabsTrigger>
-          <TabsTrigger value="webinar">Webinars</TabsTrigger>
-          <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
-          <TabsTrigger value="meetup">Meetups</TabsTrigger>
-          <TabsTrigger value="contest">Contests</TabsTrigger>
-        </TabsList>
-        
-        {['all', 'webinar', 'hackathon', 'meetup', 'contest'].map((type) => (
-          <TabsContent key={type} value={type}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {filterEvents(type === 'all' ? undefined : type).map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          </TabsContent>
+      {/* Mobile Dropdown */}
+      <div className="md:hidden mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              {selectedType === 'all' ? 'All Events' : selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-full">
+            <DropdownMenuItem onClick={() => setSelectedType('all')}>
+              All Events
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('webinar')}>
+              Webinars
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('hackathon')}>
+              Hackathons
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('meetup')}>
+              Meetups
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('contest')}>
+              Contests
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Desktop Tabs */}
+      <div className="hidden md:block">
+        <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="all">All Events</TabsTrigger>
+            <TabsTrigger value="webinar">Webinars</TabsTrigger>
+            <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
+            <TabsTrigger value="meetup">Meetups</TabsTrigger>
+            <TabsTrigger value="contest">Contests</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Event Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {filterEvents(selectedType === 'all' ? undefined : selectedType).map((event) => (
+          <EventCard key={event.id} event={event} />
         ))}
-      </Tabs>
+      </div>
     </div>
   );
 }

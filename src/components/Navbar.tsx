@@ -27,7 +27,11 @@ export function Navbar() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-soft">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <img src="/Logo.png" alt="EventHub Logo" className="h-8 w-auto" />
+          <img 
+            src="/Logo.png" 
+            alt="NAMESPACE LOGO" 
+            className="h-8 w-auto object-contain max-h-8"
+          />
         </Link>
 
         <div className="flex items-center space-x-4">
@@ -43,10 +47,6 @@ export function Navbar() {
               <Moon className="h-5 w-5" />
             )}
           </Button>
-          
-          <Link to="/events">
-            <Button variant="ghost" className="text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">Events</Button>
-          </Link>
 
           {user ? (
             <DropdownMenu>
