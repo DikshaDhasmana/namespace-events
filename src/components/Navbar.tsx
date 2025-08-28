@@ -26,9 +26,8 @@ export function Navbar() {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-soft">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/极" className="flex items-center space-x-2">
-          <Calendar className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold font-heading">EventHub</span>
+        <Link to="/" className="flex items-center space-x-2">
+          <img src="/Logo.png" alt="EventHub Logo" className="h-8 w-8" />
         </Link>
 
         <div className="flex items-center space-x-4">
