@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navbar } from "@/components/Navbar";
-import SquaresBackground from "@/components/SquaresBackground";
+import Squares from "@/components/Squares";
 // Removed Index import
 import Events from "./pages/Events";
 import Auth from "./pages/Auth";
@@ -36,7 +36,14 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <div className="min-h-screen bg-background relative">
-                <SquaresBackground />
+                <Squares 
+                  direction="diagonal"
+                  speed={0.5}
+                  borderColor="hsl(270, 52%, 70%)"
+                  squareSize={40}
+                  hoverFillColor="hsl(270, 52%, 28%)"
+                  className="fixed inset-0"
+                />
                 <div className="relative z-10">
                 <Routes>
                   <Route path="/" element={<><Navbar /><Events /></>} />
