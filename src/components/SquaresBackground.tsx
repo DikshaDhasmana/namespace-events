@@ -12,9 +12,9 @@ interface SquaresBackgroundProps {
 const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
   direction = 'diagonal',
   speed = 0.5,
-  borderColor = 'hsl(270, 52%, 50%)', // More visible purple
+  borderColor = 'hsl(270, 52%, 70%)', // Light purple for borders
   squareSize = 40,
-  hoverFillColor = 'hsl(270, 52%, 28%)', // Primary color
+  hoverFillColor = 'hsl(270, 52%, 28%)', // Primary purple for hover
   className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,7 +52,7 @@ const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
         squares.push({
           x: i * squareSize - squareSize,
           y: j * squareSize - squareSize,
-          alpha: 0.4 + Math.random() * 0.3, // More visible alpha
+          alpha: 0.2 + Math.random() * 0.3, // Lighter opacity for subtle effect
           size: squareSize,
         });
       }
@@ -95,7 +95,7 @@ const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
           mouseRef.current.y <= y + square.size;
 
         ctx.strokeStyle = borderColor;
-        ctx.lineWidth = 0.8; // Thinner lines
+        ctx.lineWidth = 0.5; // Even thinner lines
         ctx.globalAlpha = square.alpha;
 
         if (isHovered) {
@@ -142,7 +142,7 @@ const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
       style={{ 
         background: 'transparent', 
         pointerEvents: 'auto',
-        zIndex: 0
+        zIndex: 1
       }}
     />
   );
