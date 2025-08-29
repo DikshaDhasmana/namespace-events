@@ -39,9 +39,11 @@ const handler = async (req: Request): Promise<Response> => {
       for (const recipient of recipients) {
         try {
           const personalizedHtml = htmlTemplate
-            .replace(/\${data\.applicantName}/g, recipient.name)
+            .replace(/\$\{data\.applicantName\}/g, recipient.name)
             .replace(/{{name}}/g, recipient.name)
             .replace(/{{email}}/g, recipient.email);
+
+          console.log(`Sending email to: ${recipient.email}, name: ${recipient.name}`);
 
           const emailResponse = await resend.emails.send({
             from: from || 'Site Shine <onboarding@resend.dev>',
