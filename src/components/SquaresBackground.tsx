@@ -95,7 +95,7 @@ const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
           mouseRef.current.y <= y + square.size;
 
         ctx.strokeStyle = borderColor;
-        ctx.lineWidth = 1.5; // Thicker lines for visibility
+        ctx.lineWidth = 0.8; // Thinner lines
         ctx.globalAlpha = square.alpha;
 
         if (isHovered) {
