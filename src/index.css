@@ -43,8 +43,8 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border and Input Colors - More visible purple tones */
-    --border: 270 35% 82%;
+    /* Border and Input Colors - Use dark purple for borders */
+    --border: 270 52% 28%;
     --input: 270 35% 82%;
     --ring: 270 52% 28%;
 
@@ -58,7 +58,7 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 270 40% 94%;
     --sidebar-accent-foreground: 270 35% 20%;
-    --sidebar-border: 270 35% 82%;
+    --sidebar-border: 270 52% 28%;
     --sidebar-ring: 270 52% 28%;
   }
 
@@ -88,7 +88,8 @@ All colors MUST be HSL.
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 270 25% 22%;
+    /* Use light purple for borders in dark mode */
+    --border: 270 67% 75%;
     --input: 270 25% 22%;
     --ring: 270 67% 75%;
     
@@ -98,7 +99,7 @@ All colors MUST be HSL.
     --sidebar-primary-foreground: 240 10% 4%;
     --sidebar-accent: 270 25% 16%;
     --sidebar-accent-foreground: 270 50% 88%;
-    --sidebar-border: 270 25% 22%;
+    --sidebar-border: 270 67% 75%;
     --sidebar-ring: 270 67% 75%;
   }
 }

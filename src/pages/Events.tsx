@@ -148,7 +148,7 @@ export default function Events() {
   };
 
   const EventCard = ({ event }: { event: Event }) => (
-    <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover">
+    <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
       {/* Event Banner */}
       <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
         <img
@@ -198,7 +198,7 @@ export default function Events() {
         <div className="space-y-2">
           <Button 
             onClick={() => navigate(`/events/${event.id}`)}
-            className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover"
+            className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
           >
             View Details
           </Button>
