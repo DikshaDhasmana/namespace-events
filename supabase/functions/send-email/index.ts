@@ -34,9 +34,13 @@ const handler = async (req: Request): Promise<Response> => {
     if (body.recipients) {
       // Handle bulk email
       const { recipients, subject, htmlTemplate, from }: BulkEmailRequest = body;
+      console.log(`Starting bulk email to ${recipients.length} recipients:`, recipients.map(r => r.email));
       const results = [];
       
-      for (const recipient of recipients) {
+      for (let i = 0; i < recipients.length; i++) {
+        const recipient = recipients[i];
+        console.log(`Processing recipient ${i + 1}/${recipients.length}: ${recipient.email}`);
+        
         try {
           const personalizedHtml = htmlTemplate
             .replace(/\$\{data\.applicantName\}/g, recipient.name)
@@ -52,6 +56,8 @@ const handler = async (req: Request): Promise<Response> => {
             html: personalizedHtml,
           });
 
+          console.log(`Email sent successfully to ${recipient.email}:`, emailResponse);
+          
           results.push({
             email: recipient.email,
             status: 'success',
@@ -67,9 +73,10 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // Add a small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
 
+      console.log('Bulk email results:', results);
       return new Response(JSON.stringify({ results }), {
         status: 200,
         headers: {
