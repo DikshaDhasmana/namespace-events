@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, User, Phone, Calendar, GraduationCap, Code } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SquaresBackground from '@/components/SquaresBackground';
 import { format } from 'date-fns';
 
 interface Profile {
@@ -63,8 +64,9 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background relative">
+      <SquaresBackground />
+      <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button
             variant="outline"
@@ -81,7 +83,7 @@ const AdminUsers = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {loading ? (
           <div className="text-center py-8">Loading users...</div>
         ) : users.length === 0 ? (

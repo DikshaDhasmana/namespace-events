@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navbar } from "@/components/Navbar";
+import SquaresBackground from "@/components/SquaresBackground";
 // Removed Index import
 import Events from "./pages/Events";
 import Auth from "./pages/Auth";
@@ -34,7 +35,9 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <div className="min-h-screen bg-background">
+              <div className="min-h-screen bg-background relative">
+                <SquaresBackground />
+                <div className="relative z-10">
                 <Routes>
                   <Route path="/" element={<><Navbar /><Events /></>} />
                   <Route path="/events" element={<><Navbar /><Events /></>} />
@@ -51,6 +54,7 @@ const App = () => {
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="*" element={<><Navbar /><NotFound /></>} />
                 </Routes>
+                </div>
               </div>
             </BrowserRouter>
           </TooltipProvider>

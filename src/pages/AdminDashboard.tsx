@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Calendar, UserCheck, LogOut, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SquaresBackground from '@/components/SquaresBackground';
 
 interface Stats {
   totalUsers: number;
@@ -63,8 +64,9 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background relative">
+      <SquaresBackground />
+      <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <Button onClick={handleLogout} variant="outline">
@@ -74,7 +76,7 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>

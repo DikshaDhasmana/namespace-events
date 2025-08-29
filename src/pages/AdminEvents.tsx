@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Edit, Trash2, Users, Calendar, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SquaresBackground from '@/components/SquaresBackground';
 import { format } from 'date-fns';
 
 interface Event {
@@ -101,8 +102,9 @@ const AdminEvents = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background relative">
+      <SquaresBackground />
+      <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button
             variant="outline"
@@ -122,7 +124,7 @@ const AdminEvents = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {loading ? (
           <div className="text-center py-8">Loading events...</div>
         ) : events.length === 0 ? (

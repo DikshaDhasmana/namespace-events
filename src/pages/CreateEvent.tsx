@@ -13,6 +13,7 @@ import WebinarForm from '@/components/forms/WebinarForm';
 import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
+import SquaresBackground from '@/components/SquaresBackground';
 
 const CreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -166,8 +167,9 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background relative">
+      <SquaresBackground />
+      <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button
             variant="outline"
@@ -181,7 +183,7 @@ const CreateEvent = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
         <Card>
           <CardHeader>
             <CardTitle>Event Details</CardTitle>

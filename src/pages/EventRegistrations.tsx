@@ -9,6 +9,7 @@ import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon }
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import EmailComposer from '@/components/EmailComposer';
+import SquaresBackground from '@/components/SquaresBackground';
 
 interface Registration {
   id: string;
@@ -102,8 +103,9 @@ const EventRegistrations = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background relative">
+      <SquaresBackground />
+      <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button
             variant="outline"
@@ -136,7 +138,7 @@ const EventRegistrations = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative z-10">
         {event && (
           <Card className="mb-6">
             <CardHeader>
