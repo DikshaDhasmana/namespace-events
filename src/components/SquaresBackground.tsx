@@ -141,7 +141,7 @@ const SquaresBackground: React.FC<SquaresBackgroundProps> = ({
       className={`fixed inset-0 ${className}`}
       style={{ 
         background: 'transparent', 
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
         zIndex: 0
       }}
     />
