@@ -27,13 +27,13 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 4%;
 
-    /* Secondary Colors - Light purple instead of grey */
-    --secondary: 270 30% 94%;
-    --secondary-foreground: 270 15% 25%;
+    /* Secondary Colors - More visible purple */
+    --secondary: 270 45% 92%;
+    --secondary-foreground: 270 35% 20%;
 
-    /* Muted Colors - Very light purple for sections */
-    --muted: 270 25% 96%;
-    --muted-foreground: 270 15% 40%;
+    /* Muted Colors - More visible purple for sections */
+    --muted: 270 40% 94%;
+    --muted-foreground: 270 25% 35%;
 
     /* Accent Colors */
     --accent: 270 52% 28%;
@@ -43,9 +43,9 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border and Input Colors - Light purple tones */
-    --border: 270 20% 88%;
-    --input: 270 20% 88%;
+    /* Border and Input Colors - More visible purple tones */
+    --border: 270 35% 82%;
+    --input: 270 35% 82%;
     --ring: 270 52% 28%;
 
     /* Border Radius - Rounded corners (2xl) */
@@ -56,9 +56,9 @@ All colors MUST be HSL.
     --sidebar-foreground: 240 10% 4%;
     --sidebar-primary: 270 52% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 25% 96%;
-    --sidebar-accent-foreground: 270 15% 25%;
-    --sidebar-border: 270 20% 88%;
+    --sidebar-accent: 270 40% 94%;
+    --sidebar-accent-foreground: 270 35% 20%;
+    --sidebar-border: 270 35% 82%;
     --sidebar-ring: 270 52% 28%;
   }
 
@@ -76,11 +76,11 @@ All colors MUST be HSL.
     --primary: 270 67% 75%;
     --primary-foreground: 240 10% 4%;
 
-    --secondary: 270 15% 20%;
-    --secondary-foreground: 270 40% 85%;
+    --secondary: 270 25% 16%;
+    --secondary-foreground: 270 50% 88%;
 
-    --muted: 270 15% 20%;
-    --muted-foreground: 270 20% 65%;
+    --muted: 270 25% 16%;
+    --muted-foreground: 270 30% 70%;
 
     --accent: 270 67% 75%;
     --accent-foreground: 240 10% 4%;
@@ -88,17 +88,17 @@ All colors MUST be HSL.
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 270 15% 20%;
-    --input: 270 15% 20%;
+    --border: 270 25% 22%;
+    --input: 270 25% 22%;
     --ring: 270 67% 75%;
     
     --sidebar-background: 240 10% 6%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 270 67% 75%;
     --sidebar-primary-foreground: 240 10% 4%;
-    --sidebar-accent: 270 15% 20%;
-    --sidebar-accent-foreground: 270 40% 85%;
-    --sidebar-border: 270 15% 20%;
+    --sidebar-accent: 270 25% 16%;
+    --sidebar-accent-foreground: 270 50% 88%;
+    --sidebar-border: 270 25% 22%;
     --sidebar-ring: 270 67% 75%;
   }
 }
@@ -115,5 +115,20 @@ All colors MUST be HSL.
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
+  }
+}
+
+/* Subtle hover effects for cards and interactive elements */
+@layer components {
+  .card-hover {
+    @apply transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] hover:bg-secondary/50;
+  }
+  
+  .button-hover {
+    @apply transition-all duration-200 ease-out hover:shadow-md hover:scale-[1.02];
+  }
+  
+  .card-subtle-hover {
+    @apply transition-all duration-300 ease-out hover:shadow-md hover:border-primary/20 hover:bg-gradient-to-br hover:from-background hover:to-secondary/30;
   }
 }
