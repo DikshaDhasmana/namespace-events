@@ -24,13 +24,13 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b tech-blur animate-slide-in-left sticky top-0 z-50">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-soft">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 nav-link">
+        <Link to="/" className="flex items-center space-x-2">
           <img 
             src="/Logo.png" 
             alt="NAMESPACE LOGO" 
-            className="h-8 w-auto object-contain max-h-8 animate-float"
+            className="h-8 w-auto object-contain max-h-8"
           />
         </Link>
 
@@ -39,7 +39,7 @@ export function Navbar() {
             onClick={toggleTheme} 
             variant="ghost" 
             size="icon"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground button-hover"
+            className="text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             {theme === 'dark' ? (
               <Sun className="h-5 w-5" />
@@ -87,7 +87,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90 button-hover animate-glow">Sign In</Button>
+              <Button className="bg-primary hover:bg-primary/90 transition-colors">Sign In</Button>
             </Link>
           )}
         </div>

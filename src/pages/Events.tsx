@@ -148,7 +148,7 @@ export default function Events() {
   };
 
   const EventCard = ({ event }: { event: Event }) => (
-    <Card className="h-full flex flex-col rounded-xl card-hover gradient-border animate-slide-up">
+    <Card className="h-full flex flex-col rounded-xl shadow-medium hover:shadow-lg transition-shadow">
       {/* Event Banner */}
       <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
         <img
@@ -198,7 +198,7 @@ export default function Events() {
         <div className="space-y-2">
           <Button 
             onClick={() => navigate(`/events/${event.id}`)}
-            className="w-full bg-primary hover:bg-primary/90 button-hover animate-pulse-glow"
+            className="w-full bg-primary hover:bg-primary/90 transition-colors"
           >
             View Details
           </Button>
@@ -222,9 +222,9 @@ export default function Events() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="mb-8 animate-slide-up">
-        <h1 className="text-3xl font-bold mb-2 font-heading animate-glow">Upcoming Events</h1>
-        <p className="text-muted-foreground typing-indicator">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2 font-heading">Upcoming Events</h1>
+        <p className="text-muted-foreground">
           Discover and register for exciting tech events
         </p>
       </div>
@@ -259,14 +259,14 @@ export default function Events() {
       </div>
 
       {/* Desktop Tabs */}
-      <div className="hidden md:block animate-slide-in-left">
+      <div className="hidden md:block">
         <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
-          <TabsList className="grid w-full grid-cols-5 tech-blur">
-            <TabsTrigger value="all" className="nav-link">All Events</TabsTrigger>
-            <TabsTrigger value="webinar" className="nav-link">Webinars</TabsTrigger>
-            <TabsTrigger value="hackathon" className="nav-link">Hackathons</TabsTrigger>
-            <TabsTrigger value="meetup" className="nav-link">Meetups</TabsTrigger>
-            <TabsTrigger value="contest" className="nav-link">Contests</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="all">All Events</TabsTrigger>
+            <TabsTrigger value="webinar">Webinars</TabsTrigger>
+            <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
+            <TabsTrigger value="meetup">Meetups</TabsTrigger>
+            <TabsTrigger value="contest">Contests</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
