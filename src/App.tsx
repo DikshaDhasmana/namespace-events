@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { Navbar } from "@/components/Navbar";
+import Layout from "@/components/Layout";
 import LightRays from "@/components/LightRays";
 // Removed Index import
 import Events from "./pages/Events";
@@ -49,12 +49,12 @@ const App = () => {
                   />
                   <div className="relative z-10">
                     <Routes>
-                      <Route path="/" element={<><Navbar /><Events /></>} />
-                      <Route path="/events" element={<><Navbar /><Events /></>} />
-                      <Route path="/events/:eventId" element={<><Navbar /><EventDetail /></>} />
-                      <Route path="/auth" element={<><Navbar /><Auth /></>} />
-                      <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
-                      <Route path="/profile" element={<><Navbar /><Profile /></>} />
+                      <Route path="/" element={<Layout><Events /></Layout>} />
+                      <Route path="/events" element={<Layout><Events /></Layout>} />
+                      <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
+                      <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
+                      <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+                      <Route path="/profile" element={<Layout><Profile /></Layout>} />
                       <Route path="/admin/login" element={<AdminLogin />} />
                       <Route path="/admin" element={<AdminDashboard />} />
                       <Route path="/admin/events" element={<AdminEvents />} />
@@ -62,7 +62,7 @@ const App = () => {
                       <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
                       <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
                       <Route path="/admin/users" element={<AdminUsers />} />
-                      <Route path="*" element={<><Navbar /><NotFound /></>} />
+                      <Route path="*" element={<Layout><NotFound /></Layout>} />
                     </Routes>
                   </div>
                 </div>

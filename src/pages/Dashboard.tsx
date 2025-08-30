@@ -135,11 +135,11 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {registrations.map((registration) => (
-          <Card key={registration.id} className="relative card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
+            <Card key={registration.id} className="relative card-subtle-hover">
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute top-2 right-2 h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground button-hover button-hover-light dark:button-hover-dark"
+                className="absolute top-2 right-2 h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
                 onClick={() => handleUnregister(registration.id, registration.events.name)}
               >
                 <X className="h-4 w-4" />
