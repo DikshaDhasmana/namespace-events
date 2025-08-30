@@ -29,7 +29,7 @@ const handler = async (req) => {
             .replace(/{{email}}/g, recipient.email);
 
           const emailResponse = await resend.emails.send({
-            from: from || 'Site Shine <onboarding@resend.dev>',
+            from: from || 'NAMESPACE <contact@namespacecomm.in>',
             to: recipient.email,
             subject,
             html: personalizedHtml,
