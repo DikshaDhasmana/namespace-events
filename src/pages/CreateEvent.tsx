@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ import WebinarForm from '@/components/forms/WebinarForm';
 import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
-import SquaresBackground from '@/components/SquaresBackground';
 
 const CreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -23,11 +22,12 @@ const CreateEvent = () => {
     date: '',
     venue: '',
     max_participants: '',
+    mode: '',
+    team_size: '',
     // Additional fields for different event types
     end_date: '',
     speaker: '',
     prerequisites: '',
-    team_size: '',
     prizes: '',
     tech_stack: '',
     judging_criteria: '',
@@ -56,6 +56,10 @@ const CreateEvent = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -140,6 +144,8 @@ const CreateEvent = () => {
         date: formData.date,
         venue: formData.venue,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        mode: formData.mode || null,
+        team_size: formData.team_size ? parseInt(formData.team_size) : null,
         banner_url: banner_url || null
       };
 
@@ -168,7 +174,6 @@ const CreateEvent = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <SquaresBackground />
       <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button
@@ -211,7 +216,7 @@ const CreateEvent = () => {
                     <WebinarForm formData={formData} onInputChange={handleInputChange} />
                   )}
                   {formData.event_type === 'hackathon' && (
-                    <HackathonForm formData={formData} onInputChange={handleInputChange} />
+                    <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                   {formData.event_type === 'meetup' && (
                     <MeetupForm formData={formData} onInputChange={handleInputChange} />

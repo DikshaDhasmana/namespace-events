@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, MapPin, Users, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -23,8 +23,11 @@ interface Event {
   event_type: string;
   date: string;
   venue: string;
-  max_participants: number;
+  max_participants: number | null;
+  mode: string | null;
+  team_size: number | null;
   banner_url: string | null;
+  registrations?: { count: number }[];
 }
 
 const eventTypeColors = {
@@ -53,7 +56,10 @@ export default function Events() {
   const fetchEvents = async () => {
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select(`
+        *,
+        registrations(count)
+      `)
       .order('date', { ascending: true });
 
     if (error) {
@@ -147,6 +153,16 @@ export default function Events() {
     });
   };
 
+  const getRegistrationCount = (event: Event): number => {
+    // Handle different possible response formats from Supabase
+    if (Array.isArray(event.registrations)) {
+      // If registrations is an array of objects with count property
+      const countObj = event.registrations[0] as { count: number };
+      return countObj?.count || 0;
+    }
+    return 0;
+  };
+
   const EventCard = ({ event }: { event: Event }) => (
     <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
       {/* Event Banner */}
@@ -172,9 +188,6 @@ export default function Events() {
       
       <CardHeader>
         <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
-        <CardDescription className="line-clamp-3 text-muted-foreground">
-          {event.description || 'No description available'}
-        </CardDescription>
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col justify-between">
@@ -190,7 +203,10 @@ export default function Events() {
           {event.max_participants && (
             <div className="flex items-center text-sm text-muted-foreground">
               <Users className="mr-2 h-4 w-4" />
-              Max {event.max_participants} participants
+              {event.event_type === 'meetup'
+                ? `${event.max_participants - getRegistrationCount(event)} slots left`
+                : `Max ${event.max_participants} participants`
+              }
             </div>
           )}
         </div>

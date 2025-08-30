@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Calendar, UserCheck, LogOut, Plus, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SquaresBackground from '@/components/SquaresBackground';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Stats {
@@ -88,7 +87,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <SquaresBackground />
       <header className="border-b bg-card relative z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>

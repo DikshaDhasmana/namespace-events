@@ -16,7 +16,9 @@ interface Event {
   event_type: string;
   date: string;
   venue: string;
-  max_participants: number;
+  max_participants: number | null;
+  mode: string | null;
+  team_size: number | null;
   banner_url: string | null;
   created_at: string;
 }
@@ -326,6 +328,36 @@ export default function EventDetail() {
                       <div className="font-medium">Capacity</div>
                       <div className="text-sm text-muted-foreground">
                         Maximum {event.max_participants} participants
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {event.event_type === 'hackathon' && event.mode && (
+                <>
+                  <Separator />
+                  <div className="flex items-start space-x-3">
+                    <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Mode</div>
+                      <div className="text-sm text-muted-foreground capitalize">
+                        {event.mode}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {event.event_type === 'hackathon' && event.team_size && (
+                <>
+                  <Separator />
+                  <div className="flex items-start space-x-3">
+                    <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div>
+                      <div className="font-medium">Team Size</div>
+                      <div className="text-sm text-muted-foreground">
+                        {event.team_size} members per team
                       </div>
                     </div>
                   </div>

@@ -44,7 +44,9 @@ export type Database = {
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
           max_participants: number | null
+          mode: string | null
           name: string
+          team_size: number | null
           updated_at: string
           venue: string
         }
@@ -56,7 +58,9 @@ export type Database = {
           event_type: Database["public"]["Enums"]["event_type"]
           id?: string
           max_participants?: number | null
+          mode?: string | null
           name: string
+          team_size?: number | null
           updated_at?: string
           venue: string
         }
@@ -68,7 +72,9 @@ export type Database = {
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
           max_participants?: number | null
+          mode?: string | null
           name?: string
+          team_size?: number | null
           updated_at?: string
           venue?: string
         }
