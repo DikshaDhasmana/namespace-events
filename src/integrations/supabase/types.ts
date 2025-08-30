@@ -38,43 +38,88 @@ export type Database = {
       events: {
         Row: {
           banner_url: string | null
+          contest_type: string | null
           created_at: string
           date: string
           description: string | null
+          duration: number | null
+          eligibility: string | null
+          end_date: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
+          judging_criteria: string | null
           max_participants: number | null
           mode: string | null
           name: string
+          networking: string | null
+          prerequisites: string | null
+          prizes: string | null
+          refreshments: string | null
+          rules: string | null
+          speaker: string | null
+          speakers: string[] | null
+          submission_format: string | null
           team_size: number | null
+          tech_stack: string[] | null
+          topics: string[] | null
           updated_at: string
           venue: string
         }
         Insert: {
           banner_url?: string | null
+          contest_type?: string | null
           created_at?: string
           date: string
           description?: string | null
+          duration?: number | null
+          eligibility?: string | null
+          end_date?: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id?: string
+          judging_criteria?: string | null
           max_participants?: number | null
           mode?: string | null
           name: string
+          networking?: string | null
+          prerequisites?: string | null
+          prizes?: string | null
+          refreshments?: string | null
+          rules?: string | null
+          speaker?: string | null
+          speakers?: string[] | null
+          submission_format?: string | null
           team_size?: number | null
+          tech_stack?: string[] | null
+          topics?: string[] | null
           updated_at?: string
           venue: string
         }
         Update: {
           banner_url?: string | null
+          contest_type?: string | null
           created_at?: string
           date?: string
           description?: string | null
+          duration?: number | null
+          eligibility?: string | null
+          end_date?: string | null
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
+          judging_criteria?: string | null
           max_participants?: number | null
           mode?: string | null
           name?: string
+          networking?: string | null
+          prerequisites?: string | null
+          prizes?: string | null
+          refreshments?: string | null
+          rules?: string | null
+          speaker?: string | null
+          speakers?: string[] | null
+          submission_format?: string | null
           team_size?: number | null
+          tech_stack?: string[] | null
+          topics?: string[] | null
           updated_at?: string
           venue?: string
         }
@@ -159,7 +204,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       event_type: "webinar" | "hackathon" | "meetup" | "contest"

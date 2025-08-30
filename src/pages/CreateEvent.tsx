@@ -47,6 +47,7 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isAdminAuthenticated } = useAdminAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -140,14 +141,29 @@ const CreateEvent = () => {
 
       const eventData = {
         name: formData.name,
-        description: formData.description + (Object.keys(additionalData).length > 0 ? '\n\n' + JSON.stringify(additionalData, null, 2) : ''),
+        description: formData.description,
         event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest',
         date: formData.date,
-        venue: formData.venue,
+        venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
-        banner_url: banner_url || null
+        banner_url: banner_url || null,
+        end_date: formData.end_date || null,
+        speaker: formData.speaker || null,
+        prerequisites: formData.prerequisites || null,
+        prizes: formData.prizes || null,
+        tech_stack: formData.tech_stack ? formData.tech_stack.split(',').map(s => s.trim()) : null,
+        judging_criteria: formData.judging_criteria || null,
+        duration: formData.duration ? parseFloat(formData.duration) : null,
+        networking: formData.networking || null,
+        speakers: formData.speakers ? formData.speakers.split(',').map(s => s.trim()) : null,
+        topics: formData.topics ? formData.topics.split(',').map(s => s.trim()) : null,
+        refreshments: formData.refreshments || null,
+        contest_type: formData.contest_type || null,
+        rules: formData.rules || null,
+        eligibility: formData.eligibility || null,
+        submission_format: formData.submission_format || null
       };
 
       const { error } = await supabase
