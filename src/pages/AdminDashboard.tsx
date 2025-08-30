@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Calendar, UserCheck, LogOut, Plus } from 'lucide-react';
+import { Users, Calendar, UserCheck, LogOut, Plus, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SquaresBackground from '@/components/SquaresBackground';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface Stats {
   totalUsers: number;
@@ -18,6 +19,7 @@ interface Stats {
 const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalEvents: 0, totalRegistrations: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { isAdminAuthenticated, adminLogout } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -32,11 +34,25 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
+      setError(null);
+      setLoading(true);
+      
       const [usersResponse, eventsResponse, registrationsResponse] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('events').select('*', { count: 'exact', head: true }),
         supabase.from('registrations').select('*', { count: 'exact', head: true })
       ]);
+
+      // Check for errors in each response
+      const errors = [
+        usersResponse.error,
+        eventsResponse.error,
+        registrationsResponse.error
+      ].filter(error => error !== null);
+
+      if (errors.length > 0) {
+        throw new Error(`Database access error: ${errors[0]?.message}`);
+      }
 
       setStats({
         totalUsers: usersResponse.count || 0,
@@ -44,14 +60,21 @@ const AdminDashboard = () => {
         totalRegistrations: registrationsResponse.count || 0
       });
     } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch dashboard statistics');
+      
       toast({
         title: "Error",
-        description: "Failed to fetch dashboard stats",
+        description: "Failed to fetch dashboard stats. Please check your database permissions.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRetry = () => {
+    fetchStats();
   };
 
   const handleLogout = () => {
