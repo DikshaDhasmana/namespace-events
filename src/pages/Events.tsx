@@ -212,17 +212,12 @@ export default function Events() {
         </div>
         
         <div className="space-y-2">
-          <Button 
+          <Button
             onClick={() => navigate(`/events/${event.id}`)}
-            className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+            className={`w-full transition-colors button-hover button-hover-light dark:button-hover-dark ${registeredEvents.has(event.id) ? 'bg-green-500 hover:bg-green-600' : 'bg-primary hover:bg-primary/90'}`}
           >
             View Details
           </Button>
-          {registeredEvents.has(event.id) && (
-            <div className="text-xs text-center text-muted-foreground bg-green-50 py-1 px-2 rounded border border-green-200">
-              ✓ Registered
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
