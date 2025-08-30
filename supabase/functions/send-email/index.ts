@@ -59,7 +59,7 @@ const handler = async (req) => {
     } else {
       const { to, subject, html, from } = body;
       const emailResponse = await resend.emails.send({
-        from: from || 'Site Shine <onboarding@resend.dev>',
+        from: from || 'NAMESPACE <contact@namespacecomm.in>',
         to,
         subject,
         html
