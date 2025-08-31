@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, Users, ArrowLeft, Clock, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EmailService } from '@/services/emailService';
+import LeaderboardModal from '@/components/LeaderboardModal';
 
 interface Event {
   id: string;
@@ -33,13 +34,18 @@ const eventTypeColors = {
 
 export default function EventDetail() {
   const { eventId } = useParams<{ eventId: string }>();
+  const [searchParams] = useSearchParams();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registrationCount, setRegistrationCount] = useState(0);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Extract utm_source from URL query params
+  const utmSource = searchParams.get('utm_source');
 
   useEffect(() => {
     if (eventId) {
@@ -118,9 +124,15 @@ export default function EventDetail() {
       return;
     }
     
+    const registrationData: any = { user_id: user.id, event_id: eventId };
+    // Include utm_source if present
+    if (utmSource) {
+      registrationData.utm_source = utmSource;
+    }
+
     const { error } = await supabase
       .from('registrations')
-      .insert([{ user_id: user.id, event_id: eventId }]);
+      .insert([registrationData]);
 
     if (error) {
       if (error.code === '23505') {
@@ -273,6 +285,8 @@ export default function EventDetail() {
     }
   };
 
+  const customUtmLink = user && event ? `${window.location.origin}/events/${event.id}?utm_source=${user.id}` : '';
+
   if (loading) {
     return (
       <div className="container mx-auto py-8">
@@ -352,6 +366,40 @@ export default function EventDetail() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Custom UTM Link for Registered Users */}
+          {isRegistered && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Your Custom UTM Link</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Share this link to invite others to this event. Your referrals will be tracked.
+                </p>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={customUtmLink}
+                    className="flex-grow rounded border border-gray-300 px-3 py-2 text-sm"
+                    onFocus={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(customUtmLink);
+                      toast({
+                        title: "Copied!",
+                        description: "Your custom UTM link has been copied to clipboard.",
+                      });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -461,10 +509,27 @@ export default function EventDetail() {
                   </div>
                 </>
               )}
+
+              {/* Leaderboard Button */}
+              <Separator />
+              <Button
+                variant="outline"
+                onClick={() => setLeaderboardOpen(true)}
+                className="w-full"
+              >
+                View Leaderboard
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <LeaderboardModal
+        isOpen={leaderboardOpen}
+        onClose={() => setLeaderboardOpen(false)}
+        eventId={event?.id || ''}
+        eventName={event?.name || ''}
+      />
     </div>
   );
 }
