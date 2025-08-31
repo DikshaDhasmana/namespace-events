@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Users, ArrowLeft, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowLeft, Clock, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -186,6 +186,40 @@ export default function EventDetail() {
     });
   };
 
+  const handleShare = async () => {
+    if (!event) return;
+    
+    const eventUrl = window.location.href;
+    const shareData = {
+      title: event.name,
+      text: `Check out this ${event.event_type}: ${event.name}`,
+      url: eventUrl
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        // User cancelled sharing or error occurred
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(eventUrl);
+        toast({
+          title: "Link copied!",
+          description: "Event link has been copied to clipboard",
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to copy link",
+        });
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto py-8">
@@ -232,13 +266,24 @@ export default function EventDetail() {
 
           {/* Event Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Badge 
-                variant="secondary" 
-                className={eventTypeColors[event.event_type as keyof typeof eventTypeColors]}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <Badge 
+                  variant="secondary" 
+                  className={eventTypeColors[event.event_type as keyof typeof eventTypeColors]}
+                >
+                  {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="gap-2"
               >
-                {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
-              </Badge>
+                <Share2 className="h-4 w-4" />
+                Share Event
+              </Button>
             </div>
             <h1 className="text-3xl font-bold mb-4 font-heading">{event.name}</h1>
           </div>

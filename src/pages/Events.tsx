@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Calendar, MapPin, Users, ChevronDown } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronDown, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -163,6 +163,38 @@ export default function Events() {
     return 0;
   };
 
+  const handleShare = async (event: Event) => {
+    const eventUrl = `${window.location.origin}/events/${event.id}`;
+    const shareData = {
+      title: event.name,
+      text: `Check out this ${event.event_type}: ${event.name}`,
+      url: eventUrl
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        // User cancelled sharing or error occurred
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(eventUrl);
+        toast({
+          title: "Link copied!",
+          description: "Event link has been copied to clipboard",
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to copy link",
+        });
+      }
+    }
+  };
+
   const EventCard = ({ event }: { event: Event }) => (
     <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
       {/* Event Banner */}
@@ -176,7 +208,18 @@ export default function Events() {
             target.src = '/placeholder.svg';
           }}
         />
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShare(event);
+            }}
+            className="p-2 h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
+          >
+            <Share2 className="h-3 w-3" />
+          </Button>
           <Badge 
             variant="secondary" 
             className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]} shadow-sm`}
