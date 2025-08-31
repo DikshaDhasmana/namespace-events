@@ -9,12 +9,15 @@ const corsHeaders = {
 };
 
 const handler = async (req) => {
+  console.log(`Received ${req.method} request to send-email function`);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const body = await req.json();
+    console.log('Request body:', JSON.stringify(body, null, 2));
 
     if (body.recipients) {
       const { recipients, subject, htmlTemplate, from } = body;

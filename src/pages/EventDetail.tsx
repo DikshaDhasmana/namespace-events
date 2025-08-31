@@ -194,12 +194,16 @@ export default function EventDetail() {
     if (!user || !event) return;
     
     try {
+      console.log('Attempting to send confirmation email...');
+      
       // Get user profile for name
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
         .single();
+      
+      console.log('User profile retrieved:', profile);
       
       const emailTemplate = EmailService.generateEventEmailTemplate({
         eventName: event.name,
@@ -210,13 +214,28 @@ export default function EventDetail() {
         subject: `Registration Confirmed: ${event.name}`
       });
       
-      await EmailService.sendEmail({
+      console.log('Email template generated, sending email...');
+      
+      const result = await EmailService.sendEmail({
         to: user.email || '',
         subject: `Registration Confirmed: ${event.name}`,
         html: emailTemplate
       });
+      
+      console.log('Email sent successfully:', result);
+      
+      toast({
+        title: "Email Sent",
+        description: "Confirmation email has been sent to your email address",
+      });
+      
     } catch (error) {
       console.error('Failed to send confirmation email:', error);
+      toast({
+        variant: "destructive",
+        title: "Email Error",
+        description: "Failed to send confirmation email. Please check your email settings.",
+      });
     }
   };
 
