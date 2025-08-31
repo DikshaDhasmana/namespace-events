@@ -7,25 +7,32 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AdminAuthProvider } from "@/hooks/useAdminAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Layout from "@/components/Layout";
-import LightRays from "@/components/LightRays";
-// Removed Index import
-import Events from "./pages/Events";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminEvents from "./pages/AdminEvents";
-import CreateEvent from "./pages/CreateEvent";
-import AdminUsers from "./pages/AdminUsers";
-import EventRegistrations from "./pages/EventRegistrations";
-import EventDetail from "./pages/EventDetail";
+import { lazy, Suspense } from "react";
+
+// Lazy load pages for better performance
+const LightRays = lazy(() => import("@/components/LightRays"));
+const Events = lazy(() => import("./pages/Events"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Profile = lazy(() => import("./pages/Profile"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminEvents = lazy(() => import("./pages/AdminEvents"));
+const CreateEvent = lazy(() => import("./pages/CreateEvent"));
+const AdminUsers = lazy(() => import("./pages/AdminUsers"));
+const EventRegistrations = lazy(() => import("./pages/EventRegistrations"));
+const EventDetail = lazy(() => import("./pages/EventDetail"));
 
 const queryClient = new QueryClient();
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
 const App = () => {
-  console.log('App component rendering');
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -36,34 +43,38 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <div className="min-h-screen bg-background relative">
-                  <LightRays
-                    raysOrigin="top-center"
-                    raysSpeed={1.5}
-                    lightSpread={0.8}
-                    rayLength={1.2}
-                    followMouse={true}
-                    mouseInfluence={0.1}
-                    noiseAmount={0.1}
-                    distortion={0.05}
-                    className="fixed inset-0"
-                  />
+                  <Suspense fallback={<div />}>
+                    <LightRays
+                      raysOrigin="top-center"
+                      raysSpeed={1.5}
+                      lightSpread={0.8}
+                      rayLength={1.2}
+                      followMouse={true}
+                      mouseInfluence={0.1}
+                      noiseAmount={0.1}
+                      distortion={0.05}
+                      className="fixed inset-0"
+                    />
+                  </Suspense>
                   <div className="relative z-10">
-                    <Routes>
-                      <Route path="/" element={<Layout><Events /></Layout>} />
-                      <Route path="/events" element={<Layout><Events /></Layout>} />
-                      <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
-                      <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
-                      <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-                      <Route path="/profile" element={<Layout><Profile /></Layout>} />
-                      <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/admin" element={<AdminDashboard />} />
-                      <Route path="/admin/events" element={<AdminEvents />} />
-                      <Route path="/admin/events/create" element={<CreateEvent />} />
-                      <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
-                      <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
-                      <Route path="/admin/users" element={<AdminUsers />} />
-                      <Route path="*" element={<Layout><NotFound /></Layout>} />
-                    </Routes>
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Routes>
+                        <Route path="/" element={<Layout><Events /></Layout>} />
+                        <Route path="/events" element={<Layout><Events /></Layout>} />
+                        <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
+                        <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
+                        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+                        <Route path="/profile" element={<Layout><Profile /></Layout>} />
+                        <Route path="/admin/login" element={<AdminLogin />} />
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/admin/events" element={<AdminEvents />} />
+                        <Route path="/admin/events/create" element={<CreateEvent />} />
+                        <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
+                        <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
+                        <Route path="/admin/users" element={<AdminUsers />} />
+                        <Route path="*" element={<Layout><NotFound /></Layout>} />
+                      </Routes>
+                    </Suspense>
                   </div>
                 </div>
               </BrowserRouter>
