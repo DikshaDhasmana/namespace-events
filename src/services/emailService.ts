@@ -91,7 +91,7 @@ export class EmailService {
       </head>
       <body>
         <div class="header">
-          <h1>Site Shine Events</h1>
+          <h1>NAMESPACE Ecosystem</h1>
         </div>
         
         <div class="content">
@@ -107,11 +107,11 @@ export class EmailService {
             ${data.message}
           </div>
           
-          <p>Best regards,<br>The Site Shine Team</p>
+          <p>Best regards,<br>Team NAMESPACE</p>
         </div>
         
         <div class="footer">
-          <p>This email was sent to you because you registered for an event on Site Shine.</p>
+          <p>This email was sent to you because you registered for an event on NAMESPACE.</p>
           <p>If you have any questions, please contact our support team.</p>
         </div>
       </body>
