@@ -120,6 +120,9 @@ export default function EventDetail() {
         title: "Profile Incomplete",
         description: "Please complete your profile before registering for events",
       });
+      // Store current event URL for redirect after profile completion
+      const currentUrl = window.location.href;
+      localStorage.setItem('profileRedirectUrl', currentUrl);
       navigate('/profile');
       return;
     }
