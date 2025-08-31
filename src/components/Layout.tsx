@@ -15,16 +15,25 @@ const Layout = ({ children, showFooter = true }: LayoutProps) => {
   // Show sidebar on dashboard and profile pages
   const showSidebar = location.pathname === '/dashboard' || location.pathname === '/profile';
 
+  // Hide footer on dashboard and profile pages
+  const shouldShowFooter = showFooter && location.pathname !== '/dashboard' && location.pathname !== '/profile';
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex flex-grow">
-        {showSidebar && <Sidebar />}
-        <main className="flex-grow">
-          {children}
+      <div className="flex flex-grow relative pt-16">
+        {showSidebar && (
+          <div className="fixed left-0 top-16 bottom-0 w-64 z-10">
+            <Sidebar />
+          </div>
+        )}
+        <main className={`flex-grow overflow-auto ${showSidebar ? 'ml-64' : ''}`}>
+          <div className="h-full">
+            {children}
+          </div>
         </main>
       </div>
-      {showFooter && <Footer />}
+      {shouldShowFooter && <Footer />}
     </div>
   );
 };

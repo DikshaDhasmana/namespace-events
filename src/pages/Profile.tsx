@@ -186,158 +186,184 @@ export default function Profile() {
 
   return (
     <>
-      <div className="container mx-auto py-8 max-w-2xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
+      <div className="min-h-screen">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
+          <div className="container mx-auto px-6 py-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">My Profile</h1>
+              <p className="text-muted-foreground text-lg">
+                Manage your account settings and preferences
+              </p>
+            </div>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={profile.avatar_url || undefined} />
-                <AvatarFallback className="text-lg">
-                  {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <CardTitle>{profile.full_name || 'User'}</CardTitle>
-                <CardDescription>{profile.email}</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSave} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    disabled
-                    className="bg-muted"
-                  />
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card className="shadow-lg">
+              <CardHeader className="pb-6">
+                <div className="flex items-center space-x-6">
+                  <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                    <AvatarImage src={profile.avatar_url || undefined} />
+                    <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20">
+                      {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl mb-1">{profile.full_name || 'User'}</CardTitle>
+                    <CardDescription className="text-base mb-2">{profile.email}</CardDescription>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex items-center">
+                        <Calendar className="mr-1 h-4 w-4" />
+                        Member since {new Date(profile.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                        })}
+                      </div>
+                      {profile.profile_completed && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          ✓ Profile Completed
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
+              </CardHeader>
 
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    defaultValue={profile.full_name || ''}
-                    placeholder="Enter your full name"
-                  />
-                </div>
-              </div>
+              <CardContent>
+                <form onSubmit={handleSave} className="space-y-8">
+                  {/* Personal Information Section */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold border-b pb-2">Personal Information</h3>
 
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    type="tel"
-                    defaultValue={profile.phone_number || ''}
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <div className="flex items-center space-x-3">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="email"
+                            type="email"
+                            value={profile.email}
+                            disabled
+                            className="bg-muted/50"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Email cannot be changed
+                        </p>
+                      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <div className="flex items-center space-x-2">
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    defaultValue={profile.date_of_birth || ''}
-                  />
-                </div>
-              </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName">Full Name</Label>
+                        <div className="flex items-center space-x-3">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="fullName"
+                            name="fullName"
+                            type="text"
+                            defaultValue={profile.full_name || ''}
+                            placeholder="Enter your full name"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="academicInfo">Academic Information</Label>
-                <div className="flex items-center space-x-2">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    id="academicInfo"
-                    name="academicInfo"
-                    defaultValue={profile.academic_info || ''}
-                    placeholder="Enter your academic background (degree, institution, etc.)"
-                    rows={3}
-                  />
-                </div>
-              </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <div className="flex items-center space-x-3">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            type="tel"
+                            defaultValue={profile.phone_number || ''}
+                            placeholder="Enter your phone number"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="techStack">Tech Stack (comma-separated)</Label>
-                <div className="flex items-center space-x-2">
-                  <Code className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="techStack"
-                    name="techStack"
-                    type="text"
-                    defaultValue={profile.tech_stack?.join(', ') || ''}
-                    placeholder="e.g., React, Node.js, Python, JavaScript"
-                  />
-                </div>
-              </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <div className="flex items-center space-x-3">
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="dateOfBirth"
+                            name="dateOfBirth"
+                            type="date"
+                            defaultValue={profile.date_of_birth || ''}
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="skills">Skills (comma-separated)</Label>
-                <div className="flex items-center space-x-2">
-                  <Award className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="skills"
-                    name="skills"
-                    type="text"
-                    defaultValue={profile.skills?.join(', ') || ''}
-                    placeholder="e.g., Leadership, Communication, Problem Solving"
-                  />
-                </div>
-              </div>
+                  {/* Academic & Professional Section */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold border-b pb-2">Academic & Professional</h3>
 
-              <div className="space-y-2">
-                <Label>Member Since</Label>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {new Date(profile.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </div>
-              </div>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="academicInfo">Academic Information</Label>
+                        <div className="flex items-start space-x-3">
+                          <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                          <Textarea
+                            id="academicInfo"
+                            name="academicInfo"
+                            defaultValue={profile.academic_info || ''}
+                            placeholder="Enter your academic background (degree, institution, etc.)"
+                            rows={3}
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
 
-              {profile.profile_completed && (
-                <Badge variant="secondary" className="w-full justify-center">
-                  ✓ Profile Completed
-                </Badge>
-              )}
+                      <div className="space-y-2">
+                        <Label htmlFor="techStack">Tech Stack (comma-separated)</Label>
+                        <div className="flex items-center space-x-3">
+                          <Code className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="techStack"
+                            name="techStack"
+                            type="text"
+                            defaultValue={profile.tech_stack?.join(', ') || ''}
+                            placeholder="e.g., React, Node.js, Python, JavaScript"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
 
-              <Button type="submit" disabled={saving} className="w-full">
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                      <div className="space-y-2">
+                        <Label htmlFor="skills">Skills (comma-separated)</Label>
+                        <div className="flex items-center space-x-3">
+                          <Award className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="skills"
+                            name="skills"
+                            type="text"
+                            defaultValue={profile.skills?.join(', ') || ''}
+                            placeholder="e.g., Leadership, Communication, Problem Solving"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end space-x-4 pt-6 border-t">
+                    <Button type="submit" disabled={saving} size="lg" className="px-8">
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       <Dialog open={showRedirectDialog} onOpenChange={setShowRedirectDialog}>

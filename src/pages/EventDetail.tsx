@@ -385,7 +385,7 @@ export default function EventDetail() {
                     type="text"
                     readOnly
                     value={customUtmLink}
-                    className="flex-grow rounded border border-gray-300 px-3 py-2 text-sm"
+                    className="flex-grow rounded border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     onFocus={(e) => e.currentTarget.select()}
                   />
                   <Button
@@ -396,6 +396,8 @@ export default function EventDetail() {
                         description: "Your custom UTM link has been copied to clipboard.",
                       });
                     }}
+                    className="bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                    style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
                   >
                     Copy
                   </Button>
