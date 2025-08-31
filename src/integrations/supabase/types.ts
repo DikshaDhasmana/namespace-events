@@ -176,18 +176,21 @@ export type Database = {
           id: string
           registered_at: string
           user_id: string
+          utm_source: string | null
         }
         Insert: {
           event_id: string
           id?: string
           registered_at?: string
           user_id: string
+          utm_source?: string | null
         }
         Update: {
           event_id?: string
           id?: string
           registered_at?: string
           user_id?: string
+          utm_source?: string | null
         }
         Relationships: [
           {
@@ -201,7 +204,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      registration_leaderboard: {
+        Row: {
+          event_id: string | null
+          event_name: string | null
+          referral_count: number | null
+          referrer_name: string | null
+          utm_source: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       is_admin: {
