@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { EmailService } from '@/services/emailService';
 
 interface Event {
   id: string;
@@ -142,6 +143,9 @@ export default function EventDetail() {
       });
       setIsRegistered(true);
       setRegistrationCount(prev => prev + 1);
+      
+      // Send confirmation email
+      sendConfirmationEmail();
     }
   };
 
@@ -184,6 +188,36 @@ export default function EventDetail() {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const sendConfirmationEmail = async () => {
+    if (!user || !event) return;
+    
+    try {
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      const emailTemplate = EmailService.generateEventEmailTemplate({
+        eventName: event.name,
+        applicantName: profile?.full_name || 'Participant',
+        message: `Thank you for registering for ${event.name}! We're excited to have you join us.`,
+        eventDate: formatDate(event.date),
+        eventVenue: event.venue,
+        subject: `Registration Confirmed: ${event.name}`
+      });
+      
+      await EmailService.sendEmail({
+        to: user.email || '',
+        subject: `Registration Confirmed: ${event.name}`,
+        html: emailTemplate
+      });
+    } catch (error) {
+      console.error('Failed to send confirmation email:', error);
+    }
   };
 
   const handleShare = async () => {

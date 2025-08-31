@@ -5,10 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import EmailComposer from '@/components/EmailComposer';
+import * as XLSX from 'xlsx';
 
 interface Registration {
   id: string;
@@ -97,6 +98,46 @@ const EventRegistrations = () => {
     }
   };
 
+  const exportToExcel = () => {
+    if (registrations.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There are no registrations to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const worksheetData = registrations.map((reg, index) => ({
+      'S.No': index + 1,
+      'Full Name': reg.profiles.full_name || 'Not provided',
+      'Email': reg.profiles.email,
+      'Phone Number': reg.profiles.phone_number || 'Not provided',
+      'Date of Birth': reg.profiles.date_of_birth ? format(new Date(reg.profiles.date_of_birth), 'dd/MM/yyyy') : 'Not provided',
+      'Academic Info': reg.profiles.academic_info || 'Not provided',
+      'Tech Stack': reg.profiles.tech_stack?.join(', ') || 'Not provided',
+      'Skills': reg.profiles.skills?.join(', ') || 'Not provided',
+      'Profile Completed': reg.profiles.profile_completed ? 'Yes' : 'No',
+      'Registration Date': format(new Date(reg.registered_at), 'dd/MM/yyyy hh:mm a')
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+
+    // Auto-adjust column widths
+    const cols = Object.keys(worksheetData[0] || {}).map(() => ({ wch: 20 }));
+    worksheet['!cols'] = cols;
+
+    const fileName = `${event?.name || 'Event'}_Registrations_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+
+    toast({
+      title: "Export successful",
+      description: `Downloaded ${registrations.length} registrations as ${fileName}`,
+    });
+  };
+
   if (!isAdminAuthenticated) {
     return null;
   }
@@ -124,13 +165,23 @@ const EventRegistrations = () => {
               {registrations.length} registrations
             </Badge>
             {registrations.length > 0 && (
-              <Button 
-                onClick={() => setIsEmailComposerOpen(true)}
-                className="ml-2"
-              >
-                <MailIcon className="h-4 w-4 mr-2" />
-                Email Applicants
-              </Button>
+              <>
+                <Button 
+                  onClick={() => setIsEmailComposerOpen(true)}
+                  className="ml-2"
+                >
+                  <MailIcon className="h-4 w-4 mr-2" />
+                  Email Applicants
+                </Button>
+                <Button 
+                  onClick={exportToExcel}
+                  variant="outline"
+                  className="ml-2"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Excel
+                </Button>
+              </>
             )}
           </div>
         </div>
