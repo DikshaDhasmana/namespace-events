@@ -28,6 +28,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle redirect after authentication
+        if (event === 'SIGNED_IN' && session) {
+          const redirectUrl = localStorage.getItem('authRedirectUrl');
+          if (redirectUrl) {
+            localStorage.removeItem('authRedirectUrl');
+            // Use window.location.href to force a full page reload and preserve UTM parameters
+            window.location.href = redirectUrl;
+          }
+        }
       }
     );
 
@@ -42,8 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
+    // Check if there's a stored redirect URL and use it, otherwise use default
+    const storedRedirectUrl = localStorage.getItem('authRedirectUrl');
+    const redirectUrl = storedRedirectUrl || `${window.location.origin}/`;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -92,8 +104,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/`;
-    
+    // Check if there's a stored redirect URL and use it, otherwise use default
+    const storedRedirectUrl = localStorage.getItem('authRedirectUrl');
+    const redirectUrl = storedRedirectUrl || `${window.location.origin}/`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

@@ -55,7 +55,13 @@ export default function EventDetail() {
       }
       fetchRegistrationCount();
     }
-  }, [eventId, user]);
+
+    // Store UTM parameters for anonymous users
+    if (!user && utmSource) {
+      const currentUrl = window.location.href;
+      localStorage.setItem('authRedirectUrl', currentUrl);
+    }
+  }, [eventId, user, utmSource]);
 
   const fetchEvent = async () => {
     const { data, error } = await supabase
@@ -128,8 +134,8 @@ export default function EventDetail() {
     }
     
     const registrationData: any = { user_id: user.id, event_id: eventId };
-    // Include utm_source if present
-    if (utmSource) {
+    // Include utm_source if present and it's not the same user (prevent self-referrals)
+    if (utmSource && utmSource !== user.id) {
       registrationData.utm_source = utmSource;
     }
 
