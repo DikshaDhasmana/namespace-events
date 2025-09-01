@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus } from 'lucide-react';
+import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +30,21 @@ interface Registration {
   };
 }
 
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  phone_number: string | null;
+  date_of_birth: string | null;
+  academic_info: string | null;
+  tech_stack: string[] | null;
+  skills: string[] | null;
+  profile_completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const eventTypeColors = {
   webinar: 'bg-blue-100 text-blue-800',
   hackathon: 'bg-purple-100 text-purple-800',
@@ -33,7 +54,19 @@ const eventTypeColors = {
 
 export default function Dashboard() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showRedirectDialog, setShowRedirectDialog] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [profileForm, setProfileForm] = useState({
+    full_name: '',
+    phone_number: '',
+    date_of_birth: '',
+    academic_info: '',
+    tech_stack: '',
+    skills: '',
+  });
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -43,8 +76,35 @@ export default function Dashboard() {
       navigate('/auth');
       return;
     }
+    fetchProfile();
     fetchRegistrations();
   }, [user, navigate]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    } else {
+      setProfile(data);
+      // Initialize form with profile data
+      setProfileForm({
+        full_name: data.full_name || '',
+        phone_number: data.phone_number || '',
+        date_of_birth: data.date_of_birth || '',
+        academic_info: data.academic_info || '',
+        tech_stack: data.tech_stack?.join(', ') || '',
+        skills: data.skills?.join(', ') || '',
+      });
+    }
+  };
 
   const fetchRegistrations = async () => {
     if (!user) return;
@@ -88,6 +148,50 @@ export default function Dashboard() {
         description: `You have been unregistered from ${eventName}`,
       });
       setRegistrations(prev => prev.filter(reg => reg.id !== registrationId));
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    if (!user) return;
+
+    setSaving(true);
+    try {
+      const updatedProfile = {
+        full_name: profileForm.full_name || null,
+        phone_number: profileForm.phone_number || null,
+        date_of_birth: profileForm.date_of_birth || null,
+        academic_info: profileForm.academic_info || null,
+        tech_stack: profileForm.tech_stack ? profileForm.tech_stack.split(',').map(s => s.trim()).filter(s => s) : null,
+        skills: profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : null,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updatedProfile)
+        .eq('id', user.id);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update profile",
+        });
+      } else {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been successfully updated",
+        });
+        fetchProfile(); // Refresh profile data
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -138,15 +242,15 @@ export default function Dashboard() {
     <div className="min-h-screen">
       {/* Header Section */}
       <div className="border-b">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Welcome back!</h1>
-              <p className="text-muted-foreground text-lg">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Welcome back!</h1>
+              <p className="text-muted-foreground text-base sm:text-lg">
                 Here's what's happening with your events
               </p>
             </div>
-            <Button onClick={() => navigate('/events')} className="gap-2">
+            <Button onClick={() => navigate('/events')} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Browse Events
             </Button>
@@ -154,258 +258,694 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalEvents}</div>
-              <p className="text-xs text-muted-foreground">
-                Events you've registered for
-              </p>
-            </CardContent>
-          </Card>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Mobile Layout: Dashboard title + Tabs */}
+        <div className="lg:hidden">
+          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          <Tabs defaultValue="events" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="events" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Events
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+            </TabsList>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{upcomingCount}</div>
-              <p className="text-xs text-muted-foreground">
-                Events in your future
-              </p>
-            </CardContent>
-          </Card>
+            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
+            {registrations.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent className="space-y-4">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <Calendar className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl mb-2">No Registrations Yet</CardTitle>
+                    <CardDescription className="text-lg">
+                      You haven't registered for any events yet. Explore upcoming events to get started.
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => navigate('/events')} size="lg" className="mt-4">
+                    Browse Events
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Live Events Section */}
+                {liveCount > 0 && (
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                      <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        Live Events
+                      </h2>
+                      <Badge variant="destructive" className="text-xs sm:text-sm w-fit">
+                        {liveCount} event{liveCount !== 1 ? 's' : ''} happening now
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {liveEvents.map((registration) => (
+                <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow border-red-200">
+                  <div className="absolute top-2 left-2">
+                    <div className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      LIVE
+                    </div>
+                  </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed Events</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pastCount}</div>
-              <p className="text-xs text-muted-foreground">
-                Events you've attended
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+                  <CardHeader className="pt-12">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg line-clamp-2 font-heading">
+                        {registration.events.name}
+                      </CardTitle>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                    >
+                      {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                    </Badge>
+                  </CardHeader>
 
-        {/* Main Content */}
-        {registrations.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent className="space-y-4">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <Calendar className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl mb-2">No Registrations Yet</CardTitle>
-                <CardDescription className="text-lg">
-                  You haven't registered for any events yet. Explore upcoming events to get started.
-                </CardDescription>
-              </div>
-              <Button onClick={() => navigate('/events')} size="lg" className="mt-4">
-                Browse Events
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            {/* Live Events Section */}
-            {liveCount > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    Live Events
-                  </h2>
-                  <Badge variant="destructive" className="text-sm">
-                    {liveCount} event{liveCount !== 1 ? 's' : ''} happening now
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {liveEvents.map((registration) => (
-            <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow border-red-200">
-              <div className="absolute top-2 left-2">
-                <div className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  LIVE
-                </div>
-              </div>
+                  <CardContent className="flex flex-col justify-between">
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {formatDate(registration.events.date)}
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        {registration.events.venue}
+                      </div>
+                      {registration.events.max_participants && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Users className="mr-2 h-4 w-4" />
+                          Max {registration.events.max_participants} participants
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => navigate(`/events/${registration.events.id}`)}
+                      className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                      style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                    >
+                      View Details
+                    </button>
+                  </CardContent>
+                </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              <CardHeader className="pt-12">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg line-clamp-2 font-heading">
-                    {registration.events.name}
+                {/* Upcoming Events Section */}
+                {upcomingCount > 0 && (
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                      <h2 className="text-xl sm:text-2xl font-semibold">Upcoming Events</h2>
+                      <Badge variant="secondary" className="text-xs sm:text-sm w-fit">
+                        {upcomingCount} event{upcomingCount !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {upcomingEvents.map((registration) => (
+                        <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => handleUnregister(registration.id, registration.events.name)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+
+                          <CardHeader>
+                            <div className="flex justify-between items-start pr-8">
+                              <CardTitle className="text-lg line-clamp-2 font-heading">
+                                {registration.events.name}
+                              </CardTitle>
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                            >
+                              {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                            </Badge>
+                          </CardHeader>
+
+                          <CardContent className="flex flex-col justify-between">
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                {formatDate(registration.events.date)}
+                              </div>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <MapPin className="mr-2 h-4 w-4" />
+                                {registration.events.venue}
+                              </div>
+                              {registration.events.max_participants && (
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Users className="mr-2 h-4 w-4" />
+                                  Max {registration.events.max_participants} participants
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => navigate(`/events/${registration.events.id}`)}
+                              className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                              style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                            >
+                              View Details
+                            </button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Past Events Section */}
+                {pastCount > 0 && (
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                      <h2 className="text-xl sm:text-2xl font-semibold">Past Events</h2>
+                      <Badge variant="outline" className="text-xs sm:text-sm w-fit">
+                        {pastCount} event{pastCount !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {pastEvents.map((registration) => (
+                        <Card key={registration.id} className="relative opacity-75">
+                          <CardHeader>
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg line-clamp-2 font-heading">
+                                {registration.events.name}
+                              </CardTitle>
+                              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                            >
+                              {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                            </Badge>
+                          </CardHeader>
+
+                          <CardContent className="flex flex-col justify-between">
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                {formatDate(registration.events.date)}
+                              </div>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <MapPin className="mr-2 h-4 w-4" />
+                                {registration.events.venue}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Attended • Registered on {new Date(registration.registered_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => navigate(`/events/${registration.events.id}`)}
+                              className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                              style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                            >
+                              View Details
+                            </button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
                   </CardTitle>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
-                >
-                  {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
-                </Badge>
-              </CardHeader>
-
-              <CardContent className="flex flex-col justify-between">
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {formatDate(registration.events.date)}
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    {registration.events.venue}
-                  </div>
-                  {registration.events.max_participants && (
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users className="mr-2 h-4 w-4" />
-                      Max {registration.events.max_participants} participants
+                  <CardDescription>
+                    Manage your personal information and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {profile && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="full_name">Full Name</Label>
+                          <Input
+                            id="full_name"
+                            value={profileForm.full_name}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                            placeholder="Enter your full name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={profile.email}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="phone_number">Phone Number</Label>
+                          <Input
+                            id="phone_number"
+                            value={profileForm.phone_number}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                            placeholder="Enter your phone number"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="date_of_birth">Date of Birth</Label>
+                          <Input
+                            id="date_of_birth"
+                            type="date"
+                            value={profileForm.date_of_birth}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="academic_info">Academic Information</Label>
+                          <Textarea
+                            id="academic_info"
+                            value={profileForm.academic_info}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
+                            placeholder="Enter your academic background"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="tech_stack">Tech Stack</Label>
+                          <Textarea
+                            id="tech_stack"
+                            value={profileForm.tech_stack}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
+                            placeholder="Enter your tech stack (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="skills">Skills</Label>
+                          <Textarea
+                            id="skills"
+                            value={profileForm.skills}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                            placeholder="Enter your skills (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-                <button
-                  onClick={() => navigate(`/events/${registration.events.id}`)}
-                  className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
-                  style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
-                >
-                  View Details
-                </button>
+                  <div className="flex justify-end">
+                    <Button onClick={handleProfileUpdate} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Desktop Layout: Stats Cards + Tabs */}
+        <div className="hidden lg:block space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalEvents}</div>
+                <p className="text-xs text-muted-foreground">
+                  Events you've registered for
+                </p>
               </CardContent>
             </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Upcoming Events Section */}
-            {upcomingCount > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold">Upcoming Events</h2>
-                  <Badge variant="secondary" className="text-sm">
-                    {upcomingCount} event{upcomingCount !== 1 ? 's' : ''}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {upcomingEvents.map((registration) => (
-                    <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleUnregister(registration.id, registration.events.name)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{upcomingCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  Events in your future
+                </p>
+              </CardContent>
+            </Card>
 
-                      <CardHeader>
-                        <div className="flex justify-between items-start pr-8">
-                          <CardTitle className="text-lg line-clamp-2 font-heading">
-                            {registration.events.name}
-                          </CardTitle>
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
-                        >
-                          {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed Events</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{pastCount}</div>
+                <p className="text-xs text-muted-foreground">
+                  Events you've attended
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content with Tabs */}
+          <Tabs defaultValue="events" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="events" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Events
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
+              {registrations.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent className="space-y-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <Calendar className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl mb-2">No Registrations Yet</CardTitle>
+                      <CardDescription className="text-lg">
+                        You haven't registered for any events yet. Explore upcoming events to get started.
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => navigate('/events')} size="lg" className="mt-4">
+                      Browse Events
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  {/* Live Events Section */}
+                  {liveCount > 0 && (
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                          Live Events
+                        </h2>
+                        <Badge variant="destructive" className="text-xs sm:text-sm w-fit">
+                          {liveCount} event{liveCount !== 1 ? 's' : ''} happening now
                         </Badge>
-                      </CardHeader>
-
-                      <CardContent className="flex flex-col justify-between">
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            {formatDate(registration.events.date)}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            {registration.events.venue}
-                          </div>
-                          {registration.events.max_participants && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Users className="mr-2 h-4 w-4" />
-                              Max {registration.events.max_participants} participants
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        {liveEvents.map((registration) => (
+                          <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow border-red-200">
+                            <div className="absolute top-2 left-2">
+                              <div className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                LIVE
+                              </div>
                             </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => navigate(`/events/${registration.events.id}`)}
-                          className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
-                          style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
-                        >
-                          View Details
-                        </button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Past Events Section */}
-            {pastCount > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold">Past Events</h2>
-                  <Badge variant="outline" className="text-sm">
-                    {pastCount} event{pastCount !== 1 ? 's' : ''}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pastEvents.map((registration) => (
-                    <Card key={registration.id} className="relative opacity-75">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-lg line-clamp-2 font-heading">
-                            {registration.events.name}
-                          </CardTitle>
-                          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
-                        >
-                          {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                            <CardHeader className="pt-12">
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg line-clamp-2 font-heading">
+                                  {registration.events.name}
+                                </CardTitle>
+                              </div>
+                              <Badge
+                                variant="secondary"
+                                className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                              >
+                                {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                              </Badge>
+                            </CardHeader>
+
+                            <CardContent className="flex flex-col justify-between">
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Calendar className="mr-2 h-4 w-4" />
+                                  {formatDate(registration.events.date)}
+                                </div>
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <MapPin className="mr-2 h-4 w-4" />
+                                  {registration.events.venue}
+                                </div>
+                                {registration.events.max_participants && (
+                                  <div className="flex items-center text-sm text-muted-foreground">
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Max {registration.events.max_participants} participants
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => navigate(`/events/${registration.events.id}`)}
+                                className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                                style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                              >
+                                View Details
+                              </button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upcoming Events Section */}
+                  {upcomingCount > 0 && (
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-semibold">Upcoming Events</h2>
+                        <Badge variant="secondary" className="text-xs sm:text-sm w-fit">
+                          {upcomingCount} event{upcomingCount !== 1 ? 's' : ''}
                         </Badge>
-                      </CardHeader>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        {upcomingEvents.map((registration) => (
+                          <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleUnregister(registration.id, registration.events.name)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
 
-                      <CardContent className="flex flex-col justify-between">
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            {formatDate(registration.events.date)}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            {registration.events.venue}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Attended • Registered on {new Date(registration.registered_at).toLocaleDateString()}
-                          </div>
+                            <CardHeader>
+                              <div className="flex justify-between items-start pr-8">
+                                <CardTitle className="text-lg line-clamp-2 font-heading">
+                                  {registration.events.name}
+                                </CardTitle>
+                              </div>
+                              <Badge
+                                variant="secondary"
+                                className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                              >
+                                {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                              </Badge>
+                            </CardHeader>
+
+                            <CardContent className="flex flex-col justify-between">
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Calendar className="mr-2 h-4 w-4" />
+                                  {formatDate(registration.events.date)}
+                                </div>
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <MapPin className="mr-2 h-4 w-4" />
+                                  {registration.events.venue}
+                                </div>
+                                {registration.events.max_participants && (
+                                  <div className="flex items-center text-sm text-muted-foreground">
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Max {registration.events.max_participants} participants
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => navigate(`/events/${registration.events.id}`)}
+                                className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                                style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                              >
+                                View Details
+                              </button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Past Events Section */}
+                  {pastCount > 0 && (
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-semibold">Past Events</h2>
+                        <Badge variant="outline" className="text-xs sm:text-sm w-fit">
+                          {pastCount} event{pastCount !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {pastEvents.map((registration) => (
+                          <Card key={registration.id} className="relative opacity-75">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg line-clamp-2 font-heading">
+                                  {registration.events.name}
+                                </CardTitle>
+                                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                              </div>
+                              <Badge
+                                variant="secondary"
+                                className={`w-fit ${eventTypeColors[registration.events.event_type as keyof typeof eventTypeColors]}`}
+                              >
+                                {registration.events.event_type.charAt(0).toUpperCase() + registration.events.event_type.slice(1)}
+                              </Badge>
+                            </CardHeader>
+
+                            <CardContent className="flex flex-col justify-between">
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Calendar className="mr-2 h-4 w-4" />
+                                  {formatDate(registration.events.date)}
+                                </div>
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <MapPin className="mr-2 h-4 w-4" />
+                                  {registration.events.venue}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  Attended • Registered on {new Date(registration.registered_at).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => navigate(`/events/${registration.events.id}`)}
+                                className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                                style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                              >
+                                View Details
+                              </button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your personal information and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {profile && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="full_name">Full Name</Label>
+                          <Input
+                            id="full_name"
+                            value={profileForm.full_name}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                            placeholder="Enter your full name"
+                          />
                         </div>
-                        <button
-                          onClick={() => navigate(`/events/${registration.events.id}`)}
-                          className="w-full bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
-                          style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
-                        >
-                          View Details
-                        </button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
+                        <div>
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={profile.email}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="phone_number">Phone Number</Label>
+                          <Input
+                            id="phone_number"
+                            value={profileForm.phone_number}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                            placeholder="Enter your phone number"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="date_of_birth">Date of Birth</Label>
+                          <Input
+                            id="date_of_birth"
+                            type="date"
+                            value={profileForm.date_of_birth}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="academic_info">Academic Information</Label>
+                          <Textarea
+                            id="academic_info"
+                            value={profileForm.academic_info}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
+                            placeholder="Enter your academic background"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="tech_stack">Tech Stack</Label>
+                          <Textarea
+                            id="tech_stack"
+                            value={profileForm.tech_stack}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
+                            placeholder="Enter your tech stack (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="skills">Skills</Label>
+                          <Textarea
+                            id="skills"
+                            value={profileForm.skills}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                            placeholder="Enter your skills (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <Button onClick={handleProfileUpdate} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

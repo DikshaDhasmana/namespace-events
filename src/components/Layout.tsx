@@ -23,11 +23,11 @@ const Layout = ({ children, showFooter = true }: LayoutProps) => {
       <Navbar />
       <div className="flex flex-grow relative pt-16">
         {showSidebar && (
-          <div className="fixed left-0 top-16 bottom-0 w-64 z-10">
+          <div className="fixed left-0 top-16 bottom-0 w-64 z-10 hidden lg:block">
             <Sidebar />
           </div>
         )}
-        <main className={`flex-grow overflow-auto ${showSidebar ? 'ml-64' : ''}`}>
+        <main className={`flex-grow overflow-auto ${showSidebar ? 'lg:ml-64' : ''}`}>
           <div className="h-full">
             {children}
           </div>
