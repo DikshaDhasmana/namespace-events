@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,12 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import WebinarForm from '@/components/forms/WebinarForm';
 import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
 
 const CreateEvent = () => {
+  const { eventId } = useParams<{ eventId: string }>();
+  const isEditMode = !!eventId;
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -45,11 +50,73 @@ const CreateEvent = () => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isAdminAuthenticated } = useAdminAuth();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Fetch event data if in edit mode
+  useEffect(() => {
+    if (isEditMode && eventId) {
+      fetchEventData(eventId);
+    }
+  }, [eventId, isEditMode]);
+
+  const fetchEventData = async (id: string) => {
+    setFetchLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          name: data.name || '',
+          description: data.description || '',
+          event_type: data.event_type || '',
+          date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
+          venue: data.venue || '',
+          max_participants: data.max_participants?.toString() || '',
+          mode: data.mode || '',
+          team_size: data.team_size?.toString() || '',
+          end_date: data.end_date ? new Date(data.end_date).toISOString().split('T')[0] : '',
+          speaker: data.speaker || '',
+          prerequisites: data.prerequisites || '',
+          prizes: data.prizes || '',
+          tech_stack: Array.isArray(data.tech_stack) ? data.tech_stack.join(', ') : '',
+          judging_criteria: data.judging_criteria || '',
+          duration: data.duration?.toString() || '',
+          networking: data.networking || '',
+          speakers: Array.isArray(data.speakers) ? data.speakers.join(', ') : '',
+          topics: Array.isArray(data.topics) ? data.topics.join(', ') : '',
+          refreshments: data.refreshments || '',
+          contest_type: data.contest_type || '',
+          rules: data.rules || '',
+          eligibility: data.eligibility || '',
+          submission_format: data.submission_format || ''
+        });
+
+        if (data.banner_url) {
+          setBannerPreview(data.banner_url);
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch event data",
+        variant: "destructive",
+      });
+      navigate('/admin/events');
+    } finally {
+      setFetchLoading(false);
+    }
+  };
 
   if (!isAdminAuthenticated) {
     navigate('/admin/login');
@@ -110,8 +177,8 @@ const CreateEvent = () => {
     setLoading(true);
 
     try {
-      let banner_url = '';
-      
+      let banner_url = bannerPreview; // Keep existing banner if no new file
+
       if (bannerFile) {
         const uploadedUrl = await uploadBanner(bannerFile);
         if (uploadedUrl) {
@@ -166,28 +233,48 @@ const CreateEvent = () => {
         submission_format: formData.submission_format || null
       };
 
-      const { error } = await supabase
-        .from('events')
-        .insert([eventData]);
+      let error;
+      if (isEditMode && eventId) {
+        // Update existing event
+        const { error: updateError } = await supabase
+          .from('events')
+          .update(eventData)
+          .eq('id', eventId);
+        error = updateError;
+      } else {
+        // Create new event
+        const { error: insertError } = await supabase
+          .from('events')
+          .insert([eventData]);
+        error = insertError;
+      }
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Event created successfully",
+        description: isEditMode ? "Event updated successfully" : "Event created successfully",
       });
-      
+
       navigate('/admin/events');
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create event",
+        description: `Failed to ${isEditMode ? 'update' : 'create'} event`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetchLoading) {
+    return (
+      <div className="min-h-screen bg-background relative flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -201,14 +288,16 @@ const CreateEvent = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
           </Button>
-          <h1 className="text-2xl font-bold">Create New Event</h1>
+          <h1 className="text-2xl font-bold">
+            {isEditMode ? 'Edit Event' : 'Create New Event'}
+          </h1>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
         <Card>
           <CardHeader>
-            <CardTitle>Event Details</CardTitle>
+            <CardTitle>{isEditMode ? 'Edit Event Details' : 'Event Details'}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -298,7 +387,7 @@ const CreateEvent = () => {
                   disabled={loading}
                   className="flex-1"
                 >
-                  {loading ? 'Creating...' : 'Create Event'}
+                  {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
                 </Button>
               </div>
             </form>

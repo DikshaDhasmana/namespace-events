@@ -1,7 +1,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface MeetupFormProps {
   formData: any;
@@ -25,13 +26,12 @@ const MeetupForm: React.FC<MeetupFormProps> = ({ formData, onInputChange }) => {
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          name="description"
+        <ReactQuill
+          theme="snow"
           value={formData.description}
-          onChange={onInputChange}
+          onChange={(value) => onInputChange({ target: { name: 'description', value } } as any)}
           placeholder="Describe the meetup agenda and what participants can expect"
-          rows={4}
+          className="bg-background"
         />
       </div>
 
