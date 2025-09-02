@@ -370,9 +370,12 @@ export default function EventDetail() {
               <CardTitle>About This Event</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                {event.description || 'No description available for this event.'}
-              </p>
+              <div
+                className="text-muted-foreground leading-relaxed prose prose-slate prose-sm max-w-none prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: event.description || 'No description available for this event.'
+                }}
+              />
             </CardContent>
           </Card>
 
