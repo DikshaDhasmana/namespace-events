@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import { Calendar, MapPin, Users, ChevronDown, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 interface Event {
@@ -38,84 +39,110 @@ const eventTypeColors = {
 };
 
 export default function Events() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [registeredEvents, setRegisteredEvents] = useState<Set<string>>(new Set());
   const [selectedType, setSelectedType] = useState('all');
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Fetch events with React Query for better caching
+  const { data: events = [], isLoading: eventsLoading, error: eventsError } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const startTime = performance.now();
+      const { data, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          registrations(count)
+        `)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      const endTime = performance.now();
+      console.log(`Events fetch took ${endTime - startTime} milliseconds`);
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Fetch user registrations with React Query
+  const { data: registrations = [], isLoading: registrationsLoading } = useQuery({
+    queryKey: ['registrations', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('event_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const registeredEvents = useMemo(() =>
+    new Set(registrations.map(r => r.event_id)),
+    [registrations]
+  );
+
+  const loading = eventsLoading || (user && registrationsLoading);
+  const queryClient = useQueryClient();
+
+  // Show error if events failed to load
   useEffect(() => {
-    fetchEvents();
-    if (user) {
-      fetchRegistrations();
-    }
-  }, [user]);
-
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from('events')
-      .select(`
-        *,
-        registrations(count)
-      `)
-      .order('date', { ascending: true });
-
-    if (error) {
+    if (eventsError) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to fetch events",
       });
-    } else {
-      setEvents(data || []);
     }
-    setLoading(false);
-  };
+  }, [eventsError, toast]);
 
-  const fetchRegistrations = async () => {
-    if (!user) return;
+  // Mutation for registering to events
+  const registerMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      if (!user) throw new Error('User not authenticated');
 
-    const { data } = await supabase
-      .from('registrations')
-      .select('event_id')
-      .eq('user_id', user.id);
+      // Check if user has completed their profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('profile_completed')
+        .eq('id', user.id)
+        .single();
 
-    if (data) {
-      setRegisteredEvents(new Set(data.map(r => r.event_id)));
-    }
-  };
+      if (!profile?.profile_completed) {
+        throw new Error('PROFILE_INCOMPLETE');
+      }
 
-  const handleRegister = async (eventId: string) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
+      const { error } = await supabase
+        .from('registrations')
+        .insert([{ user_id: user.id, event_id: eventId }]);
 
-    // Check if user has completed their profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('profile_completed')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.profile_completed) {
+      if (error) throw error;
+      return eventId;
+    },
+    onSuccess: (eventId) => {
+      // Invalidate and refetch registrations
+      queryClient.invalidateQueries({ queryKey: ['registrations', user?.id] });
       toast({
-        variant: "destructive",
-        title: "Profile Incomplete",
-        description: "Please complete your profile before registering for events",
+        title: "Success!",
+        description: "You have been registered for the event",
       });
-      navigate('/profile');
-      return;
-    }
-    
-    const { error } = await supabase
-      .from('registrations')
-      .insert([{ user_id: user.id, event_id: eventId }]);
-
-    if (error) {
-      if (error.code === '23505') {
+    },
+    onError: (error: any) => {
+      if (error.message === 'PROFILE_INCOMPLETE') {
+        toast({
+          variant: "destructive",
+          title: "Profile Incomplete",
+          description: "Please complete your profile before registering for events",
+        });
+        navigate('/profile');
+      } else if (error.code === '23505') {
         toast({
           variant: "destructive",
           title: "Already registered",
@@ -128,19 +155,31 @@ export default function Events() {
           description: error.message,
         });
       }
-    } else {
-      toast({
-        title: "Success!",
-        description: "You have been registered for the event",
-      });
-      setRegisteredEvents(prev => new Set([...prev, eventId]));
+    },
+  });
+
+  const handleRegister = (eventId: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
     }
+    registerMutation.mutate(eventId);
   };
 
-  const filterEvents = (type?: string) => {
-    if (!type || type === 'all') return events;
-    return events.filter(event => event.event_type === type);
-  };
+  const filterEvents = useMemo(() => {
+    return (type?: string) => {
+      const startTime = performance.now();
+      let result;
+      if (!type || type === 'all') {
+        result = events;
+      } else {
+        result = events.filter(event => event.event_type === type);
+      }
+      const endTime = performance.now();
+      console.log(`Filtering ${events.length} events took ${endTime - startTime} milliseconds`);
+      return result;
+    };
+  }, [events]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -195,76 +234,80 @@ export default function Events() {
     }
   };
 
-  const EventCard = ({ event }: { event: Event }) => (
-    <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
-      {/* Event Banner */}
-      <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
-        <img
-          src={event.banner_url || '/placeholder.svg'}
-          alt={event.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/placeholder.svg';
-          }}
-        />
-        <div className="absolute top-3 right-3 flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleShare(event);
+  const EventCard = memo(({ event }: { event: Event }) => {
+    const isRegistered = registeredEvents.has(event.id);
+
+    return (
+      <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
+        {/* Event Banner */}
+        <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+          <img
+            src={event.banner_url || '/placeholder.svg'}
+            alt={event.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
             }}
-            className="p-2 h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
-          >
-            <Share2 className="h-3 w-3" />
-          </Button>
-          <Badge 
-            variant="secondary" 
-            className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]} shadow-sm`}
-          >
-            {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
-          </Badge>
+          />
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShare(event);
+              }}
+              className="p-2 h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
+            >
+              <Share2 className="h-3 w-3" />
+            </Button>
+            <Badge
+              variant="secondary"
+              className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]} shadow-sm`}
+            >
+              {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
+            </Badge>
+          </div>
         </div>
-      </div>
-      
-      <CardHeader>
-        <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col justify-between">
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="mr-2 h-4 w-4" />
-            {formatDate(event.date)}
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="mr-2 h-4 w-4" />
-            {event.venue}
-          </div>
-          {event.max_participants && (
+
+        <CardHeader>
+          <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex-1 flex flex-col justify-between">
+          <div className="space-y-2 mb-4">
             <div className="flex items-center text-sm text-muted-foreground">
-              <Users className="mr-2 h-4 w-4" />
-              {event.event_type === 'meetup'
-                ? `${event.max_participants - getRegistrationCount(event)} slots left`
-                : `Max ${event.max_participants} participants`
-              }
+              <Calendar className="mr-2 h-4 w-4" />
+              {formatDate(event.date)}
             </div>
-          )}
-        </div>
-        
-        <div className="space-y-2">
-          <Button
-            onClick={() => navigate(`/events/${event.id}`)}
-            className={`w-full transition-colors button-hover button-hover-light dark:button-hover-dark ${registeredEvents.has(event.id) ? 'bg-green-500 hover:bg-green-600' : 'bg-primary hover:bg-primary/90'}`}
-          >
-            View Details
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+            <div className="flex items-center text-sm text-muted-foreground">
+              <MapPin className="mr-2 h-4 w-4" />
+              {event.venue}
+            </div>
+            {event.max_participants && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="mr-2 h-4 w-4" />
+                {event.event_type === 'meetup'
+                  ? `${event.max_participants - getRegistrationCount(event)} slots left`
+                  : `Max ${event.max_participants} participants`
+                }
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Button
+              onClick={() => navigate(`/events/${event.id}`)}
+              className={`w-full transition-colors button-hover button-hover-light dark:button-hover-dark ${isRegistered ? 'bg-green-500 hover:bg-green-600' : 'bg-primary hover:bg-primary/90'}`}
+            >
+              View Details
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  });
 
   if (loading) {
     return (
