@@ -158,31 +158,6 @@ const AdminEvents = () => {
           <div className="text-center py-8">Loading events...</div>
         ) : (
           <>
-            {/* Referral Links Section */}
-            {leaderboard.length > 0 && (
-              <Card className="mb-8">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <LinkIcon className="h-5 w-5" />
-                    Active Referral Links ({leaderboard.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {leaderboard.map((entry, index) => (
-                      <div key={`${entry.utm_source}-${entry.event_id}`} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{entry.referrer_name || 'Anonymous'}</h4>
-                          <Badge variant="outline">{entry.referral_count} referrals</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{entry.event_name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">ID: {entry.utm_source}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
             
             {/* Events Section */}
             {events.length === 0 ? (
