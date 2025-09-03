@@ -200,6 +200,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "registration_leaderboard"
+            referencedColumns: ["event_id"]
+          },
         ]
       }
     }
@@ -212,15 +219,7 @@ export type Database = {
           referrer_name: string | null
           utm_source: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "registrations_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
