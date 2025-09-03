@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Edit, Trash2, Users, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Users, Calendar, MapPin, LinkIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -24,8 +24,17 @@ interface Event {
   registrations?: { count: number }[];
 }
 
+interface LeaderboardEntry {
+  utm_source: string;
+  referrer_name: string;
+  event_id: string;
+  event_name: string;
+  referral_count: number;
+}
+
 const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAdminAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
@@ -37,6 +46,7 @@ const AdminEvents = () => {
       return;
     }
     fetchEvents();
+    fetchLeaderboard();
   }, [isAdminAuthenticated, navigate]);
 
   const fetchEvents = async () => {
@@ -59,6 +69,25 @@ const AdminEvents = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('registration_leaderboard')
+        .select('*')
+        .gte('referral_count', 1)
+        .order('referral_count', { ascending: false });
+
+      if (error) throw error;
+      setLeaderboard(data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch referral leaderboard",
+        variant: "destructive",
+      });
     }
   };
 
@@ -127,83 +156,114 @@ const AdminEvents = () => {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {loading ? (
           <div className="text-center py-8">Loading events...</div>
-        ) : events.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No events found</h3>
-              <p className="text-muted-foreground mb-4">Create your first event to get started</p>
-              <Button onClick={() => navigate('/admin/events/create')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Event
-              </Button>
-            </CardContent>
-          </Card>
         ) : (
-          <div className="grid gap-6">
-            {events.map((event) => (
-              <Card key={event.id}>
+          <>
+            {/* Referral Links Section */}
+            {leaderboard.length > 0 && (
+              <Card className="mb-8">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">{event.name}</CardTitle>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(event.date), 'PPP')}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {event.venue}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {getRegistrationCount(event)}{event.max_participants && `/${event.max_participants}`} registered
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{event.event_type}</Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate(`/admin/events/${event.id}/registrations`)}
-                      >
-                        <Users className="h-4 w-4 mr-1" />
-                        View Applicants
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate(`/admin/events/${event.id}/edit`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteEvent(event.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  <CardTitle className="flex items-center gap-2">
+                    <LinkIcon className="h-5 w-5" />
+                    Active Referral Links ({leaderboard.length})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {event.banner_url && (
-                    <div className="mb-4">
-                      <img
-                        src={event.banner_url}
-                        alt={event.name}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                  <p className="text-muted-foreground">{event.description}</p>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {leaderboard.map((entry, index) => (
+                      <div key={`${entry.utm_source}-${entry.event_id}`} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{entry.referrer_name || 'Anonymous'}</h4>
+                          <Badge variant="outline">{entry.referral_count} referrals</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{entry.event_name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">ID: {entry.utm_source}</p>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            )}
+            
+            {/* Events Section */}
+            {events.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No events found</h3>
+                  <p className="text-muted-foreground mb-4">Create your first event to get started</p>
+                  <Button onClick={() => navigate('/admin/events/create')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Event
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-6">
+                {events.map((event) => (
+                  <Card key={event.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <CardTitle className="text-xl mb-2">{event.name}</CardTitle>
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {format(new Date(event.date), 'PPP')}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {event.venue}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              {getRegistrationCount(event)}{event.max_participants && `/${event.max_participants}`} registered
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{event.event_type}</Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/admin/events/${event.id}/registrations`)}
+                          >
+                            <Users className="h-4 w-4 mr-1" />
+                            View Applicants
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/admin/events/${event.id}/edit`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteEvent(event.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {event.banner_url && (
+                        <div className="mb-4">
+                          <img
+                            src={event.banner_url}
+                            alt={event.name}
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        </div>
+                      )}
+                      <p className="text-muted-foreground">{event.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
