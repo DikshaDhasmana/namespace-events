@@ -233,6 +233,14 @@ const AdminEvents = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => navigate(`/admin/events/${event.id}/referrals`)}
+                          >
+                            <LinkIcon className="h-4 w-4 mr-1" />
+                            View Referrals
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => navigate(`/admin/events/${event.id}/edit`)}
                           >
                             <Edit className="h-4 w-4" />
