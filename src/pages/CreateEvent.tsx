@@ -49,9 +49,12 @@ const CreateEvent = () => {
   });
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>('');
+  const [displayImageFile, setDisplayImageFile] = useState<File | null>(null);
+  const [displayImagePreview, setDisplayImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const displayImageInputRef = useRef<HTMLInputElement>(null);
   const { isAdminAuthenticated } = useAdminAuth();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -141,11 +144,28 @@ const CreateEvent = () => {
     }
   };
 
+  const handleDisplayImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setDisplayImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setDisplayImagePreview(previewUrl);
+    }
+  };
+
   const removeBanner = () => {
     setBannerFile(null);
     setBannerPreview('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const removeDisplayImage = () => {
+    setDisplayImageFile(null);
+    setDisplayImagePreview('');
+    if (displayImageInputRef.current) {
+      displayImageInputRef.current.value = '';
     }
   };
 
@@ -319,7 +339,20 @@ const CreateEvent = () => {
               {formData.event_type && (
                 <>
                   {formData.event_type === 'webinar' && (
-                    <WebinarForm formData={formData} onInputChange={handleInputChange} />
+                    <WebinarForm 
+                      formData={formData} 
+                      onInputChange={handleInputChange}
+                      bannerFile={bannerFile}
+                      bannerPreview={bannerPreview}
+                      displayImageFile={displayImageFile}
+                      displayImagePreview={displayImagePreview}
+                      fileInputRef={fileInputRef}
+                      displayImageInputRef={displayImageInputRef}
+                      onBannerSelect={handleFileSelect}
+                      onDisplayImageSelect={handleDisplayImageSelect}
+                      onRemoveBanner={removeBanner}
+                      onRemoveDisplayImage={removeDisplayImage}
+                    />
                   )}
                   {formData.event_type === 'hackathon' && (
                     <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
@@ -333,45 +366,47 @@ const CreateEvent = () => {
                 </>
               )}
 
-              <div className="space-y-2">
-                <Label>Event Banner</Label>
-                <div className="space-y-4">
-                  {bannerPreview ? (
-                    <div className="relative">
-                      <img
-                        src={bannerPreview}
-                        alt="Banner preview"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={removeBanner}
+              {formData.event_type !== 'webinar' && (
+                <div className="space-y-2">
+                  <Label>Event Banner</Label>
+                  <div className="space-y-4">
+                    {bannerPreview ? (
+                      <div className="relative">
+                        <img
+                          src={bannerPreview}
+                          alt="Banner preview"
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={removeBanner}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div
+                        className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
+                        onClick={() => fileInputRef.current?.click()}
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">Click to upload event banner</p>
-                      <p className="text-sm text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
-                    </div>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+                        <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Click to upload event banner</p>
+                        <p className="text-sm text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex gap-4 pt-4">
                 <Button
