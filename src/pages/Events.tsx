@@ -28,6 +28,7 @@ interface Event {
   mode: string | null;
   team_size: number | null;
   banner_url: string | null;
+  display_image_url: string | null;
   registrations?: { count: number }[];
 }
 
@@ -239,10 +240,10 @@ export default function Events() {
 
     return (
       <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
-        {/* Event Banner */}
-        <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
+        {/* Event Display Image */}
+        <div className="relative aspect-square w-full overflow-hidden rounded-t-xl">
           <img
-            src={event.banner_url || '/placeholder.svg'}
+            src={event.display_image_url || event.banner_url || '/placeholder.svg'}
             alt={event.name}
             className="w-full h-full object-cover"
             onError={(e) => {
