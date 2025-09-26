@@ -42,6 +42,7 @@ export type Database = {
           created_at: string
           date: string
           description: string | null
+          display_image_url: string | null
           duration: number | null
           eligibility: string | null
           end_date: string | null
@@ -71,6 +72,7 @@ export type Database = {
           created_at?: string
           date: string
           description?: string | null
+          display_image_url?: string | null
           duration?: number | null
           eligibility?: string | null
           end_date?: string | null
@@ -100,6 +102,7 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string | null
+          display_image_url?: string | null
           duration?: number | null
           eligibility?: string | null
           end_date?: string | null

@@ -108,6 +108,10 @@ const CreateEvent = () => {
         if (data.banner_url) {
           setBannerPreview(data.banner_url);
         }
+        
+        if (data.display_image_url) {
+          setDisplayImagePreview(data.display_image_url);
+        }
       }
     } catch (error) {
       toast({
@@ -198,11 +202,19 @@ const CreateEvent = () => {
 
     try {
       let banner_url = bannerPreview; // Keep existing banner if no new file
+      let display_image_url = displayImagePreview; // Keep existing display image if no new file
 
       if (bannerFile) {
         const uploadedUrl = await uploadBanner(bannerFile);
         if (uploadedUrl) {
           banner_url = uploadedUrl;
+        }
+      }
+
+      if (displayImageFile) {
+        const uploadedDisplayImageUrl = await uploadBanner(displayImageFile); // Using same upload function
+        if (uploadedDisplayImageUrl) {
+          display_image_url = uploadedDisplayImageUrl;
         }
       }
 
@@ -236,6 +248,7 @@ const CreateEvent = () => {
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
         banner_url: banner_url || null,
+        display_image_url: display_image_url || null,
         end_date: formData.end_date || null,
         speaker: formData.speaker || null,
         prerequisites: formData.prerequisites || null,
