@@ -241,7 +241,7 @@ export default function Events() {
     return (
       <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
         {/* Event Display Image */}
-        <div className="relative aspect-square w-full overflow-hidden rounded-t-xl">
+        <div className="relative aspect-[2/1] w-full overflow-hidden rounded-t-xl">
           <img
             src={event.display_image_url || event.banner_url || '/placeholder.svg'}
             alt={event.name}

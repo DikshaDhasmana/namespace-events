@@ -114,17 +114,17 @@ const WebinarForm: React.FC<WebinarFormProps> = ({
         </div>
       </div>
 
-      {/* Display Image Upload - Square format for event cards */}
+      {/* Display Image Upload - 2:1 aspect ratio for event cards */}
       <div className="space-y-2">
         <Label>Event Display Image</Label>
-        <p className="text-sm text-muted-foreground">Recommended: 400×400px (Square format for event listings)</p>
+        <p className="text-sm text-muted-foreground">Recommended: 400×200px (2:1 aspect ratio for event listings)</p>
         <div className="space-y-4">
           {displayImagePreview ? (
             <div className="relative max-w-sm">
               <img
                 src={displayImagePreview}
                 alt="Display image preview"
-                className="w-full aspect-square object-cover rounded-lg border"
+                className="w-full aspect-[2/1] object-cover rounded-lg border"
               />
               <Button
                 type="button"
@@ -138,12 +138,12 @@ const WebinarForm: React.FC<WebinarFormProps> = ({
             </div>
           ) : (
             <div
-              className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors aspect-square max-w-sm flex flex-col items-center justify-center"
+              className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors aspect-[2/1] max-w-sm flex flex-col items-center justify-center"
               onClick={() => displayImageInputRef.current?.click()}
             >
               <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">Click to upload display image</p>
-              <p className="text-sm text-muted-foreground mt-1">400×400px recommended, PNG/JPG up to 10MB</p>
+              <p className="text-sm text-muted-foreground mt-1">400×200px recommended, PNG/JPG up to 10MB</p>
             </div>
           )}
           <input
