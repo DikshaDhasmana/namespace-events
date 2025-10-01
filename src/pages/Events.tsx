@@ -161,6 +161,8 @@ export default function Events() {
 
   const handleRegister = (eventId: string) => {
     if (!user) {
+      // Preserve current page so we can return after auth
+      localStorage.setItem('authRedirectUrl', window.location.href);
       navigate('/auth');
       return;
     }

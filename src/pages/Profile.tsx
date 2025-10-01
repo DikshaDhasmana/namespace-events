@@ -40,6 +40,8 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) {
+      // Return here after authentication
+      localStorage.setItem('authRedirectUrl', window.location.href);
       navigate('/auth');
       return;
     }

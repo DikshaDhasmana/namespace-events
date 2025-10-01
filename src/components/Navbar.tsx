@@ -87,7 +87,12 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90 transition-colors">Sign In</Button>
+              <Button 
+                onClick={() => localStorage.setItem('authRedirectUrl', window.location.href)}
+                className="bg-primary hover:bg-primary/90 transition-colors"
+              >
+                Sign In
+              </Button>
             </Link>
           )}
         </div>
