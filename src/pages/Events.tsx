@@ -240,39 +240,26 @@ export default function Events() {
 
     return (
       <Card className="h-full flex flex-col rounded-xl shadow-medium card-subtle-hover card-subtle-hover-light dark:card-subtle-hover-dark">
-        {/* Event Display Image */}
-        <div className="relative aspect-[2/1] w-full overflow-hidden rounded-t-xl">
-          <img
-            src={event.display_image_url || event.banner_url || '/placeholder.svg'}
-            alt={event.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
-            }}
-          />
-          <div className="absolute top-3 right-3 flex items-center gap-2">
+        <CardHeader>
+          <div className="flex items-center justify-between mb-2">
+            <Badge
+              variant="secondary"
+              className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]}`}
+            >
+              {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
+            </Badge>
             <Button
               size="sm"
-              variant="secondary"
+              variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
                 handleShare(event);
               }}
-              className="p-2 h-8 w-8 bg-white/90 hover:bg-white shadow-sm"
+              className="p-2 h-8 w-8"
             >
               <Share2 className="h-3 w-3" />
             </Button>
-            <Badge
-              variant="secondary"
-              className={`${eventTypeColors[event.event_type as keyof typeof eventTypeColors]} shadow-sm`}
-            >
-              {event.event_type.charAt(0).toUpperCase() + event.event_type.slice(1)}
-            </Badge>
           </div>
-        </div>
-
-        <CardHeader>
           <CardTitle className="text-lg line-clamp-2 font-heading">{event.name}</CardTitle>
         </CardHeader>
 
@@ -319,10 +306,10 @@ export default function Events() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 font-heading">Upcoming Events</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 font-heading">Upcoming Events</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Discover and register for exciting tech events
         </p>
       </div>

@@ -313,7 +313,7 @@ export default function EventDetail() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
       <div className="mb-6">
         <Button
           variant="ghost"
@@ -325,14 +325,14 @@ export default function EventDetail() {
         </Button>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          {/* Event Banner */}
-          <div className="mb-6">
+          {/* Event Banner - 3:1 aspect ratio */}
+          <div className="mb-6 w-full aspect-[3/1] overflow-hidden rounded-lg shadow-md">
             <img
               src={event.banner_url || '/placeholder.svg'}
               alt={event.name}
-              className="w-full h-64 object-cover rounded-lg shadow-md"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = '/placeholder.svg';
