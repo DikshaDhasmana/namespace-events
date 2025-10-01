@@ -32,7 +32,7 @@ const EventReferrals = () => {
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
-      navigate('/admin/login');
+      navigate('/neipl-administrator/login');
       return;
     }
     if (eventId) {
@@ -106,7 +106,7 @@ const EventReferrals = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/admin/events')}
+            onClick={() => navigate('/neipl-administrator/events')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
