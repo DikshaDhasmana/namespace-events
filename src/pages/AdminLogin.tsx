@@ -20,7 +20,7 @@ const AdminLogin = () => {
 
     const success = await adminLogin(username, password);
     if (success) {
-      navigate('/neipl-administrator');
+      navigate('/admin');
     }
 
     setLoading(false);

@@ -119,14 +119,14 @@ const CreateEvent = () => {
         description: "Failed to fetch event data",
         variant: "destructive",
       });
-      navigate('/neipl-administrator/events');
+      navigate('/admin/events');
     } finally {
       setFetchLoading(false);
     }
   };
 
   if (!isAdminAuthenticated) {
-    navigate('/neipl-administrator/login');
+    navigate('/admin/login');
     return null;
   }
 
@@ -289,7 +289,7 @@ const CreateEvent = () => {
         description: isEditMode ? "Event updated successfully" : "Event created successfully",
       });
 
-      navigate('/neipl-administrator/events');
+      navigate('/admin/events');
     } catch (error) {
       toast({
         title: "Error",
@@ -316,7 +316,7 @@ const CreateEvent = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/neipl-administrator/events')}
+            onClick={() => navigate('/admin/events')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
@@ -425,7 +425,7 @@ const CreateEvent = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/neipl-administrator/events')}
+                  onClick={() => navigate('/admin/events')}
                   className="flex-1"
                 >
                   Cancel

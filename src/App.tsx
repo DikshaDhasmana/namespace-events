@@ -66,14 +66,14 @@ const App = () => {
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
                         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
                         <Route path="/profile" element={<Layout><Profile /></Layout>} />
-                        <Route path="/neipl-administrator/login" element={<AdminLogin />} />
-                        <Route path="/neipl-administrator" element={<AdminDashboard />} />
-                        <Route path="/neipl-administrator/events" element={<AdminEvents />} />
-                        <Route path="/neipl-administrator/events/create" element={<CreateEvent />} />
-                        <Route path="/neipl-administrator/events/:eventId/edit" element={<CreateEvent />} />
-                        <Route path="/neipl-administrator/events/:eventId/registrations" element={<EventRegistrations />} />
-                        <Route path="/neipl-administrator/events/:eventId/referrals" element={<EventReferrals />} />
-                        <Route path="/neipl-administrator/users" element={<AdminUsers />} />
+                        <Route path="/admin/login" element={<AdminLogin />} />
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/admin/events" element={<AdminEvents />} />
+                        <Route path="/admin/events/create" element={<CreateEvent />} />
+                        <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
+                        <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
+                        <Route path="/admin/events/:eventId/referrals" element={<EventReferrals />} />
+                        <Route path="/admin/users" element={<AdminUsers />} />
                         <Route path="*" element={<Layout><NotFound /></Layout>} />
                       </Routes>
                     </Suspense>

@@ -42,7 +42,7 @@ const AdminEvents = () => {
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
-      navigate('/neipl-administrator/login');
+      navigate('/admin/login');
       return;
     }
     fetchEvents();
@@ -138,14 +138,14 @@ const AdminEvents = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/neipl-administrator')}
+            onClick={() => navigate('/admin')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <h1 className="text-2xl font-bold">Manage Events</h1>
           <div className="ml-auto">
-            <Button onClick={() => navigate('/neipl-administrator/events/create')}>
+            <Button onClick={() => navigate('/admin/events/create')}>
               <Plus className="h-4 w-4 mr-2" />
               Create Event
             </Button>
@@ -166,7 +166,7 @@ const AdminEvents = () => {
                   <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No events found</h3>
                   <p className="text-muted-foreground mb-4">Create your first event to get started</p>
-                  <Button onClick={() => navigate('/neipl-administrator/events/create')}>
+                  <Button onClick={() => navigate('/admin/events/create')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Event
                   </Button>
@@ -200,7 +200,7 @@ const AdminEvents = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/neipl-administrator/events/${event.id}/registrations`)}
+                            onClick={() => navigate(`/admin/events/${event.id}/registrations`)}
                           >
                             <Users className="h-4 w-4 mr-1" />
                             View Applicants
@@ -208,7 +208,7 @@ const AdminEvents = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/neipl-administrator/events/${event.id}/referrals`)}
+                            onClick={() => navigate(`/admin/events/${event.id}/referrals`)}
                           >
                             <LinkIcon className="h-4 w-4 mr-1" />
                             View Referrals
@@ -216,7 +216,7 @@ const AdminEvents = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/neipl-administrator/events/${event.id}/edit`)}
+                            onClick={() => navigate(`/admin/events/${event.id}/edit`)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>

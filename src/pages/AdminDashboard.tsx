@@ -25,7 +25,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
-      navigate('/neipl-administrator/login');
+      navigate('/admin/login');
       return;
     }
     fetchStats();
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     adminLogout();
-    navigate('/neipl-administrator/login');
+    navigate('/admin/login');
   };
 
   if (!isAdminAuthenticated) {
@@ -140,14 +140,14 @@ const AdminDashboard = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button 
-                onClick={() => navigate('/neipl-administrator/events/create')}
+                onClick={() => navigate('/admin/events/create')}
                 className="h-auto py-4 flex flex-col gap-2"
               >
                 <Plus className="h-6 w-6" />
                 Create Event
               </Button>
               <Button 
-                onClick={() => navigate('/neipl-administrator/events')}
+                onClick={() => navigate('/admin/events')}
                 variant="outline"
                 className="h-auto py-4 flex flex-col gap-2"
               >
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
                 Manage Events
               </Button>
               <Button 
-                onClick={() => navigate('/neipl-administrator/users')}
+                onClick={() => navigate('/admin/users')}
                 variant="outline"
                 className="h-auto py-4 flex flex-col gap-2"
               >
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
                 View Users
               </Button>
               <Button 
-                onClick={() => navigate('/neipl-administrator/events')}
+                onClick={() => navigate('/admin/events')}
                 variant="outline"
                 className="h-auto py-4 flex flex-col gap-2"
               >

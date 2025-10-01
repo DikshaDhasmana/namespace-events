@@ -32,7 +32,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
-      navigate('/neipl-administrator/login');
+      navigate('/admin/login');
       return;
     }
     fetchUsers();
@@ -69,7 +69,7 @@ const AdminUsers = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/neipl-administrator')}
+            onClick={() => navigate('/admin')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
