@@ -48,8 +48,18 @@ export default function Auth() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    await signIn(email, password);
-    // Redirect is handled automatically by useAuth hook
+    const { error } = await signIn(email, password);
+
+    if (!error) {
+      // Check if there's a stored redirect URL (e.g., from UTM link)
+      const redirectUrl = localStorage.getItem('authRedirectUrl');
+      if (redirectUrl) {
+        localStorage.removeItem('authRedirectUrl');
+        window.location.href = redirectUrl;
+      } else {
+        navigate('/events');
+      }
+    }
 
     setIsLoading(false);
   };

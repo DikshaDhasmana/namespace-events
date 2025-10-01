@@ -73,8 +73,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) {
-      // Remember where the user was headed
-      localStorage.setItem('authRedirectUrl', window.location.href);
       navigate('/auth');
       return;
     }
