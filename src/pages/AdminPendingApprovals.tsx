@@ -42,42 +42,50 @@ export default function AdminPendingApprovals() {
   const fetchPendingRegistrations = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // First fetch pending registrations
+      const { data: registrationsData, error: regError } = await supabase
         .from('registrations')
-        .select(`
-          id,
-          registered_at,
-          event_id,
-          user_id,
-          events (
-            name,
-            date,
-            venue
-          ),
-          profiles (
-            full_name,
-            email,
-            phone_number,
-            academic_info
-          )
-        `)
+        .select('id, registered_at, event_id, user_id')
         .eq('status', 'pending')
         .order('registered_at', { ascending: false });
 
-      if (error) throw error;
+      if (regError) throw regError;
 
-      const formattedData = data.map((reg: any) => ({
+      if (!registrationsData || registrationsData.length === 0) {
+        setPendingRegistrations([]);
+        return;
+      }
+
+      // Get unique event and user IDs
+      const eventIds = [...new Set(registrationsData.map(r => r.event_id))];
+      const userIds = [...new Set(registrationsData.map(r => r.user_id))];
+
+      // Fetch events and profiles separately
+      const [eventsResponse, profilesResponse] = await Promise.all([
+        supabase.from('events').select('id, name, date, venue').in('id', eventIds),
+        supabase.from('profiles').select('id, full_name, email, phone_number, academic_info').in('id', userIds)
+      ]);
+
+      if (eventsResponse.error) throw eventsResponse.error;
+      if (profilesResponse.error) throw profilesResponse.error;
+
+      // Create lookup maps
+      const eventsMap = new Map(eventsResponse.data?.map(e => [e.id, e]) || []);
+      const profilesMap = new Map(profilesResponse.data?.map(p => [p.id, p]) || []);
+
+      // Merge data
+      const formattedData = registrationsData.map(reg => ({
         id: reg.id,
         registered_at: reg.registered_at,
         event_id: reg.event_id,
         user_id: reg.user_id,
-        event_name: reg.events?.name || 'Unknown Event',
-        event_date: reg.events?.date || '',
-        event_venue: reg.events?.venue || '',
-        user_name: reg.profiles?.full_name || 'Unknown User',
-        user_email: reg.profiles?.email || '',
-        user_phone: reg.profiles?.phone_number || '',
-        user_academic_info: reg.profiles?.academic_info || ''
+        event_name: eventsMap.get(reg.event_id)?.name || 'Unknown Event',
+        event_date: eventsMap.get(reg.event_id)?.date || '',
+        event_venue: eventsMap.get(reg.event_id)?.venue || '',
+        user_name: profilesMap.get(reg.user_id)?.full_name || 'Unknown User',
+        user_email: profilesMap.get(reg.user_id)?.email || '',
+        user_phone: profilesMap.get(reg.user_id)?.phone_number || '',
+        user_academic_info: profilesMap.get(reg.user_id)?.academic_info || ''
       }));
 
       setPendingRegistrations(formattedData);
