@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Upload, X } from 'lucide-react';
@@ -30,6 +31,7 @@ const CreateEvent = () => {
     max_participants: '',
     mode: '',
     team_size: '',
+    approval_enabled: false,
     // Additional fields for different event types
     end_date: '',
     speaker: '',
@@ -88,6 +90,7 @@ const CreateEvent = () => {
           max_participants: data.max_participants?.toString() || '',
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
+          approval_enabled: data.approval_enabled || false,
           end_date: data.end_date ? new Date(data.end_date).toISOString().split('T')[0] : '',
           speaker: data.speaker || '',
           prerequisites: data.prerequisites || '',
@@ -247,6 +250,7 @@ const CreateEvent = () => {
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
+        approval_enabled: formData.approval_enabled,
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
         end_date: formData.end_date || null,
@@ -347,6 +351,17 @@ const CreateEvent = () => {
                     <SelectItem value="contest">Contest</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="approval_enabled"
+                  checked={formData.approval_enabled}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, approval_enabled: checked as boolean }))}
+                />
+                <Label htmlFor="approval_enabled" className="cursor-pointer">
+                  Require approval for registrations
+                </Label>
               </div>
 
               {formData.event_type && (

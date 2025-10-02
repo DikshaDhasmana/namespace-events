@@ -23,6 +23,7 @@ interface Event {
   team_size: number | null;
   banner_url: string | null;
   created_at: string;
+  approval_enabled: boolean | null;
 }
 
 const eventTypeColors = {
@@ -38,6 +39,7 @@ export default function EventDetail() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState<'pending' | 'approved' | null>(null);
   const [registrationCount, setRegistrationCount] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const { user } = useAuth();
@@ -88,12 +90,15 @@ export default function EventDetail() {
 
     const { data } = await supabase
       .from('registrations')
-      .select('id')
+      .select('id, status')
       .eq('user_id', user.id)
       .eq('event_id', eventId)
       .single();
 
-    setIsRegistered(!!data);
+    if (data) {
+      setIsRegistered(true);
+      setRegistrationStatus(data.status as 'pending' | 'approved');
+    }
   };
 
   const fetchRegistrationCount = async () => {
@@ -133,7 +138,11 @@ export default function EventDetail() {
       return;
     }
     
-    const registrationData: any = { user_id: user.id, event_id: eventId };
+    const registrationData: any = { 
+      user_id: user.id, 
+      event_id: eventId,
+      status: event?.approval_enabled ? 'pending' : 'approved'
+    };
     // Include utm_source if present and it's not the same user (prevent self-referrals)
     if (utmSource && utmSource !== user.id) {
       registrationData.utm_source = utmSource;
@@ -158,15 +167,24 @@ export default function EventDetail() {
         });
       }
     } else {
+      const newStatus = event?.approval_enabled ? 'pending' : 'approved';
+      setRegistrationStatus(newStatus);
+      
       toast({
         title: "Success!",
-        description: "You have been registered for the event",
+        description: event?.approval_enabled 
+          ? "Your registration request has been submitted. You will receive an email once reviewed."
+          : "You have been registered for the event",
       });
       setIsRegistered(true);
       setRegistrationCount(prev => prev + 1);
       
-      // Send confirmation email
-      sendConfirmationEmail();
+      // Send appropriate email
+      if (event?.approval_enabled) {
+        sendPendingEmail();
+      } else {
+        sendConfirmationEmail();
+      }
     }
   };
 
@@ -191,7 +209,38 @@ export default function EventDetail() {
         description: "You have been unregistered from the event",
       });
       setIsRegistered(false);
+      setRegistrationStatus(null);
       setRegistrationCount(prev => Math.max(0, prev - 1));
+    }
+  };
+
+  const sendPendingEmail = async () => {
+    if (!user || !event) return;
+    
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      const emailTemplate = EmailService.generateEventEmailTemplate({
+        eventName: event.name,
+        applicantName: profile?.full_name || 'Participant',
+        message: `Thank you for your interest in ${event.name}. We have received your registration request and will review your profile. You will hear back from us shortly.`,
+        eventDate: formatDate(event.date),
+        eventVenue: event.venue,
+        subject: `Registration Request Received: ${event.name}`
+      });
+      
+      await EmailService.sendEmail({
+        to: user.email || '',
+        subject: `Registration Request Received: ${event.name}`,
+        html: emailTemplate
+      });
+      
+    } catch (error) {
+      console.error('Failed to send pending email:', error);
     }
   };
 
@@ -426,9 +475,15 @@ export default function EventDetail() {
             <CardContent className="space-y-4">
               {isRegistered ? (
                 <div className="space-y-3">
-                  <div className="text-sm text-muted-foreground bg-green-50 p-3 rounded-lg border border-green-200">
-                    ✓ You are registered for this event
-                  </div>
+                  {registrationStatus === 'pending' ? (
+                    <div className="text-sm text-muted-foreground bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                      ⏳ Request Sent - Pending Approval
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground bg-green-50 p-3 rounded-lg border border-green-200">
+                      ✓ Registered
+                    </div>
+                  )}
                   <Button 
                     variant="outline" 
                     onClick={handleUnregister}

@@ -24,6 +24,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const EventRegistrations = lazy(() => import("./pages/EventRegistrations"));
 const EventReferrals = lazy(() => import("./pages/EventReferrals"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
+const AdminPendingApprovals = lazy(() => import("./pages/AdminPendingApprovals"));
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => {
                         <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
                         <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
                         <Route path="/admin/events/:eventId/referrals" element={<EventReferrals />} />
+                        <Route path="/admin/pending-approvals" element={<AdminPendingApprovals />} />
                         <Route path="/admin/users" element={<AdminUsers />} />
                         <Route path="*" element={<Layout><NotFound /></Layout>} />
                       </Routes>

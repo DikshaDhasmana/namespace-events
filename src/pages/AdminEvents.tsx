@@ -144,7 +144,13 @@ const AdminEvents = () => {
             Back to Dashboard
           </Button>
           <h1 className="text-2xl font-bold">Manage Events</h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/admin/pending-approvals')}
+            >
+              Pending Approvals
+            </Button>
             <Button onClick={() => navigate('/admin/events/create')}>
               <Plus className="h-4 w-4 mr-2" />
               Create Event

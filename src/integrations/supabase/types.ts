@@ -37,6 +37,7 @@ export type Database = {
       }
       events: {
         Row: {
+          approval_enabled: boolean | null
           banner_url: string | null
           contest_type: string | null
           created_at: string
@@ -67,6 +68,7 @@ export type Database = {
           venue: string
         }
         Insert: {
+          approval_enabled?: boolean | null
           banner_url?: string | null
           contest_type?: string | null
           created_at?: string
@@ -97,6 +99,7 @@ export type Database = {
           venue: string
         }
         Update: {
+          approval_enabled?: boolean | null
           banner_url?: string | null
           contest_type?: string | null
           created_at?: string
@@ -187,6 +190,7 @@ export type Database = {
           event_id: string
           id: string
           registered_at: string
+          status: Database["public"]["Enums"]["registration_status"] | null
           user_id: string
           utm_source: string | null
         }
@@ -194,6 +198,7 @@ export type Database = {
           event_id: string
           id?: string
           registered_at?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
           user_id: string
           utm_source?: string | null
         }
@@ -201,6 +206,7 @@ export type Database = {
           event_id?: string
           id?: string
           registered_at?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
           user_id?: string
           utm_source?: string | null
         }
@@ -242,6 +248,7 @@ export type Database = {
     }
     Enums: {
       event_type: "webinar" | "hackathon" | "meetup" | "contest"
+      registration_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -370,6 +377,7 @@ export const Constants = {
   public: {
     Enums: {
       event_type: ["webinar", "hackathon", "meetup", "contest"],
+      registration_status: ["pending", "approved", "rejected"],
     },
   },
 } as const
