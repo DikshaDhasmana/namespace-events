@@ -5,16 +5,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon, Download, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import EmailComposer from '@/components/EmailComposer';
+import { EmailService } from '@/services/emailService';
 import * as XLSX from 'xlsx';
 
 interface Registration {
   id: string;
   registered_at: string;
   user_id: string;
+  status: 'pending' | 'approved' | 'rejected';
   profiles: {
     email: string;
     full_name: string;
@@ -61,7 +64,7 @@ const EventRegistrations = () => {
         supabase.from('events').select('*').eq('id', eventId).single(),
         supabase
           .from('registrations')
-          .select('id, registered_at, user_id')
+          .select('id, registered_at, user_id, status')
           .eq('event_id', eventId)
           .order('registered_at', { ascending: false })
       ]);
@@ -79,6 +82,7 @@ const EventRegistrations = () => {
       // Merge registrations with profiles
       const registrationsWithProfiles = registrationsResponse.data?.map(reg => ({
         ...reg,
+        status: reg.status as 'pending' | 'approved' | 'rejected',
         profiles: profiles?.find(p => p.id === reg.user_id) || {
           email: '', full_name: '', phone_number: '', date_of_birth: '',
           academic_info: '', tech_stack: [], skills: [], profile_completed: false
@@ -95,6 +99,47 @@ const EventRegistrations = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApprove = async (registration: Registration) => {
+    try {
+      const { error } = await supabase
+        .from('registrations')
+        .update({ status: 'approved' })
+        .eq('id', registration.id);
+
+      if (error) throw error;
+
+      // Send approval email
+      const emailTemplate = EmailService.generateEventEmailTemplate({
+        eventName: event?.name || '',
+        applicantName: registration.profiles.full_name || 'Participant',
+        message: `Congratulations! Your registration request for ${event?.name} has been approved. We look forward to seeing you at the event!`,
+        eventDate: event ? format(new Date(event.date), 'PPP') : '',
+        eventVenue: event?.venue || '',
+        subject: `Registration Approved: ${event?.name}`
+      });
+
+      await EmailService.sendEmail({
+        to: registration.profiles.email,
+        subject: `Registration Approved: ${event?.name}`,
+        html: emailTemplate
+      });
+
+      toast({
+        title: 'Registration Approved',
+        description: `${registration.profiles.full_name}'s registration has been approved and they have been notified via email.`
+      });
+
+      fetchEventAndRegistrations();
+    } catch (error) {
+      console.error('Error approving registration:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve registration',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -219,100 +264,240 @@ const EventRegistrations = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {registrations.map((registration) => (
-              <Card key={registration.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {registration.profiles.full_name || 'No name provided'}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        {registration.profiles.email}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={registration.profiles.profile_completed ? "default" : "destructive"}>
-                        {registration.profiles.profile_completed ? "Complete Profile" : "Incomplete"}
-                      </Badge>
-                      <Badge variant="outline">
-                        Registered {format(new Date(registration.registered_at), 'MMM d, yyyy')}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <User className="h-4 w-4" />
-                        Contact Info
-                      </div>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        {registration.profiles.phone_number && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="h-3 w-3" />
-                            {registration.profiles.phone_number}
-                          </div>
-                        )}
-                        {registration.profiles.date_of_birth && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3" />
-                            Born: {format(new Date(registration.profiles.date_of_birth), 'MMM d, yyyy')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="pending">
+                Pending ({registrations.filter(r => r.status === 'pending').length})
+              </TabsTrigger>
+              <TabsTrigger value="approved">
+                Approved ({registrations.filter(r => r.status === 'approved').length})
+              </TabsTrigger>
+            </TabsList>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <GraduationCap className="h-4 w-4" />
-                        Academic Background
+            <TabsContent value="pending" className="space-y-4">
+              {registrations.filter(r => r.status === 'pending').length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <User className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No pending registrations</h3>
+                    <p className="text-muted-foreground">All registrations have been processed</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                registrations.filter(r => r.status === 'pending').map((registration) => (
+                  <Card key={registration.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">
+                            {registration.profiles.full_name || 'No name provided'}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail className="h-4 w-4" />
+                            {registration.profiles.email}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                            Pending Approval
+                          </Badge>
+                          <Badge variant={registration.profiles.profile_completed ? "default" : "destructive"}>
+                            {registration.profiles.profile_completed ? "Complete Profile" : "Incomplete"}
+                          </Badge>
+                          <Badge variant="outline">
+                            Registered {format(new Date(registration.registered_at), 'MMM d, yyyy')}
+                          </Badge>
+                          <Button
+                            onClick={() => handleApprove(registration)}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {registration.profiles.academic_info || 'Not provided'}
-                      </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <User className="h-4 w-4" />
+                            Contact Info
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.phone_number && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3" />
+                                {registration.profiles.phone_number}
+                              </div>
+                            )}
+                            {registration.profiles.date_of_birth && (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-3 w-3" />
+                                Born: {format(new Date(registration.profiles.date_of_birth), 'MMM d, yyyy')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Code className="h-4 w-4" />
-                        Technical Profile
-                      </div>
-                      <div className="space-y-2">
-                        {registration.profiles.tech_stack && registration.profiles.tech_stack.length > 0 && (
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
-                            <div className="flex flex-wrap gap-1">
-                              {registration.profiles.tech_stack.map((tech, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {tech}
-                                </Badge>
-                              ))}
-                            </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <GraduationCap className="h-4 w-4" />
+                            Academic Background
                           </div>
-                        )}
-                        {registration.profiles.skills && registration.profiles.skills.length > 0 && (
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Skills:</div>
-                            <div className="flex flex-wrap gap-1">
-                              {registration.profiles.skills.map((skill, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ))}
-                            </div>
+                          <div className="text-sm text-muted-foreground">
+                            {registration.profiles.academic_info || 'Not provided'}
                           </div>
-                        )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Code className="h-4 w-4" />
+                            Technical Profile
+                          </div>
+                          <div className="space-y-2">
+                            {registration.profiles.tech_stack && registration.profiles.tech_stack.length > 0 && (
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {registration.profiles.tech_stack.map((tech, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {tech}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {registration.profiles.skills && registration.profiles.skills.length > 0 && (
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Skills:</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {registration.profiles.skills.map((skill, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="approved" className="space-y-4">
+              {registrations.filter(r => r.status === 'approved').length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <User className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No approved registrations</h3>
+                    <p className="text-muted-foreground">Approved registrations will appear here</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                registrations.filter(r => r.status === 'approved').map((registration) => (
+                  <Card key={registration.id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">
+                            {registration.profiles.full_name || 'No name provided'}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail className="h-4 w-4" />
+                            {registration.profiles.email}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            Approved
+                          </Badge>
+                          <Badge variant={registration.profiles.profile_completed ? "default" : "destructive"}>
+                            {registration.profiles.profile_completed ? "Complete Profile" : "Incomplete"}
+                          </Badge>
+                          <Badge variant="outline">
+                            Registered {format(new Date(registration.registered_at), 'MMM d, yyyy')}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <User className="h-4 w-4" />
+                            Contact Info
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.phone_number && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3" />
+                                {registration.profiles.phone_number}
+                              </div>
+                            )}
+                            {registration.profiles.date_of_birth && (
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-3 w-3" />
+                                Born: {format(new Date(registration.profiles.date_of_birth), 'MMM d, yyyy')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <GraduationCap className="h-4 w-4" />
+                            Academic Background
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {registration.profiles.academic_info || 'Not provided'}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Code className="h-4 w-4" />
+                            Technical Profile
+                          </div>
+                          <div className="space-y-2">
+                            {registration.profiles.tech_stack && registration.profiles.tech_stack.length > 0 && (
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {registration.profiles.tech_stack.map((tech, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {tech}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {registration.profiles.skills && registration.profiles.skills.length > 0 && (
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Skills:</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {registration.profiles.skills.map((skill, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 
