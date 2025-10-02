@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Calendar, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon } from 'lucide-react';
+import { User, Mail, Calendar, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, Link2, Github, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,9 @@ interface Profile {
   academic_info: string | null;
   tech_stack: string[] | null;
   skills: string[] | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  leetcode_url: string | null;
   profile_completed: boolean;
   created_at: string;
   updated_at: string;
@@ -75,6 +78,9 @@ export default function Profile() {
           academic_info: null,
           tech_stack: null,
           skills: null,
+          github_url: null,
+          linkedin_url: null,
+          leetcode_url: null,
           profile_completed: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -100,6 +106,9 @@ export default function Profile() {
     const academicInfo = formData.get('academicInfo') as string;
     const techStack = (formData.get('techStack') as string).split(',').map(s => s.trim()).filter(s => s);
     const skills = (formData.get('skills') as string).split(',').map(s => s.trim()).filter(s => s);
+    const githubUrl = formData.get('githubUrl') as string;
+    const linkedinUrl = formData.get('linkedinUrl') as string;
+    const leetcodeUrl = formData.get('leetcodeUrl') as string;
 
     // Check if profile is completed (all required fields filled)
     const isProfileCompleted = !!fullName && !!phoneNumber && !!dateOfBirth && !!academicInfo && techStack.length > 0 && skills.length > 0;
@@ -116,6 +125,9 @@ export default function Profile() {
         academic_info: academicInfo || null,
         tech_stack: techStack.length > 0 ? techStack : null,
         skills: skills.length > 0 ? skills : null,
+        github_url: githubUrl || null,
+        linkedin_url: linkedinUrl || null,
+        leetcode_url: leetcodeUrl || null,
         profile_completed: isProfileCompleted,
         updated_at: new Date().toISOString(),
       });
@@ -139,6 +151,9 @@ export default function Profile() {
         academic_info: academicInfo || null,
         tech_stack: techStack.length > 0 ? techStack : null,
         skills: skills.length > 0 ? skills : null,
+        github_url: githubUrl || null,
+        linkedin_url: linkedinUrl || null,
+        leetcode_url: leetcodeUrl || null,
         profile_completed: isProfileCompleted,
         updated_at: new Date().toISOString(),
       } : null);
@@ -346,6 +361,58 @@ export default function Profile() {
                             type="text"
                             defaultValue={profile.skills?.join(', ') || ''}
                             placeholder="e.g., Leadership, Communication, Problem Solving"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Links Section */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold border-b pb-2">Professional Links</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="githubUrl">GitHub Profile</Label>
+                        <div className="flex items-center space-x-3">
+                          <Github className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="githubUrl"
+                            name="githubUrl"
+                            type="url"
+                            defaultValue={profile.github_url || ''}
+                            placeholder="https://github.com/username"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedinUrl">LinkedIn Profile</Label>
+                        <div className="flex items-center space-x-3">
+                          <Linkedin className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="linkedinUrl"
+                            name="linkedinUrl"
+                            type="url"
+                            defaultValue={profile.linkedin_url || ''}
+                            placeholder="https://linkedin.com/in/username"
+                            className="focus:ring-2"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="leetcodeUrl">LeetCode Profile</Label>
+                        <div className="flex items-center space-x-3">
+                          <Link2 className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="leetcodeUrl"
+                            name="leetcodeUrl"
+                            type="url"
+                            defaultValue={profile.leetcode_url || ''}
+                            placeholder="https://leetcode.com/username"
                             className="focus:ring-2"
                           />
                         </div>

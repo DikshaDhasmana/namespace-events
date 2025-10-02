@@ -136,7 +136,10 @@ export type Database = {
           date_of_birth: string | null
           email: string
           full_name: string | null
+          github_url: string | null
           id: string
+          leetcode_url: string | null
+          linkedin_url: string | null
           phone_number: string | null
           profile_completed: boolean | null
           skills: string[] | null
@@ -150,7 +153,10 @@ export type Database = {
           date_of_birth?: string | null
           email: string
           full_name?: string | null
+          github_url?: string | null
           id: string
+          leetcode_url?: string | null
+          linkedin_url?: string | null
           phone_number?: string | null
           profile_completed?: boolean | null
           skills?: string[] | null
@@ -164,7 +170,10 @@ export type Database = {
           date_of_birth?: string | null
           email?: string
           full_name?: string | null
+          github_url?: string | null
           id?: string
+          leetcode_url?: string | null
+          linkedin_url?: string | null
           phone_number?: string | null
           profile_completed?: boolean | null
           skills?: string[] | null
