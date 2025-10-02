@@ -140,8 +140,7 @@ export default function EventDetail() {
     
     const registrationData: any = { 
       user_id: user.id, 
-      event_id: eventId,
-      status: event?.approval_enabled ? 'pending' : 'approved'
+      event_id: eventId
     };
     // Include utm_source if present and it's not the same user (prevent self-referrals)
     if (utmSource && utmSource !== user.id) {
