@@ -62,7 +62,10 @@ const Sidebar = () => {
             </h3>
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              // Check if the item is active based on pathname and hash
+              const isActive = item.path.includes('#')
+                ? location.pathname === '/dashboard' && location.hash === `#${item.path.split('#')[1]}`
+                : location.pathname === item.path;
 
               return (
                 <Button
