@@ -14,7 +14,6 @@ const LightRays = lazy(() => import("@/components/LightRays"));
 const Events = lazy(() => import("./pages/Events"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -66,7 +65,6 @@ const App = () => {
                         <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
                         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-                        <Route path="/profile" element={<Layout><Profile /></Layout>} />
                         <Route path="/admin/login" element={<AdminLogin />} />
                         <Route path="/admin" element={<AdminDashboard />} />
                         <Route path="/admin/events" element={<AdminEvents />} />

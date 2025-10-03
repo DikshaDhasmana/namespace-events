@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon } from 'lucide-react';
+import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +41,9 @@ interface Profile {
   academic_info: string | null;
   tech_stack: string[] | null;
   skills: string[] | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  leetcode_url: string | null;
   profile_completed: boolean;
   created_at: string;
   updated_at: string;
@@ -67,6 +70,9 @@ export default function Dashboard() {
     academic_info: '',
     tech_stack: '',
     skills: '',
+    github_url: '',
+    linkedin_url: '',
+    leetcode_url: '',
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -79,6 +85,12 @@ export default function Dashboard() {
     }
     fetchProfile();
     fetchRegistrations();
+
+    // Check if there's a stored redirect URL from event detail
+    const storedRedirectUrl = localStorage.getItem('profileRedirectUrl');
+    if (storedRedirectUrl) {
+      setRedirectUrl(storedRedirectUrl);
+    }
   }, [user, navigate]);
 
   const fetchProfile = async () => {
@@ -103,6 +115,9 @@ export default function Dashboard() {
         academic_info: data.academic_info || '',
         tech_stack: data.tech_stack?.join(', ') || '',
         skills: data.skills?.join(', ') || '',
+        github_url: data.github_url || '',
+        linkedin_url: data.linkedin_url || '',
+        leetcode_url: data.leetcode_url || '',
       });
     }
   };
@@ -157,13 +172,26 @@ export default function Dashboard() {
 
     setSaving(true);
     try {
+      const techStack = profileForm.tech_stack ? profileForm.tech_stack.split(',').map(s => s.trim()).filter(s => s) : [];
+      const skills = profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : [];
+      
+      // Check if profile is completed (all required fields filled)
+      const hasAtLeastOneLink = !!profileForm.github_url || !!profileForm.linkedin_url || !!profileForm.leetcode_url;
+      const isProfileCompleted = !!profileForm.full_name && !!profileForm.phone_number && !!profileForm.date_of_birth && 
+        !!profileForm.academic_info && techStack.length > 0 && skills.length > 0 && hasAtLeastOneLink;
+
       const updatedProfile = {
         full_name: profileForm.full_name || null,
         phone_number: profileForm.phone_number || null,
         date_of_birth: profileForm.date_of_birth || null,
         academic_info: profileForm.academic_info || null,
-        tech_stack: profileForm.tech_stack ? profileForm.tech_stack.split(',').map(s => s.trim()).filter(s => s) : null,
-        skills: profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : null,
+        tech_stack: techStack.length > 0 ? techStack : null,
+        skills: skills.length > 0 ? skills : null,
+        github_url: profileForm.github_url || null,
+        linkedin_url: profileForm.linkedin_url || null,
+        leetcode_url: profileForm.leetcode_url || null,
+        profile_completed: isProfileCompleted,
+        updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
@@ -179,10 +207,15 @@ export default function Dashboard() {
         });
       } else {
         toast({
-          title: "Profile Updated",
-          description: "Your profile has been successfully updated",
+          title: "Success",
+          description: isProfileCompleted ? "Profile completed successfully!" : "Profile updated successfully",
         });
         fetchProfile(); // Refresh profile data
+        
+        // Show redirect dialog if profile was just completed and there's a redirect URL
+        if (isProfileCompleted && redirectUrl) {
+          setShowRedirectDialog(true);
+        }
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -194,6 +227,22 @@ export default function Dashboard() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRedirectToEvent = () => {
+    if (redirectUrl) {
+      // Clear the stored URL
+      localStorage.removeItem('profileRedirectUrl');
+      // Navigate to the event
+      window.location.href = redirectUrl;
+    }
+    setShowRedirectDialog(false);
+  };
+
+  const handleCloseDialog = () => {
+    // Clear the stored URL when dialog is closed without redirecting
+    localStorage.removeItem('profileRedirectUrl');
+    setShowRedirectDialog(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -523,75 +572,140 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {profile && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="full_name">Full Name</Label>
-                          <Input
-                            id="full_name"
-                            value={profileForm.full_name}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
-                            placeholder="Enter your full name"
-                          />
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="full_name">Full Name</Label>
+                            <div className="flex items-center space-x-3">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="full_name"
+                                value={profileForm.full_name}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                                placeholder="Enter your full name"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="email">Email</Label>
+                            <div className="flex items-center space-x-3">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="email"
+                                type="email"
+                                value={profile.email}
+                                disabled
+                                className="bg-muted/50"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="phone_number">Phone Number</Label>
+                            <div className="flex items-center space-x-3">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="phone_number"
+                                value={profileForm.phone_number}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                                placeholder="Enter your phone number"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="date_of_birth">Date of Birth</Label>
+                            <div className="flex items-center space-x-3">
+                              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="date_of_birth"
+                                type="date"
+                                value={profileForm.date_of_birth}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={profile.email}
-                            disabled
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="phone_number">Phone Number</Label>
-                          <Input
-                            id="phone_number"
-                            value={profileForm.phone_number}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
-                            placeholder="Enter your phone number"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="date_of_birth">Date of Birth</Label>
-                          <Input
-                            id="date_of_birth"
-                            type="date"
-                            value={profileForm.date_of_birth}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                          />
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="academic_info">Academic Information</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Textarea
+                                id="academic_info"
+                                value={profileForm.academic_info}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
+                                placeholder="Enter your academic background"
+                                rows={3}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="tech_stack">Tech Stack</Label>
+                            <div className="flex items-center space-x-3">
+                              <Code className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="tech_stack"
+                                value={profileForm.tech_stack}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
+                                placeholder="e.g., React, Node.js, Python"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="skills">Skills</Label>
+                            <div className="flex items-center space-x-3">
+                              <Award className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="skills"
+                                value={profileForm.skills}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                                placeholder="e.g., Leadership, Communication"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Professional Links Section */}
                       <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="academic_info">Academic Information</Label>
-                          <Textarea
-                            id="academic_info"
-                            value={profileForm.academic_info}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
-                            placeholder="Enter your academic background"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="tech_stack">Tech Stack</Label>
-                          <Textarea
-                            id="tech_stack"
-                            value={profileForm.tech_stack}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
-                            placeholder="Enter your tech stack (comma separated)"
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="skills">Skills</Label>
-                          <Textarea
-                            id="skills"
-                            value={profileForm.skills}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
-                            placeholder="Enter your skills (comma separated)"
-                            rows={2}
-                          />
+                        <h4 className="text-sm font-semibold">Professional Links (at least one required)</h4>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <Label htmlFor="github_url">GitHub Profile</Label>
+                            <div className="flex items-center space-x-3">
+                              <Github className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="github_url"
+                                value={profileForm.github_url}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
+                                placeholder="https://github.com/username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="linkedin_url">LinkedIn Profile</Label>
+                            <div className="flex items-center space-x-3">
+                              <Linkedin className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="linkedin_url"
+                                value={profileForm.linkedin_url}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin_url: e.target.value }))}
+                                placeholder="https://linkedin.com/in/username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="leetcode_url">LeetCode Profile</Label>
+                            <div className="flex items-center space-x-3">
+                              <Link2 className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="leetcode_url"
+                                value={profileForm.leetcode_url}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
+                                placeholder="https://leetcode.com/username"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -861,6 +975,21 @@ export default function Dashboard() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={showRedirectDialog} onOpenChange={setShowRedirectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Profile Completed</DialogTitle>
+            <DialogDescription>
+              Your profile has been completed successfully. Would you like to go back to the event page?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleRedirectToEvent}>Go to Event</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
