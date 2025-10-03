@@ -94,8 +94,9 @@ export default function Dashboard() {
       setRedirectUrl(storedRedirectUrl);
     }
 
-    // Scroll to profile section if hash is present
-    if (window.location.hash === '#profile') {
+    // Scroll to sections based on hash
+    const hash = window.location.hash;
+    if (hash === '#profile') {
       setActiveTab('profile');
       setTimeout(() => {
         const profileSection = document.getElementById('profile-section');
@@ -103,6 +104,8 @@ export default function Dashboard() {
           profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
+    } else if (hash === '#myevents') {
+      setActiveTab('events');
     }
   }, [user, navigate]);
 

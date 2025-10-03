@@ -13,7 +13,7 @@ const Sidebar = () => {
   const mainMenuItems = [
     {
       label: 'My Events',
-      path: '/dashboard',
+      path: '/dashboard#myevents',
       icon: Home,
       description: 'Overview & registrations'
     },
