@@ -155,7 +155,7 @@ export default function Events() {
           title: "Profile Incomplete",
           description: "Please complete your profile before registering for events",
         });
-        navigate('/profile');
+        navigate('/dashboard');
       } else if (error.code === '23505') {
         toast({
           variant: "destructive",

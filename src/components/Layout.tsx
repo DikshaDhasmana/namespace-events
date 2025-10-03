@@ -12,11 +12,11 @@ interface LayoutProps {
 const Layout = ({ children, showFooter = true }: LayoutProps) => {
   const location = useLocation();
 
-  // Show sidebar on dashboard and profile pages
-  const showSidebar = location.pathname === '/dashboard' || location.pathname === '/profile';
+  // Show sidebar on dashboard page
+  const showSidebar = location.pathname === '/dashboard';
 
-  // Hide footer on dashboard and profile pages
-  const shouldShowFooter = showFooter && location.pathname !== '/dashboard' && location.pathname !== '/profile';
+  // Hide footer on dashboard page
+  const shouldShowFooter = showFooter && location.pathname !== '/dashboard';
 
   return (
     <div className="min-h-screen flex flex-col">

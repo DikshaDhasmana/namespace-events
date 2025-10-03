@@ -19,7 +19,7 @@ const Sidebar = () => {
     },
     {
       label: 'My Profile',
-      path: '/profile',
+      path: '/dashboard',
       icon: User,
       description: 'Manage your profile'
     },

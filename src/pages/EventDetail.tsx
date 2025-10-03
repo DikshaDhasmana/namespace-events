@@ -137,7 +137,7 @@ export default function EventDetail() {
       // Store current event URL for redirect after profile completion
       const currentUrl = window.location.href;
       localStorage.setItem('profileRedirectUrl', currentUrl);
-      navigate('/profile');
+      navigate('/dashboard');
       return;
     }
     
