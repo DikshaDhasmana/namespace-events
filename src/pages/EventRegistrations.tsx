@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon, Download, CheckCircle } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Mail, Phone, GraduationCap, Code, MailIcon, Download, CheckCircle, Github, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import EmailComposer from '@/components/EmailComposer';
@@ -27,6 +27,9 @@ interface Registration {
     tech_stack: string[];
     skills: string[];
     profile_completed: boolean;
+    github_url: string;
+    linkedin_url: string;
+    leetcode_url: string;
   };
 }
 
@@ -76,7 +79,7 @@ const EventRegistrations = () => {
       const userIds = registrationsResponse.data?.map(r => r.user_id) || [];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, email, full_name, phone_number, date_of_birth, academic_info, tech_stack, skills, profile_completed')
+        .select('id, email, full_name, phone_number, date_of_birth, academic_info, tech_stack, skills, profile_completed, github_url, linkedin_url, leetcode_url')
         .in('id', userIds);
 
       // Merge registrations with profiles
@@ -85,7 +88,8 @@ const EventRegistrations = () => {
         status: reg.status as 'pending' | 'approved' | 'rejected',
         profiles: profiles?.find(p => p.id === reg.user_id) || {
           email: '', full_name: '', phone_number: '', date_of_birth: '',
-          academic_info: '', tech_stack: [], skills: [], profile_completed: false
+          academic_info: '', tech_stack: [], skills: [], profile_completed: false,
+          github_url: '', linkedin_url: '', leetcode_url: ''
         }
       })) || [];
 
@@ -162,6 +166,9 @@ const EventRegistrations = () => {
       'Academic Info': reg.profiles.academic_info || 'Not provided',
       'Tech Stack': reg.profiles.tech_stack?.join(', ') || 'Not provided',
       'Skills': reg.profiles.skills?.join(', ') || 'Not provided',
+      'GitHub': reg.profiles.github_url || 'Not provided',
+      'LinkedIn': reg.profiles.linkedin_url || 'Not provided',
+      'LeetCode': reg.profiles.leetcode_url || 'Not provided',
       'Profile Completed': reg.profiles.profile_completed ? 'Yes' : 'No',
       'Registration Date': format(new Date(reg.registered_at), 'dd/MM/yyyy hh:mm a')
     }));
@@ -383,6 +390,39 @@ const EventRegistrations = () => {
                             )}
                           </div>
                         </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Github className="h-4 w-4" />
+                            Professional Links
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.github_url && (
+                              <div className="flex items-center gap-2">
+                                <Github className="h-3 w-3" />
+                                <a href={registration.profiles.github_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  GitHub Profile
+                                </a>
+                              </div>
+                            )}
+                            {registration.profiles.linkedin_url && (
+                              <div className="flex items-center gap-2">
+                                <Linkedin className="h-3 w-3" />
+                                <a href={registration.profiles.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  LinkedIn Profile
+                                </a>
+                              </div>
+                            )}
+                            {registration.profiles.leetcode_url && (
+                              <div className="flex items-center gap-2">
+                                <Code className="h-3 w-3" />
+                                <a href={registration.profiles.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  LeetCode Profile
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -487,6 +527,39 @@ const EventRegistrations = () => {
                                     </Badge>
                                   ))}
                                 </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Github className="h-4 w-4" />
+                            Professional Links
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.github_url && (
+                              <div className="flex items-center gap-2">
+                                <Github className="h-3 w-3" />
+                                <a href={registration.profiles.github_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  GitHub Profile
+                                </a>
+                              </div>
+                            )}
+                            {registration.profiles.linkedin_url && (
+                              <div className="flex items-center gap-2">
+                                <Linkedin className="h-3 w-3" />
+                                <a href={registration.profiles.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  LinkedIn Profile
+                                </a>
+                              </div>
+                            )}
+                            {registration.profiles.leetcode_url && (
+                              <div className="flex items-center gap-2">
+                                <Code className="h-3 w-3" />
+                                <a href={registration.profiles.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                  LeetCode Profile
+                                </a>
                               </div>
                             )}
                           </div>

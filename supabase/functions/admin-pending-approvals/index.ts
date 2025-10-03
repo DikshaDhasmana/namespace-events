@@ -26,6 +26,11 @@ interface PendingRegistrationResponse {
   user_email: string
   user_phone: string
   user_academic_info: string
+  user_tech_stack: string[]
+  user_skills: string[]
+  github_url: string
+  linkedin_url: string
+  leetcode_url: string
 }
 
 Deno.serve(async (req) => {
@@ -64,7 +69,7 @@ Deno.serve(async (req) => {
       supabase.from('events').select('id, name, date, venue').in('id', eventIds),
       supabase
         .from('profiles')
-        .select('id, full_name, email, phone_number, academic_info')
+        .select('id, full_name, email, phone_number, academic_info, tech_stack, skills, github_url, linkedin_url, leetcode_url')
         .in('id', userIds),
     ])
 
@@ -99,6 +104,11 @@ Deno.serve(async (req) => {
       user_email: profilesMap.get(reg.user_id)?.email ?? '',
       user_phone: profilesMap.get(reg.user_id)?.phone_number ?? '',
       user_academic_info: profilesMap.get(reg.user_id)?.academic_info ?? '',
+      user_tech_stack: profilesMap.get(reg.user_id)?.tech_stack ?? [],
+      user_skills: profilesMap.get(reg.user_id)?.skills ?? [],
+      github_url: profilesMap.get(reg.user_id)?.github_url ?? '',
+      linkedin_url: profilesMap.get(reg.user_id)?.linkedin_url ?? '',
+      leetcode_url: profilesMap.get(reg.user_id)?.leetcode_url ?? '',
     }))
 
     return new Response(JSON.stringify({ data: result }), {

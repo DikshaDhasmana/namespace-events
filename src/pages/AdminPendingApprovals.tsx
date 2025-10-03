@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, XCircle, Mail, Phone, Calendar } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Mail, Phone, Calendar, GraduationCap, Code, Github, Linkedin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { EmailService } from '@/services/emailService';
 
@@ -22,6 +22,11 @@ interface PendingRegistration {
   user_email: string;
   user_phone: string;
   user_academic_info: string;
+  user_tech_stack: string[];
+  user_skills: string[];
+  github_url: string;
+  linkedin_url: string;
+  leetcode_url: string;
 }
 
 export default function AdminPendingApprovals() {
@@ -210,8 +215,69 @@ export default function AdminPendingApprovals() {
                             )}
                             {registration.user_academic_info && (
                               <div>
-                                <span className="text-muted-foreground">Academic Info:</span>
-                                <p className="text-xs mt-1">{registration.user_academic_info}</p>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Academic Info:</span>
+                                </div>
+                                <p className="text-xs ml-6">{registration.user_academic_info}</p>
+                              </div>
+                            )}
+                            {registration.user_tech_stack && registration.user_tech_stack.length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Code className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Tech Stack:</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1 ml-6">
+                                  {registration.user_tech_stack.map((tech, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {tech}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {registration.user_skills && registration.user_skills.length > 0 && (
+                              <div>
+                                <span className="text-muted-foreground">Skills:</span>
+                                <div className="flex flex-wrap gap-1 ml-6 mt-1">
+                                  {registration.user_skills.map((skill, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {(registration.github_url || registration.linkedin_url || registration.leetcode_url) && (
+                              <div>
+                                <span className="text-muted-foreground">Professional Links:</span>
+                                <div className="space-y-1 ml-6 mt-1">
+                                  {registration.github_url && (
+                                    <div className="flex items-center gap-2">
+                                      <Github className="h-3 w-3" />
+                                      <a href={registration.github_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs">
+                                        GitHub
+                                      </a>
+                                    </div>
+                                  )}
+                                  {registration.linkedin_url && (
+                                    <div className="flex items-center gap-2">
+                                      <Linkedin className="h-3 w-3" />
+                                      <a href={registration.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs">
+                                        LinkedIn
+                                      </a>
+                                    </div>
+                                  )}
+                                  {registration.leetcode_url && (
+                                    <div className="flex items-center gap-2">
+                                      <Code className="h-3 w-3" />
+                                      <a href={registration.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs">
+                                        LeetCode
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
