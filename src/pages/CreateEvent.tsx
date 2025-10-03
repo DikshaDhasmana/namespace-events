@@ -17,6 +17,7 @@ import WebinarForm from '@/components/forms/WebinarForm';
 import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
+import BootcampForm from '@/components/forms/BootcampForm';
 
 const CreateEvent = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -25,7 +26,7 @@ const CreateEvent = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | '',
+    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | '',
     date: '',
     venue: '',
     max_participants: '',
@@ -85,13 +86,13 @@ const CreateEvent = () => {
           name: data.name || '',
           description: data.description || '',
           event_type: data.event_type || '',
-          date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
+          date: data.date ? new Date(data.date).toISOString().slice(0, 16) : '',
           venue: data.venue || '',
           max_participants: data.max_participants?.toString() || '',
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
           approval_enabled: data.approval_enabled || false,
-          end_date: data.end_date ? new Date(data.end_date).toISOString().split('T')[0] : '',
+          end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) : '',
           speaker: data.speaker || '',
           prerequisites: data.prerequisites || '',
           prizes: data.prizes || '',
@@ -244,7 +245,7 @@ const CreateEvent = () => {
       const eventData = {
         name: formData.name,
         description: formData.description,
-        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest',
+        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp',
         date: formData.date,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -340,7 +341,7 @@ const CreateEvent = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="event_type">Event Type</Label>
-                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest') => setFormData(prev => ({ ...prev, event_type: value }))}>
+                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp') => setFormData(prev => ({ ...prev, event_type: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select event type first" />
                   </SelectTrigger>
@@ -349,6 +350,7 @@ const CreateEvent = () => {
                     <SelectItem value="hackathon">Hackathon</SelectItem>
                     <SelectItem value="meetup">Meetup</SelectItem>
                     <SelectItem value="contest">Contest</SelectItem>
+                    <SelectItem value="bootcamp">Bootcamp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -390,6 +392,9 @@ const CreateEvent = () => {
                   )}
                   {formData.event_type === 'contest' && (
                     <ContestForm formData={formData} onInputChange={handleInputChange} />
+                  )}
+                  {formData.event_type === 'bootcamp' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} />
                   )}
                 </>
               )}

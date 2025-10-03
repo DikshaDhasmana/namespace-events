@@ -247,7 +247,7 @@ export type Database = {
       }
     }
     Enums: {
-      event_type: "webinar" | "hackathon" | "meetup" | "contest"
+      event_type: "webinar" | "hackathon" | "meetup" | "contest" | "bootcamp"
       registration_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -376,7 +376,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_type: ["webinar", "hackathon", "meetup", "contest"],
+      event_type: ["webinar", "hackathon", "meetup", "contest", "bootcamp"],
       registration_status: ["pending", "approved", "rejected"],
     },
   },

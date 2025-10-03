@@ -37,6 +37,7 @@ const eventTypeColors = {
   hackathon: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
   meetup: 'bg-green-100 text-green-800 hover:bg-green-200',
   contest: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+  bootcamp: 'bg-pink-100 text-pink-800 hover:bg-pink-200',
 };
 
 export default function Events() {
@@ -339,6 +340,9 @@ export default function Events() {
             <DropdownMenuItem onClick={() => setSelectedType('contest')}>
               Contests
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('bootcamp')}>
+              Bootcamps
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -346,12 +350,13 @@ export default function Events() {
       {/* Desktop Tabs */}
       <div className="hidden md:block">
         <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="all">All Events</TabsTrigger>
             <TabsTrigger value="webinar">Webinars</TabsTrigger>
             <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
             <TabsTrigger value="meetup">Meetups</TabsTrigger>
             <TabsTrigger value="contest">Contests</TabsTrigger>
+            <TabsTrigger value="bootcamp">Bootcamps</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
