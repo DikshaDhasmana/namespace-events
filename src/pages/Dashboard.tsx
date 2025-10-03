@@ -260,22 +260,10 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Mobile Layout: Dashboard title + Welcome Section + Tabs */}
+        {/* Mobile Layout: Dashboard title + Tabs */}
         <div className="lg:hidden">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
           
-          {/* Welcome Section - Mobile */}
-          <div className="mb-6 p-6 bg-card rounded-lg border">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome back!</h2>
-            <p className="text-muted-foreground text-sm sm:text-base mb-4">
-              Here's what's happening with your events
-            </p>
-            <Button onClick={() => navigate('/events')} className="gap-2 w-full">
-              <Plus className="h-4 w-4" />
-              Browse Events
-            </Button>
-          </div>
-
           <Tabs defaultValue="events" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="events" className="flex items-center gap-2">
@@ -289,6 +277,18 @@ export default function Dashboard() {
             </TabsList>
 
             <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
+            {/* Welcome Section - Mobile */}
+            <div className="p-6 bg-card rounded-lg border">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome back!</h2>
+              <p className="text-muted-foreground text-sm sm:text-base mb-4">
+                Here's what's happening with your events
+              </p>
+              <Button onClick={() => navigate('/events')} className="gap-2 w-full">
+                <Plus className="h-4 w-4" />
+                Browse Events
+              </Button>
+            </div>
+
             {registrations.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
