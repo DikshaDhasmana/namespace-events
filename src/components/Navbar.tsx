@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, User, LogOut, BarChart3, Moon, Sun } from 'lucide-react';
+import { Calendar, LogOut, BarChart3, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -70,10 +70,6 @@ export function Navbar() {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   Dashboard
