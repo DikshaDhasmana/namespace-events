@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ interface Registration {
   id: string;
   registered_at: string;
   event_id: string;
+  status: 'pending' | 'approved' | 'rejected';
   events: {
     id: string;
     name: string;
@@ -259,22 +260,10 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Mobile Layout: Dashboard title + Tabs */}
+        {/* Mobile Layout: Dashboard title + Events */}
         <div className="lg:hidden">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-          <Tabs defaultValue="events" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="events" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Events
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
+          <div className="space-y-6 sm:space-y-8 mt-6">
             {registrations.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
@@ -371,7 +360,7 @@ export default function Dashboard() {
                       </Badge>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                      {upcomingEvents.map((registration) => (
+                       {upcomingEvents.map((registration) => (
                         <Card key={registration.id} className="relative group hover:shadow-lg transition-shadow">
                           <Button
                             variant="ghost"
@@ -382,7 +371,18 @@ export default function Dashboard() {
                             <X className="h-4 w-4" />
                           </Button>
 
-                          <CardHeader>
+                          {registration.status === 'approved' && (
+                            <div className="absolute top-2 left-2">
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                            </div>
+                          )}
+                          {registration.status === 'pending' && (
+                            <div className="absolute top-2 left-2">
+                              <ClockIcon className="h-5 w-5 text-yellow-500" />
+                            </div>
+                          )}
+
+                          <CardHeader className={registration.status !== 'approved' ? "pt-10" : ""}>
                             <div className="flex justify-between items-start pr-8">
                               <CardTitle className="text-lg line-clamp-2 font-heading">
                                 {registration.events.name}
@@ -483,173 +483,35 @@ export default function Dashboard() {
                 )}
               </>
             )}
-          </TabsContent>
-
-            <TabsContent value="profile" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Profile Information
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your personal information and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {profile && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="full_name">Full Name</Label>
-                          <Input
-                            id="full_name"
-                            value={profileForm.full_name}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
-                            placeholder="Enter your full name"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={profile.email}
-                            disabled
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="phone_number">Phone Number</Label>
-                          <Input
-                            id="phone_number"
-                            value={profileForm.phone_number}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
-                            placeholder="Enter your phone number"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="date_of_birth">Date of Birth</Label>
-                          <Input
-                            id="date_of_birth"
-                            type="date"
-                            value={profileForm.date_of_birth}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="academic_info">Academic Information</Label>
-                          <Textarea
-                            id="academic_info"
-                            value={profileForm.academic_info}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
-                            placeholder="Enter your academic background"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="tech_stack">Tech Stack</Label>
-                          <Textarea
-                            id="tech_stack"
-                            value={profileForm.tech_stack}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
-                            placeholder="Enter your tech stack (comma separated)"
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="skills">Skills</Label>
-                          <Textarea
-                            id="skills"
-                            value={profileForm.skills}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
-                            placeholder="Enter your skills (comma separated)"
-                            rows={2}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex justify-end">
-                    <Button onClick={handleProfileUpdate} disabled={saving}>
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          </div>
         </div>
 
-        {/* Desktop Layout: Stats Cards + Tabs */}
+        {/* Desktop Layout: Tabs */}
         <div className="hidden lg:block space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalEvents}</div>
-                <p className="text-xs text-muted-foreground">
-                  Events you've registered for
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Upcoming Events</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{upcomingCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  Events in your future
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed Events</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{pastCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  Events you've attended
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Main Content with Tabs */}
-          <Tabs defaultValue="events" className="w-full">
+          <Tabs defaultValue="upcoming" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="events" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Events
+              <TabsTrigger value="upcoming" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Upcoming Events
               </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
+              <TabsTrigger value="past" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Past Events
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
-              {registrations.length === 0 ? (
+            <TabsContent value="upcoming" className="space-y-6 sm:space-y-8 mt-6">
+              {upcomingCount === 0 && liveCount === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent className="space-y-4">
                     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
                       <Calendar className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div>
-                      <CardTitle className="text-2xl mb-2">No Registrations Yet</CardTitle>
+                      <CardTitle className="text-2xl mb-2">No Upcoming Events</CardTitle>
                       <CardDescription className="text-lg">
-                        You haven't registered for any events yet. Explore upcoming events to get started.
+                        You haven't registered for any upcoming events yet.
                       </CardDescription>
                     </div>
                     <Button onClick={() => navigate('/events')} size="lg" className="mt-4">
@@ -747,7 +609,18 @@ export default function Dashboard() {
                               <X className="h-4 w-4" />
                             </Button>
 
-                            <CardHeader>
+                            {registration.status === 'approved' && (
+                              <div className="absolute top-2 left-2">
+                                <CheckCircle className="h-5 w-5 text-green-500" />
+                              </div>
+                            )}
+                            {registration.status === 'pending' && (
+                              <div className="absolute top-2 left-2">
+                                <ClockIcon className="h-5 w-5 text-yellow-500" />
+                              </div>
+                            )}
+
+                            <CardHeader className={registration.status !== 'approved' ? "pt-10" : ""}>
                               <div className="flex justify-between items-start pr-8">
                                 <CardTitle className="text-lg line-clamp-2 font-heading">
                                   {registration.events.name}
@@ -791,17 +664,34 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
+                </>
+              )}
+            </TabsContent>
 
-                  {/* Past Events Section */}
-                  {pastCount > 0 && (
+            <TabsContent value="past" className="space-y-6 sm:space-y-8 mt-6">
+              {pastCount === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent className="space-y-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <Calendar className="h-8 w-8 text-muted-foreground" />
+                    </div>
                     <div>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
-                        <h2 className="text-xl sm:text-2xl font-semibold">Past Events</h2>
-                        <Badge variant="outline" className="text-xs sm:text-sm w-fit">
-                          {pastCount} event{pastCount !== 1 ? 's' : ''}
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <CardTitle className="text-2xl mb-2">No Past Events</CardTitle>
+                      <CardDescription className="text-lg">
+                        You haven't attended any events yet.
+                      </CardDescription>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-semibold">Past Events</h2>
+                    <Badge variant="outline" className="text-xs sm:text-sm w-fit">
+                      {pastCount} event{pastCount !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {pastEvents.map((registration) => (
                           <Card key={registration.id} className="relative opacity-75">
                             <CardHeader>
@@ -843,106 +733,9 @@ export default function Dashboard() {
                             </CardContent>
                           </Card>
                         ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </TabsContent>
-
-            <TabsContent value="profile" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Profile Information
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your personal information and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {profile && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="full_name">Full Name</Label>
-                          <Input
-                            id="full_name"
-                            value={profileForm.full_name}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
-                            placeholder="Enter your full name"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={profile.email}
-                            disabled
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="phone_number">Phone Number</Label>
-                          <Input
-                            id="phone_number"
-                            value={profileForm.phone_number}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
-                            placeholder="Enter your phone number"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="date_of_birth">Date of Birth</Label>
-                          <Input
-                            id="date_of_birth"
-                            type="date"
-                            value={profileForm.date_of_birth}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="academic_info">Academic Information</Label>
-                          <Textarea
-                            id="academic_info"
-                            value={profileForm.academic_info}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
-                            placeholder="Enter your academic background"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="tech_stack">Tech Stack</Label>
-                          <Textarea
-                            id="tech_stack"
-                            value={profileForm.tech_stack}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
-                            placeholder="Enter your tech stack (comma separated)"
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="skills">Skills</Label>
-                          <Textarea
-                            id="skills"
-                            value={profileForm.skills}
-                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
-                            placeholder="Enter your skills (comma separated)"
-                            rows={2}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex justify-end">
-                    <Button onClick={handleProfileUpdate} disabled={saving}>
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
