@@ -17,6 +17,7 @@ interface Event {
   description: string;
   event_type: string;
   date: string;
+  end_date: string | null;
   venue: string;
   max_participants: number | null;
   mode: string | null;
@@ -31,6 +32,7 @@ const eventTypeColors = {
   hackathon: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
   meetup: 'bg-green-100 text-green-800 hover:bg-green-200',
   contest: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+  bootcamp: 'bg-pink-100 text-pink-800 hover:bg-pink-200',
 };
 
 export default function EventDetail() {
@@ -244,7 +246,9 @@ export default function EventDetail() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Parse the date string and format it without timezone conversion
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -253,10 +257,17 @@ export default function EventDetail() {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    // Extract time directly from the ISO string to avoid timezone conversion
+    const date = new Date(dateString);
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    
+    // Format to 12-hour time
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${displayHours}:${displayMinutes} ${period}`;
   };
 
   const sendConfirmationEmail = async () => {
@@ -517,11 +528,26 @@ export default function EventDetail() {
             <CardContent className="space-y-4">
               <div className="flex items-start space-x-3">
                 <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <div className="font-medium">{formatDate(event.date)}</div>
+                <div className="flex-1">
+                  <div className="font-medium">Start Date & Time</div>
+                  <div className="text-sm text-muted-foreground">{formatDate(event.date)}</div>
                   <div className="text-sm text-muted-foreground">{formatTime(event.date)}</div>
                 </div>
               </div>
+              
+              {event.end_date && (
+                <>
+                  <Separator />
+                  <div className="flex items-start space-x-3">
+                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                    <div className="flex-1">
+                      <div className="font-medium">End Date & Time</div>
+                      <div className="text-sm text-muted-foreground">{formatDate(event.end_date)}</div>
+                      <div className="text-sm text-muted-foreground">{formatTime(event.end_date)}</div>
+                    </div>
+                  </div>
+                </>
+              )}
               
               <Separator />
               

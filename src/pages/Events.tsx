@@ -184,14 +184,22 @@ export default function Events() {
   }, [events]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString);
+    const dateOptions: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    };
+    
+    // Extract time directly from UTC to avoid timezone conversion
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    
+    return `${date.toLocaleDateString('en-US', dateOptions)}, ${displayHours}:${displayMinutes} ${period}`;
   };
 
   const getRegistrationCount = (event: Event): number => {
