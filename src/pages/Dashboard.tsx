@@ -260,10 +260,22 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Mobile Layout: Dashboard title + Events */}
+        {/* Mobile Layout: Dashboard title + Tabs */}
         <div className="lg:hidden">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-          <div className="space-y-6 sm:space-y-8 mt-6">
+          <Tabs defaultValue="events" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="events" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Events
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
             {registrations.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
@@ -483,7 +495,103 @@ export default function Dashboard() {
                 )}
               </>
             )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your personal information and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {profile && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="full_name">Full Name</Label>
+                          <Input
+                            id="full_name"
+                            value={profileForm.full_name}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                            placeholder="Enter your full name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={profile.email}
+                            disabled
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="phone_number">Phone Number</Label>
+                          <Input
+                            id="phone_number"
+                            value={profileForm.phone_number}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                            placeholder="Enter your phone number"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="date_of_birth">Date of Birth</Label>
+                          <Input
+                            id="date_of_birth"
+                            type="date"
+                            value={profileForm.date_of_birth}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="academic_info">Academic Information</Label>
+                          <Textarea
+                            id="academic_info"
+                            value={profileForm.academic_info}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
+                            placeholder="Enter your academic background"
+                            rows={3}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="tech_stack">Tech Stack</Label>
+                          <Textarea
+                            id="tech_stack"
+                            value={profileForm.tech_stack}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
+                            placeholder="Enter your tech stack (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="skills">Skills</Label>
+                          <Textarea
+                            id="skills"
+                            value={profileForm.skills}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                            placeholder="Enter your skills (comma separated)"
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <Button onClick={handleProfileUpdate} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Desktop Layout: Tabs */}
