@@ -115,6 +115,19 @@ export default function Dashboard() {
     } else if (hash === '#myevents') {
       setActiveTab('events');
     }
+
+    // Listen for hash changes
+    const handleHashChange = () => {
+      const newHash = window.location.hash;
+      if (newHash === '#profile') {
+        setActiveTab('profile');
+      } else if (newHash === '#myevents') {
+        setActiveTab('events');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [user, navigate]);
 
   const fetchProfile = async () => {
