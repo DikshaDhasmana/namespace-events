@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Separator } from '@/components/ui/separator';
 import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +64,7 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('events');
   const [profileForm, setProfileForm] = useState({
     full_name: '',
     phone_number: '',
@@ -90,6 +92,17 @@ export default function Dashboard() {
     const storedRedirectUrl = localStorage.getItem('profileRedirectUrl');
     if (storedRedirectUrl) {
       setRedirectUrl(storedRedirectUrl);
+    }
+
+    // Scroll to profile section if hash is present
+    if (window.location.hash === '#profile') {
+      setActiveTab('profile');
+      setTimeout(() => {
+        const profileSection = document.getElementById('profile-section');
+        if (profileSection) {
+          profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
   }, [user, navigate]);
 
@@ -313,7 +326,7 @@ export default function Dashboard() {
         <div className="lg:hidden">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
           
-          <Tabs defaultValue="events" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="events" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -559,7 +572,7 @@ export default function Dashboard() {
             )}
             </TabsContent>
 
-            <TabsContent value="profile" className="space-y-6 mt-6">
+            <TabsContent value="profile" className="space-y-6 mt-6" id="profile-section">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -721,10 +734,181 @@ export default function Dashboard() {
           </Tabs>
         </div>
 
-        {/* Desktop Layout: Tabs */}
+        {/* Desktop Layout */}
         <div className="hidden lg:block space-y-6">
-          {/* Main Content with Tabs */}
-          <Tabs defaultValue="upcoming" className="w-full">
+          {activeTab === 'profile' ? (
+            /* Profile Section */
+            <Card id="profile-section">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Information
+                </CardTitle>
+                <CardDescription>
+                  Manage your personal information and preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {profile && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="full_name_desktop">Full Name</Label>
+                          <div className="flex items-center space-x-3">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="full_name_desktop"
+                              value={profileForm.full_name}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, full_name: e.target.value }))}
+                              placeholder="Enter your full name"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="email_desktop">Email</Label>
+                          <div className="flex items-center space-x-3">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="email_desktop"
+                              type="email"
+                              value={profile.email}
+                              disabled
+                              className="bg-muted/50"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="phone_number_desktop">Phone Number</Label>
+                          <div className="flex items-center space-x-3">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="phone_number_desktop"
+                              type="tel"
+                              value={profileForm.phone_number}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, phone_number: e.target.value }))}
+                              placeholder="Enter your phone number"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="date_of_birth_desktop">Date of Birth</Label>
+                          <div className="flex items-center space-x-3">
+                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="date_of_birth_desktop"
+                              type="date"
+                              value={profileForm.date_of_birth}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="academic_info_desktop">Academic Information</Label>
+                          <div className="flex items-start space-x-3">
+                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                            <Textarea
+                              id="academic_info_desktop"
+                              value={profileForm.academic_info}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
+                              placeholder="Enter your academic background, institution, degree, etc."
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="tech_stack_desktop">Tech Stack</Label>
+                          <div className="flex items-start space-x-3">
+                            <Code className="h-4 w-4 text-muted-foreground mt-3" />
+                            <Textarea
+                              id="tech_stack_desktop"
+                              value={profileForm.tech_stack}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
+                              placeholder="Enter technologies you work with (comma-separated)"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="skills_desktop">Skills</Label>
+                          <div className="flex items-start space-x-3">
+                            <Award className="h-4 w-4 text-muted-foreground mt-3" />
+                            <Textarea
+                              id="skills_desktop"
+                              value={profileForm.skills}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                              placeholder="Enter your skills (comma-separated)"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Professional Links</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Add at least one professional link to complete your profile
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="github_url_desktop">GitHub URL</Label>
+                          <div className="flex items-center space-x-3">
+                            <Github className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="github_url_desktop"
+                              type="url"
+                              value={profileForm.github_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
+                              placeholder="https://github.com/username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="linkedin_url_desktop">LinkedIn URL</Label>
+                          <div className="flex items-center space-x-3">
+                            <Linkedin className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="linkedin_url_desktop"
+                              type="url"
+                              value={profileForm.linkedin_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin_url: e.target.value }))}
+                              placeholder="https://linkedin.com/in/username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="leetcode_url_desktop">LeetCode URL</Label>
+                          <div className="flex items-center space-x-3">
+                            <Link2 className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="leetcode_url_desktop"
+                              type="url"
+                              value={profileForm.leetcode_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
+                              placeholder="https://leetcode.com/username"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button onClick={handleProfileUpdate} disabled={saving}>
+                        {saving ? 'Saving...' : 'Save Profile'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            /* Events Section with Tabs */
+            <Tabs defaultValue="upcoming" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upcoming" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
@@ -973,6 +1157,7 @@ export default function Dashboard() {
               )}
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
 
