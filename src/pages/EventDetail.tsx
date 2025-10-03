@@ -109,7 +109,8 @@ export default function EventDetail() {
     const { count } = await supabase
       .from('registrations')
       .select('*', { count: 'exact', head: true })
-      .eq('event_id', eventId);
+      .eq('event_id', eventId)
+      .eq('status', 'approved');
 
     setRegistrationCount(count || 0);
   };

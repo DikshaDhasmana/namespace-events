@@ -53,16 +53,28 @@ export default function Events() {
       const startTime = performance.now();
       const { data, error } = await supabase
         .from('events')
-        .select(`
-          *,
-          registrations(count)
-        `)
+        .select('*')
         .order('date', { ascending: true });
 
       if (error) throw error;
+      
+      // Fetch approved registration counts separately for each event
+      const eventsWithCounts = await Promise.all((data || []).map(async (event) => {
+        const { count } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'approved');
+        
+        return {
+          ...event,
+          registrations: [{ count: count || 0 }]
+        };
+      }));
+      
       const endTime = performance.now();
       console.log(`Events fetch took ${endTime - startTime} milliseconds`);
-      return data || [];
+      return eventsWithCounts;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

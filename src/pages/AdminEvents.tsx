@@ -55,12 +55,27 @@ const AdminEvents = () => {
         .from('events')
         .select(`
           *,
-          registrations(count)
+          registrations!left(count)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEvents(data || []);
+      
+      // Fetch approved registration counts separately for each event
+      const eventsWithCounts = await Promise.all((data || []).map(async (event) => {
+        const { count } = await supabase
+          .from('registrations')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'approved');
+        
+        return {
+          ...event,
+          registrations: [{ count: count || 0 }]
+        };
+      }));
+      
+      setEvents(eventsWithCounts);
     } catch (error) {
       toast({
         title: "Error",
