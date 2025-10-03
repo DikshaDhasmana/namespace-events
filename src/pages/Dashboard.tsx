@@ -80,20 +80,6 @@ export default function Dashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Scroll to section when activeTab changes
-  useEffect(() => {
-    if (activeTab === 'profile') {
-      setTimeout(() => {
-        const profileSection = document.getElementById('profile-section');
-        if (profileSection) {
-          profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    } else if (activeTab === 'events') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [activeTab]);
-
   useEffect(() => {
     if (!user) {
       navigate('/auth');
@@ -112,8 +98,18 @@ export default function Dashboard() {
     const hash = window.location.hash;
     if (hash === '#profile') {
       setActiveTab('profile');
+      // Scroll after content loads
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const profileSection = document.getElementById('profile-section');
+          if (profileSection) {
+            profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 200);
+      });
     } else if (hash === '#myevents') {
       setActiveTab('events');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Listen for hash changes
@@ -121,8 +117,17 @@ export default function Dashboard() {
       const newHash = window.location.hash;
       if (newHash === '#profile') {
         setActiveTab('profile');
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const profileSection = document.getElementById('profile-section');
+            if (profileSection) {
+              profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 200);
+        });
       } else if (newHash === '#myevents') {
         setActiveTab('events');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
 
@@ -213,9 +218,15 @@ export default function Dashboard() {
       const skills = profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : [];
       
       // Check if profile is completed (all required fields filled including ALL professional links)
-      const isProfileCompleted = !!profileForm.full_name && !!profileForm.phone_number && !!profileForm.date_of_birth && 
-        !!profileForm.academic_info && techStack.length > 0 && skills.length > 0 && 
-        !!profileForm.github_url && !!profileForm.linkedin_url && !!profileForm.leetcode_url;
+      const isProfileCompleted = !!profileForm.full_name && 
+        !!profileForm.phone_number && 
+        !!profileForm.date_of_birth && 
+        !!profileForm.academic_info && 
+        techStack.length > 0 && 
+        skills.length > 0 && 
+        !!profileForm.github_url && 
+        !!profileForm.linkedin_url && 
+        !!profileForm.leetcode_url;
 
       const updatedProfile = {
         full_name: profileForm.full_name || null,

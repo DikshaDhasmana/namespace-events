@@ -37,6 +37,38 @@ const Sidebar = () => {
     navigate('/auth');
   };
 
+  const handleNavigation = (path: string, action?: string) => {
+    if (action === 'signout') {
+      handleSignOut();
+      return;
+    }
+
+    if (path.includes('#')) {
+      // Navigate to dashboard if not already there
+      if (location.pathname !== '/dashboard') {
+        navigate('/dashboard');
+      }
+      
+      // Extract and set the hash
+      const hash = path.split('#')[1];
+      window.location.hash = hash;
+      
+      // Trigger scroll immediately
+      setTimeout(() => {
+        if (hash === 'profile') {
+          const profileSection = document.getElementById('profile-section');
+          if (profileSection) {
+            profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else if (hash === 'myevents') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      navigate(path);
+    }
+  };
+
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
       {/* Header */}
@@ -75,13 +107,7 @@ const Sidebar = () => {
                     "w-full justify-start gap-3 h-auto p-3",
                     isActive && "bg-secondary border-l-2 border-primary"
                   )}
-                  onClick={() => {
-                    if (item.action === 'signout') {
-                      handleSignOut();
-                    } else {
-                      navigate(item.path);
-                    }
-                  }}
+                  onClick={() => handleNavigation(item.path, item.action)}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
                   <div className="text-left">
