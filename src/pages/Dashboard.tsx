@@ -241,8 +241,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Header Section */}
-      <div className="border-b">
+      {/* Header Section - Desktop Only */}
+      <div className="border-b hidden lg:block">
         <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -260,9 +260,22 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Mobile Layout: Dashboard title + Tabs */}
+        {/* Mobile Layout: Dashboard title + Welcome Section + Tabs */}
         <div className="lg:hidden">
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          
+          {/* Welcome Section - Mobile */}
+          <div className="mb-6 p-6 bg-card rounded-lg border">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome back!</h2>
+            <p className="text-muted-foreground text-sm sm:text-base mb-4">
+              Here's what's happening with your events
+            </p>
+            <Button onClick={() => navigate('/events')} className="gap-2 w-full">
+              <Plus className="h-4 w-4" />
+              Browse Events
+            </Button>
+          </div>
+
           <Tabs defaultValue="events" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="events" className="flex items-center gap-2">
