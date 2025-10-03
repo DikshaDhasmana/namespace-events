@@ -111,7 +111,8 @@ export default function Profile() {
     const leetcodeUrl = formData.get('leetcodeUrl') as string;
 
     // Check if profile is completed (all required fields filled)
-    const isProfileCompleted = !!fullName && !!phoneNumber && !!dateOfBirth && !!academicInfo && techStack.length > 0 && skills.length > 0;
+    const hasAtLeastOneLink = !!githubUrl || !!linkedinUrl || !!leetcodeUrl;
+    const isProfileCompleted = !!fullName && !!phoneNumber && !!dateOfBirth && !!academicInfo && techStack.length > 0 && skills.length > 0 && hasAtLeastOneLink;
 
     const { error } = await supabase
       .from('profiles')
