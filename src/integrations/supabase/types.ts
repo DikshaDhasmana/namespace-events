@@ -133,13 +133,15 @@ export type Database = {
       }
       profiles: {
         Row: {
-          academic_info: string | null
           avatar_url: string | null
+          college: string | null
           created_at: string
           date_of_birth: string | null
+          degree: string | null
           email: string
           full_name: string | null
           github_url: string | null
+          graduation_year: number | null
           id: string
           leetcode_url: string | null
           linkedin_url: string | null
@@ -150,13 +152,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          academic_info?: string | null
           avatar_url?: string | null
+          college?: string | null
           created_at?: string
           date_of_birth?: string | null
+          degree?: string | null
           email: string
           full_name?: string | null
           github_url?: string | null
+          graduation_year?: number | null
           id: string
           leetcode_url?: string | null
           linkedin_url?: string | null
@@ -167,13 +171,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          academic_info?: string | null
           avatar_url?: string | null
+          college?: string | null
           created_at?: string
           date_of_birth?: string | null
+          degree?: string | null
           email?: string
           full_name?: string | null
           github_url?: string | null
+          graduation_year?: number | null
           id?: string
           leetcode_url?: string | null
           linkedin_url?: string | null

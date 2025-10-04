@@ -21,7 +21,9 @@ interface PendingRegistration {
   user_name: string;
   user_email: string;
   user_phone: string;
-  user_academic_info: string;
+  user_college: string;
+  user_degree: string;
+  user_graduation_year: number;
   user_tech_stack: string[];
   user_skills: string[];
   github_url: string;
@@ -213,13 +215,17 @@ export default function AdminPendingApprovals() {
                                 <span>{registration.user_phone}</span>
                               </div>
                             )}
-                            {registration.user_academic_info && (
+                            {(registration.user_college || registration.user_degree || registration.user_graduation_year) && (
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
                                   <GraduationCap className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-muted-foreground">Academic Info:</span>
                                 </div>
-                                <p className="text-xs ml-6">{registration.user_academic_info}</p>
+                                <div className="text-xs ml-6 space-y-1">
+                                  {registration.user_college && <div><span className="font-medium">College:</span> {registration.user_college}</div>}
+                                  {registration.user_degree && <div><span className="font-medium">Degree:</span> {registration.user_degree}</div>}
+                                  {registration.user_graduation_year && <div><span className="font-medium">Graduation Year:</span> {registration.user_graduation_year}</div>}
+                                </div>
                               </div>
                             )}
                             {registration.user_tech_stack && registration.user_tech_stack.length > 0 && (

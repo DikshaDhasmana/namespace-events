@@ -16,7 +16,9 @@ interface Profile {
   full_name: string;
   phone_number: string;
   date_of_birth: string;
-  academic_info: string;
+  college: string | null;
+  degree: string | null;
+  graduation_year: number | null;
   tech_stack: string[];
   skills: string[];
   profile_completed: boolean;
@@ -140,8 +142,11 @@ const AdminUsers = () => {
                         <GraduationCap className="h-4 w-4" />
                         Academic Info
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.academic_info || 'Not provided'}
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        {user.college && <div><span className="font-medium">College:</span> {user.college}</div>}
+                        {user.degree && <div><span className="font-medium">Degree:</span> {user.degree}</div>}
+                        {user.graduation_year && <div><span className="font-medium">Graduation Year:</span> {user.graduation_year}</div>}
+                        {!user.college && !user.degree && !user.graduation_year && 'Not provided'}
                       </div>
                     </div>
 

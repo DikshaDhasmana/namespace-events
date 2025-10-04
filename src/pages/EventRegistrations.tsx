@@ -23,7 +23,9 @@ interface Registration {
     full_name: string;
     phone_number: string;
     date_of_birth: string;
-    academic_info: string;
+    college: string;
+    degree: string;
+    graduation_year: number;
     tech_stack: string[];
     skills: string[];
     profile_completed: boolean;
@@ -79,7 +81,7 @@ const EventRegistrations = () => {
       const userIds = registrationsResponse.data?.map(r => r.user_id) || [];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, email, full_name, phone_number, date_of_birth, academic_info, tech_stack, skills, profile_completed, github_url, linkedin_url, leetcode_url')
+        .select('id, email, full_name, phone_number, date_of_birth, college, degree, graduation_year, tech_stack, skills, profile_completed, github_url, linkedin_url, leetcode_url')
         .in('id', userIds);
 
       // Merge registrations with profiles
@@ -88,7 +90,7 @@ const EventRegistrations = () => {
         status: reg.status as 'pending' | 'approved' | 'rejected',
         profiles: profiles?.find(p => p.id === reg.user_id) || {
           email: '', full_name: '', phone_number: '', date_of_birth: '',
-          academic_info: '', tech_stack: [], skills: [], profile_completed: false,
+          college: '', degree: '', graduation_year: 0, tech_stack: [], skills: [], profile_completed: false,
           github_url: '', linkedin_url: '', leetcode_url: ''
         }
       })) || [];
@@ -163,7 +165,9 @@ const EventRegistrations = () => {
       'Email': reg.profiles.email,
       'Phone Number': reg.profiles.phone_number || 'Not provided',
       'Date of Birth': reg.profiles.date_of_birth ? format(new Date(reg.profiles.date_of_birth), 'dd/MM/yyyy') : 'Not provided',
-      'Academic Info': reg.profiles.academic_info || 'Not provided',
+      'College': reg.profiles.college || 'Not provided',
+      'Degree': reg.profiles.degree || 'Not provided',
+      'Graduation Year': reg.profiles.graduation_year || 'Not provided',
       'Tech Stack': reg.profiles.tech_stack?.join(', ') || 'Not provided',
       'Skills': reg.profiles.skills?.join(', ') || 'Not provided',
       'GitHub': reg.profiles.github_url || 'Not provided',
@@ -353,8 +357,11 @@ const EventRegistrations = () => {
                             <GraduationCap className="h-4 w-4" />
                             Academic Background
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {registration.profiles.academic_info || 'Not provided'}
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.college && <div><span className="font-medium">College:</span> {registration.profiles.college}</div>}
+                            {registration.profiles.degree && <div><span className="font-medium">Degree:</span> {registration.profiles.degree}</div>}
+                            {registration.profiles.graduation_year && <div><span className="font-medium">Graduation Year:</span> {registration.profiles.graduation_year}</div>}
+                            {!registration.profiles.college && !registration.profiles.degree && !registration.profiles.graduation_year && 'Not provided'}
                           </div>
                         </div>
 
@@ -494,8 +501,11 @@ const EventRegistrations = () => {
                             <GraduationCap className="h-4 w-4" />
                             Academic Background
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {registration.profiles.academic_info || 'Not provided'}
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            {registration.profiles.college && <div><span className="font-medium">College:</span> {registration.profiles.college}</div>}
+                            {registration.profiles.degree && <div><span className="font-medium">Degree:</span> {registration.profiles.degree}</div>}
+                            {registration.profiles.graduation_year && <div><span className="font-medium">Graduation Year:</span> {registration.profiles.graduation_year}</div>}
+                            {!registration.profiles.college && !registration.profiles.degree && !registration.profiles.graduation_year && 'Not provided'}
                           </div>
                         </div>
 

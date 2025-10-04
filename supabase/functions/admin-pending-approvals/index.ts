@@ -25,7 +25,9 @@ interface PendingRegistrationResponse {
   user_name: string
   user_email: string
   user_phone: string
-  user_academic_info: string
+  user_college: string
+  user_degree: string
+  user_graduation_year: number
   user_tech_stack: string[]
   user_skills: string[]
   github_url: string
@@ -69,7 +71,7 @@ Deno.serve(async (req) => {
       supabase.from('events').select('id, name, date, venue').in('id', eventIds),
       supabase
         .from('profiles')
-        .select('id, full_name, email, phone_number, academic_info, tech_stack, skills, github_url, linkedin_url, leetcode_url')
+        .select('id, full_name, email, phone_number, college, degree, graduation_year, tech_stack, skills, github_url, linkedin_url, leetcode_url')
         .in('id', userIds),
     ])
 
@@ -103,7 +105,9 @@ Deno.serve(async (req) => {
       user_name: profilesMap.get(reg.user_id)?.full_name ?? 'Unknown User',
       user_email: profilesMap.get(reg.user_id)?.email ?? '',
       user_phone: profilesMap.get(reg.user_id)?.phone_number ?? '',
-      user_academic_info: profilesMap.get(reg.user_id)?.academic_info ?? '',
+      user_college: profilesMap.get(reg.user_id)?.college ?? '',
+      user_degree: profilesMap.get(reg.user_id)?.degree ?? '',
+      user_graduation_year: profilesMap.get(reg.user_id)?.graduation_year ?? 0,
       user_tech_stack: profilesMap.get(reg.user_id)?.tech_stack ?? [],
       user_skills: profilesMap.get(reg.user_id)?.skills ?? [],
       github_url: profilesMap.get(reg.user_id)?.github_url ?? '',

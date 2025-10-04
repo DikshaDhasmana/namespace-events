@@ -39,7 +39,9 @@ interface Profile {
   avatar_url: string | null;
   phone_number: string | null;
   date_of_birth: string | null;
-  academic_info: string | null;
+  college: string | null;
+  degree: string | null;
+  graduation_year: number | null;
   tech_stack: string[] | null;
   skills: string[] | null;
   github_url: string | null;
@@ -76,7 +78,9 @@ export default function Dashboard() {
           full_name: '',
           phone_number: '',
           date_of_birth: '',
-          academic_info: '',
+          college: '',
+          degree: '',
+          graduation_year: '',
           tech_stack: '',
           skills: '',
           github_url: '',
@@ -89,7 +93,9 @@ export default function Dashboard() {
       full_name: '',
       phone_number: '',
       date_of_birth: '',
-      academic_info: '',
+      college: '',
+      degree: '',
+      graduation_year: '',
       tech_stack: '',
       skills: '',
       github_url: '',
@@ -186,7 +192,9 @@ export default function Dashboard() {
           full_name: data.full_name || '',
           phone_number: data.phone_number || '',
           date_of_birth: data.date_of_birth || '',
-          academic_info: data.academic_info || '',
+          college: data.college || '',
+          degree: data.degree || '',
+          graduation_year: data.graduation_year?.toString() || '',
           tech_stack: data.tech_stack?.join(', ') || '',
           skills: data.skills?.join(', ') || '',
           github_url: data.github_url || '',
