@@ -26,7 +26,6 @@ interface Registration {
     college: string;
     degree: string;
     graduation_year: number;
-    tech_stack: string[];
     skills: string[];
     profile_completed: boolean;
     github_url: string;
@@ -81,7 +80,7 @@ const EventRegistrations = () => {
       const userIds = registrationsResponse.data?.map(r => r.user_id) || [];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, email, full_name, phone_number, date_of_birth, college, degree, graduation_year, tech_stack, skills, profile_completed, github_url, linkedin_url, leetcode_url')
+        .select('id, email, full_name, phone_number, date_of_birth, college, degree, graduation_year, skills, profile_completed, github_url, linkedin_url, leetcode_url')
         .in('id', userIds);
 
       // Merge registrations with profiles
@@ -90,7 +89,7 @@ const EventRegistrations = () => {
         status: reg.status as 'pending' | 'approved' | 'rejected',
         profiles: profiles?.find(p => p.id === reg.user_id) || {
           email: '', full_name: '', phone_number: '', date_of_birth: '',
-          college: '', degree: '', graduation_year: 0, tech_stack: [], skills: [], profile_completed: false,
+          college: '', degree: '', graduation_year: 0, skills: [], profile_completed: false,
           github_url: '', linkedin_url: '', leetcode_url: ''
         }
       })) || [];
@@ -168,7 +167,6 @@ const EventRegistrations = () => {
       'College': reg.profiles.college || 'Not provided',
       'Degree': reg.profiles.degree || 'Not provided',
       'Graduation Year': reg.profiles.graduation_year || 'Not provided',
-      'Tech Stack': reg.profiles.tech_stack?.join(', ') || 'Not provided',
       'Skills': reg.profiles.skills?.join(', ') || 'Not provided',
       'GitHub': reg.profiles.github_url || 'Not provided',
       'LinkedIn': reg.profiles.linkedin_url || 'Not provided',
@@ -368,21 +366,9 @@ const EventRegistrations = () => {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm font-medium">
                             <Code className="h-4 w-4" />
-                            Technical Profile
+                            Skills
                           </div>
                           <div className="space-y-2">
-                            {registration.profiles.tech_stack && registration.profiles.tech_stack.length > 0 && (
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {registration.profiles.tech_stack.map((tech, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {tech}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
                             {registration.profiles.skills && registration.profiles.skills.length > 0 && (
                               <div>
                                 <div className="text-xs text-muted-foreground mb-1">Skills:</div>
@@ -512,21 +498,9 @@ const EventRegistrations = () => {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm font-medium">
                             <Code className="h-4 w-4" />
-                            Technical Profile
+                            Skills
                           </div>
                           <div className="space-y-2">
-                            {registration.profiles.tech_stack && registration.profiles.tech_stack.length > 0 && (
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {registration.profiles.tech_stack.map((tech, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {tech}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
                             {registration.profiles.skills && registration.profiles.skills.length > 0 && (
                               <div>
                                 <div className="text-xs text-muted-foreground mb-1">Skills:</div>
