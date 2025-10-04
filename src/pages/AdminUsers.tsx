@@ -19,7 +19,6 @@ interface Profile {
   college: string | null;
   degree: string | null;
   graduation_year: number | null;
-  tech_stack: string[];
   skills: string[];
   profile_completed: boolean;
   created_at: string;
@@ -156,18 +155,6 @@ const AdminUsers = () => {
                         Tech & Skills
                       </div>
                       <div className="space-y-2">
-                        {user.tech_stack && user.tech_stack.length > 0 && (
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Tech Stack:</div>
-                            <div className="flex flex-wrap gap-1">
-                              {user.tech_stack.map((tech, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {tech}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                         {user.skills && user.skills.length > 0 && (
                           <div>
                             <div className="text-xs text-muted-foreground mb-1">Skills:</div>

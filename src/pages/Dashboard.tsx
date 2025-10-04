@@ -42,7 +42,6 @@ interface Profile {
   college: string | null;
   degree: string | null;
   graduation_year: number | null;
-  tech_stack: string[] | null;
   skills: string[] | null;
   github_url: string | null;
   linkedin_url: string | null;
@@ -81,7 +80,6 @@ export default function Dashboard() {
           college: '',
           degree: '',
           graduation_year: '',
-          tech_stack: '',
           skills: '',
           github_url: '',
           linkedin_url: '',
@@ -96,7 +94,6 @@ export default function Dashboard() {
       college: '',
       degree: '',
       graduation_year: '',
-      tech_stack: '',
       skills: '',
       github_url: '',
       linkedin_url: '',
@@ -195,7 +192,6 @@ export default function Dashboard() {
           college: data.college || '',
           degree: data.degree || '',
           graduation_year: data.graduation_year?.toString() || '',
-          tech_stack: data.tech_stack?.join(', ') || '',
           skills: data.skills?.join(', ') || '',
           github_url: data.github_url || '',
           linkedin_url: data.linkedin_url || '',
@@ -255,7 +251,6 @@ export default function Dashboard() {
 
     setSaving(true);
     try {
-      const techStack = profileForm.tech_stack ? profileForm.tech_stack.split(',').map(s => s.trim()).filter(s => s) : [];
       const skills = profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : [];
       
       // Check if profile is completed (all required fields filled including ALL professional links)
@@ -265,7 +260,6 @@ export default function Dashboard() {
         !!profileForm.college && 
         !!profileForm.degree && 
         !!profileForm.graduation_year && 
-        techStack.length > 0 && 
         skills.length > 0 && 
         !!profileForm.github_url && 
         !!profileForm.linkedin_url && 
@@ -278,7 +272,6 @@ export default function Dashboard() {
         college: profileForm.college || null,
         degree: profileForm.degree || null,
         graduation_year: profileForm.graduation_year ? parseInt(profileForm.graduation_year) : null,
-        tech_stack: techStack.length > 0 ? techStack : null,
         skills: skills.length > 0 ? skills : null,
         github_url: profileForm.github_url || null,
         linkedin_url: profileForm.linkedin_url || null,
@@ -762,18 +755,6 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="tech_stack">* Tech Stack</Label>
-                            <div className="flex items-center space-x-3">
-                              <Code className="h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="tech_stack"
-                                value={profileForm.tech_stack}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
-                                placeholder="e.g., React, Node.js, Python"
-                              />
-                            </div>
-                          </div>
-                          <div>
                             <Label htmlFor="skills">* Skills</Label>
                             <div className="flex items-center space-x-3">
                               <Award className="h-4 w-4 text-muted-foreground" />
@@ -950,19 +931,6 @@ export default function Dashboard() {
                               placeholder="Enter graduation year (e.g., 2024)"
                               min="1950"
                               max="2050"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="tech_stack_desktop">* Tech Stack</Label>
-                          <div className="flex items-start space-x-3">
-                            <Code className="h-4 w-4 text-muted-foreground mt-3" />
-                            <Textarea
-                              id="tech_stack_desktop"
-                              value={profileForm.tech_stack}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, tech_stack: e.target.value }))}
-                              placeholder="Enter technologies you work with (comma-separated)"
-                              rows={2}
                             />
                           </div>
                         </div>
