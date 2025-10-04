@@ -65,20 +65,50 @@ export default function Dashboard() {
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('events');
-  const [profileForm, setProfileForm] = useState({
-    full_name: '',
-    phone_number: '',
-    date_of_birth: '',
-    academic_info: '',
-    tech_stack: '',
-    skills: '',
-    github_url: '',
-    linkedin_url: '',
-    leetcode_url: '',
+  const [profileForm, setProfileForm] = useState(() => {
+    // Try to restore unsaved form data from localStorage
+    const savedFormData = localStorage.getItem('profileFormDraft');
+    if (savedFormData) {
+      try {
+        return JSON.parse(savedFormData);
+      } catch {
+        return {
+          full_name: '',
+          phone_number: '',
+          date_of_birth: '',
+          academic_info: '',
+          tech_stack: '',
+          skills: '',
+          github_url: '',
+          linkedin_url: '',
+          leetcode_url: '',
+        };
+      }
+    }
+    return {
+      full_name: '',
+      phone_number: '',
+      date_of_birth: '',
+      academic_info: '',
+      tech_stack: '',
+      skills: '',
+      github_url: '',
+      linkedin_url: '',
+      leetcode_url: '',
+    };
   });
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Auto-save form data to localStorage whenever it changes
+  useEffect(() => {
+    // Only save if there's actual data (not all empty)
+    const hasData = Object.values(profileForm).some(value => value !== '');
+    if (hasData) {
+      localStorage.setItem('profileFormDraft', JSON.stringify(profileForm));
+    }
+  }, [profileForm]);
 
   useEffect(() => {
     if (!user) {
@@ -149,18 +179,21 @@ export default function Dashboard() {
       setProfile(null);
     } else {
       setProfile(data);
-      // Initialize form with profile data
-      setProfileForm({
-        full_name: data.full_name || '',
-        phone_number: data.phone_number || '',
-        date_of_birth: data.date_of_birth || '',
-        academic_info: data.academic_info || '',
-        tech_stack: data.tech_stack?.join(', ') || '',
-        skills: data.skills?.join(', ') || '',
-        github_url: data.github_url || '',
-        linkedin_url: data.linkedin_url || '',
-        leetcode_url: data.leetcode_url || '',
-      });
+      // Only initialize form with profile data if there's no draft saved
+      const savedFormData = localStorage.getItem('profileFormDraft');
+      if (!savedFormData) {
+        setProfileForm({
+          full_name: data.full_name || '',
+          phone_number: data.phone_number || '',
+          date_of_birth: data.date_of_birth || '',
+          academic_info: data.academic_info || '',
+          tech_stack: data.tech_stack?.join(', ') || '',
+          skills: data.skills?.join(', ') || '',
+          github_url: data.github_url || '',
+          linkedin_url: data.linkedin_url || '',
+          leetcode_url: data.leetcode_url || '',
+        });
+      }
     }
   };
 
@@ -254,6 +287,9 @@ export default function Dashboard() {
           description: "Failed to update profile",
         });
       } else {
+        // Clear the saved draft from localStorage after successful save
+        localStorage.removeItem('profileFormDraft');
+        
         toast({
           title: "Success",
           description: isProfileCompleted ? "Profile completed successfully!" : "Profile updated successfully",
