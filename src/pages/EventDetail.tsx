@@ -43,6 +43,7 @@ export default function EventDetail() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState<'pending' | 'approved' | null>(null);
   const [registrationCount, setRegistrationCount] = useState(0);
+  const [applicationsCount, setApplicationsCount] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -57,7 +58,6 @@ export default function EventDetail() {
       if (user) {
         checkRegistration();
       }
-      fetchRegistrationCount();
     }
 
     // Store UTM parameters for anonymous users
@@ -66,6 +66,13 @@ export default function EventDetail() {
       localStorage.setItem('authRedirectUrl', currentUrl);
     }
   }, [eventId, user, utmSource]);
+
+  // Fetch registration counts after event data is loaded
+  useEffect(() => {
+    if (event) {
+      fetchRegistrationCount();
+    }
+  }, [event]);
 
   const fetchEvent = async () => {
     const { data, error } = await supabase
@@ -106,6 +113,7 @@ export default function EventDetail() {
   const fetchRegistrationCount = async () => {
     if (!eventId) return;
 
+    // Fetch approved registrations
     const { count } = await supabase
       .from('registrations')
       .select('*', { count: 'exact', head: true })
@@ -113,6 +121,16 @@ export default function EventDetail() {
       .eq('status', 'approved');
 
     setRegistrationCount(count || 0);
+
+    // Fetch total applications count for approval-enabled events
+    if (event?.approval_enabled) {
+      const { count: totalCount } = await supabase
+        .from('registrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId);
+
+      setApplicationsCount(totalCount || 0);
+    }
   };
 
   const handleRegister = async () => {
@@ -512,10 +530,17 @@ export default function EventDetail() {
                 </Button>
               )}
               
-              <div className="text-sm text-muted-foreground">
-                {registrationCount} {registrationCount === 1 ? 'person registered' : 'people registered'}
-                {event.max_participants && (
-                  <span> • {event.max_participants - registrationCount} spots remaining</span>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <div>
+                  {registrationCount} {registrationCount === 1 ? 'person registered' : 'people registered'}
+                  {event.max_participants && (
+                    <span> • {event.max_participants - registrationCount} spots remaining</span>
+                  )}
+                </div>
+                {event.approval_enabled && applicationsCount > 0 && (
+                  <div className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                    📋 {applicationsCount} total {applicationsCount === 1 ? 'application' : 'applications'} received
+                  </div>
                 )}
               </div>
             </CardContent>
