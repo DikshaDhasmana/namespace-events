@@ -148,7 +148,6 @@ export type Database = {
           phone_number: string | null
           profile_completed: boolean | null
           skills: string[] | null
-          tech_stack: string[] | null
           updated_at: string
         }
         Insert: {
@@ -167,7 +166,6 @@ export type Database = {
           phone_number?: string | null
           profile_completed?: boolean | null
           skills?: string[] | null
-          tech_stack?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -186,7 +184,6 @@ export type Database = {
           phone_number?: string | null
           profile_completed?: boolean | null
           skills?: string[] | null
-          tech_stack?: string[] | null
           updated_at?: string
         }
         Relationships: []
