@@ -79,7 +79,6 @@ const Sidebar = () => {
           </div>
           <div>
             <h2 className="text-lg font-semibold">Dashboard</h2>
-            <p className="text-xs text-muted-foreground">Event Management</p>
           </div>
         </div>
       </div>
