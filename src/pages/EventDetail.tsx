@@ -530,17 +530,21 @@ export default function EventDetail() {
                 </Button>
               )}
               
-              <div className="text-sm text-muted-foreground space-y-1">
-                <div>
-                  {registrationCount} {registrationCount === 1 ? 'person registered' : 'people registered'}
-                  {event.max_participants && (
-                    <span> • {event.max_participants - registrationCount} spots remaining</span>
-                  )}
-                </div>
-                {event.approval_enabled && applicationsCount > 0 && (
-                  <div className="text-xs bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
-                    📋 {applicationsCount} total {applicationsCount === 1 ? 'application' : 'applications'} received
-                  </div>
+              <div className="text-sm text-muted-foreground">
+                {event.approval_enabled ? (
+                  <>
+                    {applicationsCount} {applicationsCount === 1 ? 'application' : 'applications'} received
+                    {event.max_participants && (
+                      <span> • {event.max_participants - applicationsCount} spots remaining</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {registrationCount} {registrationCount === 1 ? 'person registered' : 'people registered'}
+                    {event.max_participants && (
+                      <span> • {event.max_participants - registrationCount} spots remaining</span>
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
