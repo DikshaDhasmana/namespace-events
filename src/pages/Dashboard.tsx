@@ -262,7 +262,9 @@ export default function Dashboard() {
       const isProfileCompleted = !!profileForm.full_name && 
         !!profileForm.phone_number && 
         !!profileForm.date_of_birth && 
-        !!profileForm.academic_info && 
+        !!profileForm.college && 
+        !!profileForm.degree && 
+        !!profileForm.graduation_year && 
         techStack.length > 0 && 
         skills.length > 0 && 
         !!profileForm.github_url && 
@@ -273,7 +275,9 @@ export default function Dashboard() {
         full_name: profileForm.full_name || null,
         phone_number: profileForm.phone_number || null,
         date_of_birth: profileForm.date_of_birth || null,
-        academic_info: profileForm.academic_info || null,
+        college: profileForm.college || null,
+        degree: profileForm.degree || null,
+        graduation_year: profileForm.graduation_year ? parseInt(profileForm.graduation_year) : null,
         tech_stack: techStack.length > 0 ? techStack : null,
         skills: skills.length > 0 ? skills : null,
         github_url: profileForm.github_url || null,
@@ -719,15 +723,41 @@ export default function Dashboard() {
                         </div>
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor="academic_info">* Academic Information</Label>
+                            <Label htmlFor="college">* College</Label>
                             <div className="flex items-start space-x-3">
                               <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
-                              <Textarea
-                                id="academic_info"
-                                value={profileForm.academic_info}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
-                                placeholder="Enter your academic background"
-                                rows={3}
+                              <Input
+                                id="college"
+                                value={profileForm.college}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
+                                placeholder="Enter your college name"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="degree">* Degree</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="degree"
+                                value={profileForm.degree}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
+                                placeholder="Enter your degree (e.g., B.Tech, M.Sc)"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="graduation_year">* Graduation Year</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="graduation_year"
+                                type="number"
+                                value={profileForm.graduation_year}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
+                                placeholder="Enter graduation year (e.g., 2024)"
+                                min="1950"
+                                max="2050"
                               />
                             </div>
                           </div>
@@ -885,15 +915,41 @@ export default function Dashboard() {
                       </div>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="academic_info_desktop">* Academic Information</Label>
+                          <Label htmlFor="college_desktop">* College</Label>
                           <div className="flex items-start space-x-3">
                             <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
-                            <Textarea
-                              id="academic_info_desktop"
-                              value={profileForm.academic_info}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, academic_info: e.target.value }))}
-                              placeholder="Enter your academic background, institution, degree, etc."
-                              rows={3}
+                            <Input
+                              id="college_desktop"
+                              value={profileForm.college}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
+                              placeholder="Enter your college name"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="degree_desktop">* Degree</Label>
+                          <div className="flex items-start space-x-3">
+                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                            <Input
+                              id="degree_desktop"
+                              value={profileForm.degree}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
+                              placeholder="Enter your degree (e.g., B.Tech, M.Sc)"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="graduation_year_desktop">* Graduation Year</Label>
+                          <div className="flex items-start space-x-3">
+                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                            <Input
+                              id="graduation_year_desktop"
+                              type="number"
+                              value={profileForm.graduation_year}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
+                              placeholder="Enter graduation year (e.g., 2024)"
+                              min="1950"
+                              max="2050"
                             />
                           </div>
                         </div>
