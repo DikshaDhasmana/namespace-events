@@ -27,6 +27,7 @@ interface Registration {
     description: string;
     event_type: string;
     date: string;
+    end_date: string | null;
     venue: string;
     max_participants: number;
   };
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('events');
+  const [eventTimeView, setEventTimeView] = useState<'live-upcoming' | 'past'>('live-upcoming');
   const [profileForm, setProfileForm] = useState(() => {
     // Try to restore unsaved form data from localStorage
     const savedFormData = localStorage.getItem('profileFormDraft');
@@ -358,7 +360,7 @@ export default function Dashboard() {
 
   const liveEvents = registrations.filter(reg => {
     const eventDate = new Date(reg.events.date);
-    const eventEndDate = new Date(eventDate.getTime() + (2 * 60 * 60 * 1000)); // Assume 2 hours duration
+    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventDate <= now && eventEndDate >= now;
   });
 
@@ -368,7 +370,7 @@ export default function Dashboard() {
 
   const pastEvents = registrations.filter(reg => {
     const eventDate = new Date(reg.events.date);
-    const eventEndDate = new Date(eventDate.getTime() + (2 * 60 * 60 * 1000)); // Assume 2 hours duration
+    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventEndDate < now;
   });
 
@@ -376,6 +378,10 @@ export default function Dashboard() {
   const liveCount = liveEvents.length;
   const upcomingCount = upcomingEvents.length;
   const pastCount = pastEvents.length;
+
+  // Combine live and upcoming for the view
+  const liveAndUpcomingEvents = [...liveEvents, ...upcomingEvents];
+  const liveAndUpcomingCount = liveCount + upcomingCount;
 
   return (
     <div className="min-h-screen">
@@ -1011,19 +1017,19 @@ export default function Dashboard() {
             </Card>
           ) : (
             /* Events Section with Tabs */
-            <Tabs defaultValue="upcoming" className="w-full">
+            <Tabs value={eventTimeView} onValueChange={(v) => setEventTimeView(v as 'live-upcoming' | 'past')} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upcoming" className="flex items-center gap-2">
+              <TabsTrigger value="live-upcoming" className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Upcoming Events
+                Live & Upcoming ({liveAndUpcomingCount})
               </TabsTrigger>
               <TabsTrigger value="past" className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                Past Events
+                Past Events ({pastCount})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="upcoming" className="space-y-6 sm:space-y-8 mt-6">
+            <TabsContent value="live-upcoming" className="space-y-6 sm:space-y-8 mt-6">
               {upcomingCount === 0 && liveCount === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent className="space-y-4">
