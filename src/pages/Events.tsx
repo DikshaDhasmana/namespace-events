@@ -23,6 +23,7 @@ interface Event {
   description: string;
   event_type: string;
   date: string;
+  end_date: string | null;
   venue: string;
   max_participants: number | null;
   mode: string | null;
@@ -42,6 +43,7 @@ const eventTypeColors = {
 
 export default function Events() {
   const [selectedType, setSelectedType] = useState('all');
+  const [timeView, setTimeView] = useState<'live-upcoming' | 'past'>('live-upcoming');
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -180,20 +182,37 @@ export default function Events() {
     registerMutation.mutate(eventId);
   };
 
-  const filterEvents = useMemo(() => {
-    return (type?: string) => {
-      const startTime = performance.now();
-      let result;
-      if (!type || type === 'all') {
-        result = events;
+  // Categorize events by time
+  const categorizedEvents = useMemo(() => {
+    const now = new Date();
+    const live: Event[] = [];
+    const upcoming: Event[] = [];
+    const past: Event[] = [];
+
+    events.forEach(event => {
+      const startDate = new Date(event.date);
+      const endDate = event.end_date ? new Date(event.end_date) : startDate;
+
+      if (endDate < now) {
+        past.push(event);
+      } else if (startDate <= now && endDate >= now) {
+        live.push(event);
       } else {
-        result = events.filter(event => event.event_type === type);
+        upcoming.push(event);
       }
-      const endTime = performance.now();
-      console.log(`Filtering ${events.length} events took ${endTime - startTime} milliseconds`);
-      return result;
-    };
+    });
+
+    return { live, upcoming, past };
   }, [events]);
+
+  const filterEvents = useMemo(() => {
+    return (eventsList: Event[], type?: string) => {
+      if (!type || type === 'all') {
+        return eventsList;
+      }
+      return eventsList.filter(event => event.event_type === type);
+    };
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -326,16 +345,34 @@ export default function Events() {
     );
   }
 
+  const currentEvents = timeView === 'live-upcoming' 
+    ? [...categorizedEvents.live, ...categorizedEvents.upcoming]
+    : categorizedEvents.past;
+
+  const filteredEvents = filterEvents(currentEvents, selectedType === 'all' ? undefined : selectedType);
+
   return (
     <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2 font-heading">Upcoming Events</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 font-heading">Events</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Discover and register for exciting tech events
         </p>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* Time View Tabs */}
+      <Tabs value={timeView} onValueChange={(v) => setTimeView(v as 'live-upcoming' | 'past')} className="w-full mb-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="live-upcoming">
+            Live & Upcoming ({categorizedEvents.live.length + categorizedEvents.upcoming.length})
+          </TabsTrigger>
+          <TabsTrigger value="past">
+            Past Events ({categorizedEvents.past.length})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Mobile Dropdown for Event Type */}
       <div className="md:hidden mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -367,7 +404,7 @@ export default function Events() {
         </DropdownMenu>
       </div>
 
-      {/* Desktop Tabs */}
+      {/* Desktop Tabs for Event Type */}
       <div className="hidden md:block">
         <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
           <TabsList className="grid w-full grid-cols-6">
@@ -381,12 +418,48 @@ export default function Events() {
         </Tabs>
       </div>
 
-      {/* Event Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {filterEvents(selectedType === 'all' ? undefined : selectedType).map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </div>
+      {/* Live Events Section (only show in live-upcoming view) */}
+      {timeView === 'live-upcoming' && categorizedEvents.live.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-4 text-red-500 flex items-center gap-2">
+            <span className="inline-block w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+            Live Now
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filterEvents(categorizedEvents.live, selectedType === 'all' ? undefined : selectedType).map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming Events Section (only show in live-upcoming view if there are live events) */}
+      {timeView === 'live-upcoming' && categorizedEvents.upcoming.length > 0 && categorizedEvents.live.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filterEvents(categorizedEvents.upcoming, selectedType === 'all' ? undefined : selectedType).map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Combined view when no live events or in past events view */}
+      {(timeView === 'past' || (timeView === 'live-upcoming' && categorizedEvents.live.length === 0)) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {filteredEvents.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      )}
+
+      {/* No events message */}
+      {filteredEvents.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          No events found in this category
+        </div>
+      )}
     </div>
   );
 }
