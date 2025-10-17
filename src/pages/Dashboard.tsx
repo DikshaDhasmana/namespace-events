@@ -355,27 +355,23 @@ export default function Dashboard() {
     );
   }
 
-  // Calculate stats and categorize events (IST timezone)
+  // Calculate stats and categorize events
   const now = new Date();
-  const utcOffset = now.getTimezoneOffset() * 60 * 1000; // Browser's UTC offset
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-  const istNow = new Date(now.getTime() + utcOffset + istOffset);
 
   const liveEvents = registrations.filter(reg => {
     const eventDate = new Date(reg.events.date);
     const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
-    return eventDate <= istNow && eventEndDate >= istNow;
+    return eventDate <= now && eventEndDate >= now;
   });
 
-  const upcomingEvents = registrations.filter(reg => {
-    const eventDate = new Date(reg.events.date);
-    return eventDate > istNow;
-  });
+  const upcomingEvents = registrations.filter(reg =>
+    new Date(reg.events.date) > now
+  );
 
   const pastEvents = registrations.filter(reg => {
     const eventDate = new Date(reg.events.date);
     const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
-    return eventEndDate < istNow;
+    return eventEndDate < now;
   });
 
   const totalEvents = registrations.length;
