@@ -184,21 +184,20 @@ export default function Events() {
 
   // Categorize events by time (IST timezone)
   const categorizedEvents = useMemo(() => {
-    // Get current time in IST (UTC + 5:30)
+    // Get current time and convert to IST
     const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    const istNow = new Date(now.getTime() + istOffset);
+    const utcOffset = now.getTimezoneOffset() * 60 * 1000; // Browser's UTC offset
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const istNow = new Date(now.getTime() + utcOffset + istOffset);
     
     const live: Event[] = [];
     const upcoming: Event[] = [];
     const past: Event[] = [];
 
     events.forEach(event => {
-      // Parse dates and add IST offset
-      const startDate = new Date(new Date(event.date).getTime() + istOffset);
-      const endDate = event.end_date 
-        ? new Date(new Date(event.end_date).getTime() + istOffset)
-        : startDate;
+      // Treat stored dates as IST times
+      const startDate = new Date(event.date);
+      const endDate = event.end_date ? new Date(event.end_date) : startDate;
 
       if (endDate < istNow) {
         past.push(event);

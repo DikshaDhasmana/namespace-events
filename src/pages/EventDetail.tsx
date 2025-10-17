@@ -392,12 +392,11 @@ export default function EventDetail() {
 
   // Check if event has ended (IST timezone)
   const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-  const istNow = new Date(now.getTime() + istOffset);
+  const utcOffset = now.getTimezoneOffset() * 60 * 1000; // Browser's UTC offset
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+  const istNow = new Date(now.getTime() + utcOffset + istOffset);
   
-  const eventEndDate = event.end_date 
-    ? new Date(new Date(event.end_date).getTime() + istOffset)
-    : new Date(new Date(event.date).getTime() + istOffset);
+  const eventEndDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
   const hasEnded = eventEndDate < istNow;
 
   return (

@@ -357,27 +357,24 @@ export default function Dashboard() {
 
   // Calculate stats and categorize events (IST timezone)
   const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-  const istNow = new Date(now.getTime() + istOffset);
+  const utcOffset = now.getTimezoneOffset() * 60 * 1000; // Browser's UTC offset
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+  const istNow = new Date(now.getTime() + utcOffset + istOffset);
 
   const liveEvents = registrations.filter(reg => {
-    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
-    const eventEndDate = reg.events.end_date 
-      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
-      : eventDate;
+    const eventDate = new Date(reg.events.date);
+    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventDate <= istNow && eventEndDate >= istNow;
   });
 
   const upcomingEvents = registrations.filter(reg => {
-    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    const eventDate = new Date(reg.events.date);
     return eventDate > istNow;
   });
 
   const pastEvents = registrations.filter(reg => {
-    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
-    const eventEndDate = reg.events.end_date 
-      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
-      : eventDate;
+    const eventDate = new Date(reg.events.date);
+    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventEndDate < istNow;
   });
 
