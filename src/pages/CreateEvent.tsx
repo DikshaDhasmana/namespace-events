@@ -33,6 +33,7 @@ const CreateEvent = () => {
     mode: '',
     team_size: '',
     approval_enabled: false,
+    timezone: 'Asia/Kolkata',
     // Additional fields for different event types
     end_date: '',
     speaker: '',
@@ -92,6 +93,7 @@ const CreateEvent = () => {
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
           approval_enabled: data.approval_enabled || false,
+          timezone: data.timezone || 'Asia/Kolkata',
           end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) : '',
           speaker: data.speaker || '',
           prerequisites: data.prerequisites || '',
@@ -252,6 +254,7 @@ const CreateEvent = () => {
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
         approval_enabled: formData.approval_enabled,
+        timezone: formData.timezone,
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
         end_date: formData.end_date || null,
@@ -372,6 +375,7 @@ const CreateEvent = () => {
                     <WebinarForm 
                       formData={formData} 
                       onInputChange={handleInputChange}
+                      onSelectChange={handleSelectChange}
                       bannerFile={bannerFile}
                       bannerPreview={bannerPreview}
                       displayImageFile={displayImageFile}
@@ -388,13 +392,13 @@ const CreateEvent = () => {
                     <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                   {formData.event_type === 'meetup' && (
-                    <MeetupForm formData={formData} onInputChange={handleInputChange} />
+                    <MeetupForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                   {formData.event_type === 'contest' && (
-                    <ContestForm formData={formData} onInputChange={handleInputChange} />
+                    <ContestForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                   {formData.event_type === 'bootcamp' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} />
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                 </>
               )}

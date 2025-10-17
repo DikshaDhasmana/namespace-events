@@ -63,6 +63,7 @@ export type Database = {
           submission_format: string | null
           team_size: number | null
           tech_stack: string[] | null
+          timezone: string | null
           topics: string[] | null
           updated_at: string
           venue: string
@@ -94,6 +95,7 @@ export type Database = {
           submission_format?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
+          timezone?: string | null
           topics?: string[] | null
           updated_at?: string
           venue: string
@@ -125,6 +127,7 @@ export type Database = {
           submission_format?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
+          timezone?: string | null
           topics?: string[] | null
           updated_at?: string
           venue?: string
