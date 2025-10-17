@@ -390,6 +390,11 @@ export default function EventDetail() {
     );
   }
 
+  // Check if event has ended
+  const now = new Date();
+  const eventEndDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
+  const hasEnded = eventEndDate < now;
+
   return (
     <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
       <div className="mb-6">
@@ -502,7 +507,15 @@ export default function EventDetail() {
               <CardTitle>Registration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isRegistered ? (
+              {hasEnded ? (
+                <Button 
+                  disabled
+                  className="w-full"
+                  variant="secondary"
+                >
+                  Event Ended
+                </Button>
+              ) : isRegistered ? (
                 <div className="space-y-3">
                   {registrationStatus === 'pending' ? (
                     <div className="text-sm text-muted-foreground bg-yellow-50 p-3 rounded-lg border border-yellow-200">
