@@ -30,6 +30,7 @@ interface Registration {
     end_date: string | null;
     venue: string;
     max_participants: number;
+    timezone: string;
   };
 }
 
@@ -57,6 +58,31 @@ const eventTypeColors = {
   hackathon: 'bg-purple-100 text-purple-800',
   meetup: 'bg-green-100 text-green-800',
   contest: 'bg-orange-100 text-orange-800',
+};
+
+// Timezone offset mapping (in hours)
+const timezoneOffsets: Record<string, number> = {
+  'Asia/Kolkata': 5.5,
+  'America/New_York': -5,
+  'America/Chicago': -6,
+  'America/Denver': -7,
+  'America/Los_Angeles': -8,
+  'Europe/London': 0,
+  'Europe/Paris': 1,
+  'Europe/Berlin': 1,
+  'Asia/Dubai': 4,
+  'Asia/Singapore': 8,
+  'Asia/Tokyo': 9,
+  'Australia/Sydney': 10,
+  'Pacific/Auckland': 12,
+};
+
+// Helper function to get current time in a specific timezone
+const getCurrentTimeInTimezone = (timezone: string): Date => {
+  const now = new Date();
+  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const offset = timezoneOffsets[timezone] || 0;
+  return new Date(utcTime + (offset * 3600000));
 };
 
 export default function Dashboard() {
@@ -356,19 +382,20 @@ export default function Dashboard() {
   }
 
   // Calculate stats and categorize events
-  const now = new Date();
-
   const liveEvents = registrations.filter(reg => {
+    const now = getCurrentTimeInTimezone(reg.events.timezone || 'Asia/Kolkata');
     const eventDate = new Date(reg.events.date);
     const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventDate <= now && eventEndDate >= now;
   });
 
-  const upcomingEvents = registrations.filter(reg =>
-    new Date(reg.events.date) > now
-  );
+  const upcomingEvents = registrations.filter(reg => {
+    const now = getCurrentTimeInTimezone(reg.events.timezone || 'Asia/Kolkata');
+    return new Date(reg.events.date) > now;
+  });
 
   const pastEvents = registrations.filter(reg => {
+    const now = getCurrentTimeInTimezone(reg.events.timezone || 'Asia/Kolkata');
     const eventDate = new Date(reg.events.date);
     const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
     return eventEndDate < now;

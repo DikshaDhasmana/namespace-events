@@ -30,8 +30,34 @@ interface Event {
   team_size: number | null;
   banner_url: string | null;
   display_image_url: string | null;
+  timezone: string;
   registrations?: { count: number }[];
 }
+
+// Timezone offset mapping (in hours)
+const timezoneOffsets: Record<string, number> = {
+  'Asia/Kolkata': 5.5,
+  'America/New_York': -5,
+  'America/Chicago': -6,
+  'America/Denver': -7,
+  'America/Los_Angeles': -8,
+  'Europe/London': 0,
+  'Europe/Paris': 1,
+  'Europe/Berlin': 1,
+  'Asia/Dubai': 4,
+  'Asia/Singapore': 8,
+  'Asia/Tokyo': 9,
+  'Australia/Sydney': 10,
+  'Pacific/Auckland': 12,
+};
+
+// Helper function to get current time in a specific timezone
+const getCurrentTimeInTimezone = (timezone: string): Date => {
+  const now = new Date();
+  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const offset = timezoneOffsets[timezone] || 0;
+  return new Date(utcTime + (offset * 3600000));
+};
 
 const eventTypeColors = {
   webinar: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
@@ -184,12 +210,15 @@ export default function Events() {
 
   // Categorize events by time
   const categorizedEvents = useMemo(() => {
-    const now = new Date();
     const live: Event[] = [];
     const upcoming: Event[] = [];
     const past: Event[] = [];
 
     events.forEach(event => {
+      // Get current time in the event's timezone
+      const now = getCurrentTimeInTimezone(event.timezone || 'Asia/Kolkata');
+      
+      // Parse event dates (these are stored in the event's timezone)
       const startDate = new Date(event.date);
       const endDate = event.end_date ? new Date(event.end_date) : startDate;
 
