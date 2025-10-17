@@ -355,23 +355,30 @@ export default function Dashboard() {
     );
   }
 
-  // Calculate stats and categorize events
+  // Calculate stats and categorize events (IST timezone)
   const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+  const istNow = new Date(now.getTime() + istOffset);
 
   const liveEvents = registrations.filter(reg => {
-    const eventDate = new Date(reg.events.date);
-    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
-    return eventDate <= now && eventEndDate >= now;
+    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    const eventEndDate = reg.events.end_date 
+      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
+      : eventDate;
+    return eventDate <= istNow && eventEndDate >= istNow;
   });
 
-  const upcomingEvents = registrations.filter(reg =>
-    new Date(reg.events.date) > now
-  );
+  const upcomingEvents = registrations.filter(reg => {
+    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    return eventDate > istNow;
+  });
 
   const pastEvents = registrations.filter(reg => {
-    const eventDate = new Date(reg.events.date);
-    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
-    return eventEndDate < now;
+    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    const eventEndDate = reg.events.end_date 
+      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
+      : eventDate;
+    return eventEndDate < istNow;
   });
 
   const totalEvents = registrations.length;

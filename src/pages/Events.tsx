@@ -182,20 +182,27 @@ export default function Events() {
     registerMutation.mutate(eventId);
   };
 
-  // Categorize events by time
+  // Categorize events by time (IST timezone)
   const categorizedEvents = useMemo(() => {
+    // Get current time in IST (UTC + 5:30)
     const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    const istNow = new Date(now.getTime() + istOffset);
+    
     const live: Event[] = [];
     const upcoming: Event[] = [];
     const past: Event[] = [];
 
     events.forEach(event => {
-      const startDate = new Date(event.date);
-      const endDate = event.end_date ? new Date(event.end_date) : startDate;
+      // Parse dates and add IST offset
+      const startDate = new Date(new Date(event.date).getTime() + istOffset);
+      const endDate = event.end_date 
+        ? new Date(new Date(event.end_date).getTime() + istOffset)
+        : startDate;
 
-      if (endDate < now) {
+      if (endDate < istNow) {
         past.push(event);
-      } else if (startDate <= now && endDate >= now) {
+      } else if (startDate <= istNow && endDate >= istNow) {
         live.push(event);
       } else {
         upcoming.push(event);
