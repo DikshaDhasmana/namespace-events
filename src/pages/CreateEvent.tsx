@@ -82,17 +82,22 @@ const CreateEvent = () => {
       if (error) throw error;
 
       if (data) {
+        // Add 5.5 hours to stored UTC time to display IST time for editing
+        const istOffset = 5.5 * 60 * 60 * 1000;
+        const dateWithISTOffset = data.date ? new Date(new Date(data.date).getTime() + istOffset).toISOString().slice(0, 16) : '';
+        const endDateWithISTOffset = data.end_date ? new Date(new Date(data.end_date).getTime() + istOffset).toISOString().slice(0, 16) : '';
+        
         setFormData({
           name: data.name || '',
           description: data.description || '',
           event_type: data.event_type || '',
-          date: data.date ? new Date(data.date).toISOString().slice(0, 16) : '',
+          date: dateWithISTOffset,
           venue: data.venue || '',
           max_participants: data.max_participants?.toString() || '',
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
           approval_enabled: data.approval_enabled || false,
-          end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) : '',
+          end_date: endDateWithISTOffset,
           speaker: data.speaker || '',
           prerequisites: data.prerequisites || '',
           prizes: data.prizes || '',
@@ -242,11 +247,16 @@ const CreateEvent = () => {
         ...(formData.submission_format && { submission_format: formData.submission_format })
       };
 
+      // Subtract 5.5 hours from input times before saving (IST to UTC adjustment)
+      const istOffset = 5.5 * 60 * 60 * 1000;
+      const adjustedDate = formData.date ? new Date(new Date(formData.date).getTime() - istOffset).toISOString() : '';
+      const adjustedEndDate = formData.end_date ? new Date(new Date(formData.end_date).getTime() - istOffset).toISOString() : null;
+
       const eventData = {
         name: formData.name,
         description: formData.description,
         event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp',
-        date: formData.date,
+        date: adjustedDate,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         mode: formData.mode || null,
@@ -254,7 +264,7 @@ const CreateEvent = () => {
         approval_enabled: formData.approval_enabled,
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
-        end_date: formData.end_date || null,
+        end_date: adjustedEndDate,
         speaker: formData.speaker || null,
         prerequisites: formData.prerequisites || null,
         prizes: formData.prizes || null,

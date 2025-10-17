@@ -184,14 +184,16 @@ export default function Events() {
 
   // Categorize events by time
   const categorizedEvents = useMemo(() => {
+    const istOffset = 5.5 * 60 * 60 * 1000;
     const now = new Date();
     const live: Event[] = [];
     const upcoming: Event[] = [];
     const past: Event[] = [];
 
     events.forEach(event => {
-      const startDate = new Date(event.date);
-      const endDate = event.end_date ? new Date(event.end_date) : startDate;
+      // Add IST offset to stored times for proper comparison
+      const startDate = new Date(new Date(event.date).getTime() + istOffset);
+      const endDate = event.end_date ? new Date(new Date(event.end_date).getTime() + istOffset) : startDate;
 
       if (endDate < now) {
         past.push(event);

@@ -355,22 +355,27 @@ export default function Dashboard() {
     );
   }
 
-  // Calculate stats and categorize events
+  // Calculate stats and categorize events - Add IST offset to stored times
+  const istOffset = 5.5 * 60 * 60 * 1000;
   const now = new Date();
 
   const liveEvents = registrations.filter(reg => {
-    const eventDate = new Date(reg.events.date);
-    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
+    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    const eventEndDate = reg.events.end_date 
+      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
+      : eventDate;
     return eventDate <= now && eventEndDate >= now;
   });
 
   const upcomingEvents = registrations.filter(reg =>
-    new Date(reg.events.date) > now
+    new Date(new Date(reg.events.date).getTime() + istOffset) > now
   );
 
   const pastEvents = registrations.filter(reg => {
-    const eventDate = new Date(reg.events.date);
-    const eventEndDate = reg.events.end_date ? new Date(reg.events.end_date) : eventDate;
+    const eventDate = new Date(new Date(reg.events.date).getTime() + istOffset);
+    const eventEndDate = reg.events.end_date 
+      ? new Date(new Date(reg.events.end_date).getTime() + istOffset)
+      : eventDate;
     return eventEndDate < now;
   });
 

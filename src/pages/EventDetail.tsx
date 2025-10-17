@@ -390,9 +390,12 @@ export default function EventDetail() {
     );
   }
 
-  // Check if event has ended
+  // Check if event has ended - Add IST offset to stored times
+  const istOffset = 5.5 * 60 * 60 * 1000;
   const now = new Date();
-  const eventEndDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
+  const eventEndDate = event.end_date 
+    ? new Date(new Date(event.end_date).getTime() + istOffset)
+    : new Date(new Date(event.date).getTime() + istOffset);
   const hasEnded = eventEndDate < now;
 
   return (
