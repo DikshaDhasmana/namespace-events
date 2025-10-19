@@ -10,11 +10,19 @@ import Layout from "@/components/Layout";
 import { lazy, Suspense } from "react";
 
 // Lazy load pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Maintenance = lazy(() => import("./pages/Maintenance"));
+const Branding = lazy(() => import("./pages/Branding"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfUse = lazy(() => import("./pages/TermsOfUse"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Team = lazy(() => import("./pages/Team"));
+const HackHazards = lazy(() => import("./pages/HackHazards"));
 const LightRays = lazy(() => import("@/components/LightRays"));
 const Events = lazy(() => import("./pages/Events"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
@@ -44,7 +52,7 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <div className="min-h-screen bg-background relative">
-                  <Suspense fallback={<div />}>
+                  {/* <Suspense fallback={<div />}>
                     <LightRays
                       raysOrigin="top-center"
                       raysSpeed={1.5}
@@ -56,11 +64,11 @@ const App = () => {
                       distortion={0.05}
                       className="fixed inset-0"
                     />
-                  </Suspense>
+                  </Suspense> */}
                   <div className="relative z-10">
                     <Suspense fallback={<LoadingSpinner />}>
                       <Routes>
-                        <Route path="/" element={<Layout><Events /></Layout>} />
+                        <Route path="/" element={<Layout><Index /></Layout>} />
                         <Route path="/events" element={<Layout><Events /></Layout>} />
                         <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
@@ -74,7 +82,15 @@ const App = () => {
                         <Route path="/admin/events/:eventId/referrals" element={<EventReferrals />} />
                         <Route path="/admin/pending-approvals" element={<AdminPendingApprovals />} />
                         <Route path="/admin/users" element={<AdminUsers />} />
+                        <Route path="/maintenance" element={<Maintenance />} />
+                        <Route path="/branding" element={<Layout><Branding /></Layout>} />
+                        <Route path="/privacy-policy" element={<Layout><PrivacyPolicy /></Layout>} />
+                        <Route path="/terms-of-use" element={<Layout><TermsOfUse /></Layout>} />
+                        <Route path="/about-us" element={<Layout><AboutUs /></Layout>} />
+                        <Route path="/team" element={<Layout><Team /></Layout>} />
+                        <Route path="/hackhazards" element={<Layout><HackHazards /></Layout>} />
                         <Route path="*" element={<Layout><NotFound /></Layout>} />
+
                       </Routes>
                     </Suspense>
                   </div>
