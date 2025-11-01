@@ -190,5 +190,89 @@
     "selectionProcess": "Applications are reviewed on a rolling basis. We will make a decision based on the information that you provide in the application form, and if shortlisted we will send out a meeting booking link for a short 15-min virtual interview. Further action is conveyed over the same call.",
     "applicationStatus": "open",
     "applicationLink": "https://forms.gle/namespace-community-volunteer"
+  },
+  {
+    "id": "8",
+    "title": "NAMESPACE Learning Experts Program",
+    "vertical": "NAMESPACE Learning",
+    "description": "Share your expertise and inspire the next generation of tech talent. Join as a Learning Expert if you're skilled in a specific tech domain and passionate about teaching. Host workshops, guide community members, and gain recognition as a go-to expert in the NAMESPACE ecosystem.",
+    "numberOfOpenings": "Multiple",
+    "payRange": "",
+    "expectations": [
+      "Host workshops, webinars, or learning sessions on your area of expertise",
+      "Engage with community members on Discord and Telegram to answer questions and provide guidance",
+      "Create educational content such as tutorials, guides, or quick tips",
+      "Mentor aspiring learners and contribute to skill-building initiatives",
+      "Maintain an active presence and build your personal brand within the NAMESPACE community"
+    ],
+    "perks": [
+      "Recognition as an official NAMESPACE Learning Expert",
+      "Opportunity to build your personal brand and portfolio",
+      "Networking with other experts and community leaders",
+      "Early access to NAMESPACE events and initiatives",
+      "Certificate of recognition and LinkedIn endorsement"
+    ],
+    "essentialSkills": [
+      "Demonstrated expertise in at least one technical domain (e.g., web development, AI/ML, blockchain, design, etc.)",
+      "Strong communication and teaching abilities",
+      "Passion for sharing knowledge and helping others learn",
+      "Ability to explain complex concepts in simple terms"
+    ],
+    "goodToHaveSkills": [
+      "Prior experience conducting workshops or training sessions",
+      "Content creation skills (blogs, videos, tutorials)",
+      "Active presence in tech communities",
+      "Public speaking experience",
+      "Portfolio or proof of work in your domain"
+    ],
+    "applicationDeadline": "No deadline - Applications are reviewed on a rolling basis",
+    "startDate": "On a rolling basis",
+    "selectionProcess": "Applications are reviewed on a rolling basis. We will make a decision based on the information that you provide in the application form, and if shortlisted we will send out a meeting booking link for a short 15-min virtual interview. Further action is conveyed over the same call.",
+    "applicationStatus": "soon",
+    "applicationLink": "https://forms.gle/namespace-learning-experts"
+  },
+  {
+    "id": "9",
+    "title": "NAMESPACE Campus Ambassadors Program",
+    "vertical": "NAMESPACE Campus",
+    "description": "Lead the tech revolution on your campus. Become a NAMESPACE Campus Ambassador to develop leadership skills, organize impactful events, network with ambassadors nationwide, and lay the foundation for establishing your own campus chapter.",
+    "numberOfOpenings": "Multiple",
+    "payRange": "",
+    "expectations": [
+      "Represent NAMESPACE on your college campus and build awareness",
+      "Organize and promote NAMESPACE events, workshops, and initiatives at your college",
+      "Engage fellow students and grow the NAMESPACE community on campus",
+      "Collaborate with other Campus Ambassadors across institutions",
+      "Work towards establishing an official NAMESPACE campus chapter at your college",
+      "Attend regular ambassador sync-ups and training sessions"
+    ],
+    "perks": [
+      "Official NAMESPACE Campus Ambassador designation and certificate",
+      "Leadership development through real-world experience",
+      "Access to exclusive workshops on technical and non-technical skills",
+      "Networking opportunities with ambassadors and industry professionals",
+      "Pathway to establish and lead your own campus chapter",
+      "Mentorship from NAMESPACE team members",
+      "Recognition on NAMESPACE platforms and social media"
+    ],
+    "essentialSkills": [
+      "Strong leadership and organizational abilities",
+      "Excellent communication and interpersonal skills",
+      "Self-motivated and proactive approach",
+      "Ability to mobilize and inspire fellow students",
+      "Currently enrolled as a student in a college or university"
+    ],
+    "goodToHaveSkills": [
+      "Prior experience in campus clubs, societies, or student leadership roles",
+      "Event management or coordination experience",
+      "Social media and marketing skills",
+      "Understanding of tech trends and startup ecosystem",
+      "Existing network or influence on campus"
+    ],
+    "applicationDeadline": "No deadline - Applications are reviewed on a rolling basis",
+    "startDate": "On a rolling basis",
+    "selectionProcess": "Applications are reviewed on a rolling basis. We will make a decision based on the information that you provide in the application form, and if shortlisted we will send out a meeting booking link for a short 15-min virtual interview. Further action is conveyed over the same call.",
+    "applicationStatus": "soon",
+    "applicationLink": "https://forms.gle/namespace-campus-ambassadors"
   }
 ]
