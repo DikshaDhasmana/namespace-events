@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import jobOpenings from "@/data/jobOpenings.json";
 
 const JoinTheTeam = () => {
@@ -217,22 +218,28 @@ const JoinTheTeam = () => {
         </div>
       </section> */}
 
-      {/* Open Roles */}
+      {/* Roles Section */}
       <section id="open-roles" className="py-20 bg-muted/20">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center space-y-8 mb-16">
               <h2 className="text-3xl md:text-5xl font-sora font-bold text-foreground">
-                Open Roles
+                Join Our Team
               </h2>
               <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
               <p className="text-lg md:text-xl text-muted-foreground font-inter">
-                We're always looking for talented individuals to join our mission. Check out our current openings or reach out if you think you'd be a great fit.
+                We're always looking for talented individuals to join our mission. Check out our current and upcoming openings.
               </p>
             </div>
 
-            <div className="space-y-4">
-              {jobOpenings.length === 0 ? (
+            <Tabs defaultValue="open" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-8">
+                <TabsTrigger value="open">Open Roles</TabsTrigger>
+                <TabsTrigger value="upcoming">Upcoming Roles</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="open" className="space-y-4">
+                {jobOpenings.filter(job => job.id !== "template" && job.applicationStatus === "open").length === 0 ? (
                 <Card className="p-8 md:p-12 border border-border bg-card text-center">
                   <div className="space-y-6">
                     <h3 className="text-2xl md:text-3xl font-sora font-bold text-foreground">
@@ -248,10 +255,10 @@ const JoinTheTeam = () => {
                     </Button>
                   </div>
                 </Card>
-              ) : (
-                jobOpenings
-                  .filter(job => job.id !== "template")
-                  .map((job) => (
+                ) : (
+                  jobOpenings
+                    .filter(job => job.id !== "template" && job.applicationStatus === "open")
+                    .map((job) => (
                   <Collapsible key={job.id}>
                     <Card className="border border-border bg-card overflow-hidden hover:border-primary/50 transition-all">
                       <CollapsibleTrigger className="w-full">
@@ -428,9 +435,205 @@ const JoinTheTeam = () => {
                       </CollapsibleContent>
                     </Card>
                   </Collapsible>
-                ))
-              )}
-            </div>
+                    ))
+                )}
+              </TabsContent>
+
+              <TabsContent value="upcoming" className="space-y-4">
+                {jobOpenings.filter(job => job.id !== "template" && job.applicationStatus === "soon").length === 0 ? (
+                  <Card className="p-8 md:p-12 border border-border bg-card text-center">
+                    <div className="space-y-6">
+                      <Rocket className="w-16 h-16 mx-auto text-primary" />
+                      <h3 className="text-2xl md:text-3xl font-sora font-bold text-foreground">
+                        No Upcoming Roles Yet
+                      </h3>
+                      <p className="text-lg text-muted-foreground font-inter max-w-2xl mx-auto">
+                        We don't have any upcoming positions at the moment. Check back soon or explore our open roles!
+                      </p>
+                    </div>
+                  </Card>
+                ) : (
+                  jobOpenings
+                    .filter(job => job.id !== "template" && job.applicationStatus === "soon")
+                    .map((job) => (
+                      <Collapsible key={job.id}>
+                        <Card className="border border-border bg-card overflow-hidden hover:border-primary/50 transition-all">
+                          <CollapsibleTrigger className="w-full">
+                            <div className="p-6 flex items-center justify-between gap-4 text-left hover:bg-muted/50 transition-colors">
+                              <div className="flex-1 space-y-2">
+                                <h3 className="text-xl md:text-2xl font-sora font-bold text-foreground">
+                                  {job.title}
+                                </h3>
+                                <div className="flex gap-2 items-center flex-wrap">
+                                  <Badge variant="secondary" className="font-inter">
+                                    {job.vertical}
+                                  </Badge>
+                                  <Badge variant="outline" className="font-inter border-primary/50 text-primary">
+                                    Coming Soon
+                                  </Badge>
+                                </div>
+                              </div>
+                              <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                            </div>
+                          </CollapsibleTrigger>
+
+                          <CollapsibleContent>
+                            <div className="px-6 pb-6 space-y-6 border-t border-border pt-6">
+                              <div>
+                                <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                  About the Role
+                                </h4>
+                                <p className="text-muted-foreground font-inter leading-relaxed">
+                                  {job.description}
+                                </p>
+                              </div>
+
+                              {job.numberOfOpenings && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Number of Openings
+                                  </h4>
+                                  <p className="text-muted-foreground font-inter leading-relaxed">
+                                    {job.numberOfOpenings}
+                                  </p>
+                                </div>
+                              )}
+
+                              {job.payRange && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Pay Range
+                                  </h4>
+                                  <p className="text-muted-foreground font-inter leading-relaxed">
+                                    {job.payRange}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div>
+                                <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                  What We Expect
+                                </h4>
+                                <ul className="space-y-2">
+                                  {job.expectations.map((expectation, index) => (
+                                    <li key={index} className="flex items-start gap-3">
+                                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                                      <span className="text-muted-foreground font-inter leading-relaxed">
+                                        {expectation}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              {job.perks && job.perks.length > 0 && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Perks of this role
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {job.perks.map((perk, index) => (
+                                      <li key={index} className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                                        <span className="text-muted-foreground font-inter leading-relaxed">
+                                          {perk}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {job.essentialSkills && job.essentialSkills.length > 0 && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Essential Skills
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {job.essentialSkills.map((skill, index) => (
+                                      <li key={index} className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                                        <span className="text-muted-foreground font-inter leading-relaxed">
+                                          {skill}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {job.goodToHaveSkills && job.goodToHaveSkills.length > 0 && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Good to Have Skills
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {job.goodToHaveSkills.map((skill, index) => (
+                                      <li key={index} className="flex items-start gap-3">
+                                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                                        <span className="text-muted-foreground font-inter leading-relaxed">
+                                          {skill}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {job.selectionProcess && (
+                                <div>
+                                  <h4 className="text-lg font-sora font-semibold text-foreground mb-3">
+                                    Selection Process
+                                  </h4>
+                                  <p className="text-muted-foreground font-inter leading-relaxed">
+                                    {job.selectionProcess}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div className="grid md:grid-cols-2 gap-4 pt-4">
+                                {job.applicationDeadline && (
+                                  <div className="flex items-start gap-3">
+                                    <Calendar className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="text-sm font-semibold text-foreground font-sora">
+                                        Application Deadline
+                                      </p>
+                                      <p className="text-sm text-muted-foreground font-inter">
+                                        {job.applicationDeadline}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {job.startDate && (
+                                  <div className="flex items-start gap-3">
+                                    <Briefcase className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="text-sm font-semibold text-foreground font-sora">
+                                        Expected Start Date
+                                      </p>
+                                      <p className="text-sm text-muted-foreground font-inter">
+                                        {job.startDate}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="pt-4">
+                                <Button size="lg" className="w-full" variant="outline" disabled>
+                                  Applications Opening Soon
+                                </Button>
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Card>
+                      </Collapsible>
+                    ))
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </section>
