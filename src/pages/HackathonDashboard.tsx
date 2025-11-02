@@ -4,9 +4,9 @@ import { ArrowLeft, Users, FolderKanban, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -33,10 +33,9 @@ interface Team {
 
 interface TeamMember {
   id: string;
-  team_id: string;
   user_id: string;
   joined_at: string;
-  profiles?: {
+  profiles: {
     full_name: string | null;
     email: string;
   };
@@ -49,9 +48,9 @@ export default function HackathonDashboard() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [team, setTeam] = useState<Team | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [createTeamOpen, setCreateTeamOpen] = useState(false);
-  const [joinTeamOpen, setJoinTeamOpen] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [teamName, setTeamName] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -71,11 +70,30 @@ export default function HackathonDashboard() {
   }, [eventId, user]);
 
   useEffect(() => {
-    if (eventId && user && isRegistered) {
-      fetchTeamData();
-      subscribeToTeamUpdates();
-    }
-  }, [eventId, user, isRegistered]);
+    if (!user || !eventId || !isRegistered) return;
+
+    fetchTeamData();
+
+    // Set up realtime subscription for team updates
+    const channel = supabase
+      .channel('team-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'team_members',
+        },
+        () => {
+          fetchTeamData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, eventId, isRegistered]);
 
   const fetchEventAndVerifyRegistration = async () => {
     if (!user) return;
@@ -141,9 +159,9 @@ export default function HackathonDashboard() {
       .from('team_members')
       .select('team_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (memberData) {
+    if (memberData?.team_id) {
       // Fetch team details
       const { data: teamData } = await supabase
         .from('teams')
@@ -154,67 +172,39 @@ export default function HackathonDashboard() {
 
       if (teamData) {
         setTeam(teamData);
-        await fetchTeamMembers(teamData.id);
+
+        // Fetch team members with profiles
+        const { data: membersData } = await supabase
+          .from('team_members')
+          .select('id, user_id, joined_at')
+          .eq('team_id', teamData.id)
+          .order('joined_at', { ascending: true });
+
+        if (membersData) {
+          // Fetch profiles for each member
+          const membersWithProfiles = await Promise.all(
+            membersData.map(async (member) => {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, email')
+                .eq('id', member.user_id)
+                .single();
+              
+              return {
+                ...member,
+                profiles: profile || { full_name: null, email: 'Unknown' }
+              };
+            })
+          );
+
+          setTeamMembers(membersWithProfiles);
+        }
       }
     }
   };
 
-  const fetchTeamMembers = async (teamId: string) => {
-    const { data: membersData, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .eq('team_id', teamId)
-      .order('joined_at', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching team members:', error);
-      return;
-    }
-
-    // Fetch profile data for each member
-    const membersWithProfiles = await Promise.all(
-      (membersData || []).map(async (member) => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, email')
-          .eq('id', member.user_id)
-          .single();
-        
-        return {
-          ...member,
-          profiles: profile || { full_name: null, email: '' }
-        };
-      })
-    );
-
-    setTeamMembers(membersWithProfiles);
-  };
-
-  const subscribeToTeamUpdates = () => {
-    const teamMembersChannel = supabase
-      .channel('team-members-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'team_members'
-        },
-        () => {
-          if (team) {
-            fetchTeamMembers(team.id);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(teamMembersChannel);
-    };
-  };
-
   const handleCreateTeam = async () => {
-    if (!user || !eventId || !newTeamName.trim()) {
+    if (!user || !eventId || !teamName.trim()) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -225,50 +215,72 @@ export default function HackathonDashboard() {
 
     setSubmitting(true);
 
-    try {
-      // Create team
-      const { data: teamData, error: teamError } = await supabase
-        .from('teams')
-        .insert([{
-          event_id: eventId,
-          name: newTeamName.trim(),
-          created_by: user.id,
-          referral_code: '', // Will be auto-generated by trigger
-        }])
-        .select()
-        .single();
+    // Check if user is already in a team
+    const { data: existingMember } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-      if (teamError) throw teamError;
-
-      // Add creator as first team member
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert({
-          team_id: teamData.id,
-          user_id: user.id,
-        });
-
-      if (memberError) throw memberError;
-
-      setTeam(teamData);
-      setCreateTeamOpen(false);
-      setNewTeamName('');
-      
+    if (existingMember) {
       toast({
-        title: "Success",
-        description: "Team created successfully!",
+        variant: "destructive",
+        title: "Already in a team",
+        description: "You are already part of a team for this hackathon",
       });
+      setSubmitting(false);
+      return;
+    }
 
-      await fetchTeamMembers(teamData.id);
-    } catch (error: any) {
+    // Create team
+    const { data: teamData, error: teamError } = await supabase
+      .from('teams')
+      .insert({
+        event_id: eventId,
+        name: teamName.trim(),
+        created_by: user.id,
+        referral_code: '', // Will be auto-generated by trigger
+      })
+      .select()
+      .single();
+
+    if (teamError || !teamData) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create team",
+        description: "Failed to create team",
       });
-    } finally {
       setSubmitting(false);
+      return;
     }
+
+    // Add creator as first team member
+    const { error: memberError } = await supabase
+      .from('team_members')
+      .insert({
+        team_id: teamData.id,
+        user_id: user.id,
+      });
+
+    if (memberError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to join team",
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    toast({
+      title: "Team created!",
+      description: `Your team "${teamName}" has been created successfully`,
+    });
+
+    setCreateDialogOpen(false);
+    setTeamName('');
+    setSubmitting(false);
+    fetchTeamData();
   };
 
   const handleJoinTeam = async () => {
@@ -283,63 +295,86 @@ export default function HackathonDashboard() {
 
     setSubmitting(true);
 
-    try {
-      // Find team by referral code
-      const { data: teamData, error: teamError } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('referral_code', referralCode.trim().toUpperCase())
-        .eq('event_id', eventId)
-        .single();
+    // Check if user is already in a team
+    const { data: existingMember } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-      if (teamError || !teamData) {
-        throw new Error("Invalid referral code");
-      }
+    if (existingMember) {
+      toast({
+        variant: "destructive",
+        title: "Already in a team",
+        description: "You are already part of a team for this hackathon",
+      });
+      setSubmitting(false);
+      return;
+    }
 
-      // Check team size limit
+    // Find team by referral code
+    const { data: teamData, error: teamError } = await supabase
+      .from('teams')
+      .select('*')
+      .eq('referral_code', referralCode.trim().toUpperCase())
+      .eq('event_id', eventId)
+      .maybeSingle();
+
+    if (teamError || !teamData) {
+      toast({
+        variant: "destructive",
+        title: "Invalid code",
+        description: "No team found with this referral code",
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    // Check team size limit
+    if (event?.team_size) {
       const { count } = await supabase
         .from('team_members')
         .select('*', { count: 'exact', head: true })
         .eq('team_id', teamData.id);
 
-      if (event?.team_size && count && count >= event.team_size) {
-        throw new Error(`Team is full (max ${event.team_size} members)`);
-      }
-
-      // Add user to team
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert({
-          team_id: teamData.id,
-          user_id: user.id,
+      if (count && count >= event.team_size) {
+        toast({
+          variant: "destructive",
+          title: "Team full",
+          description: `This team has reached the maximum size of ${event.team_size} members`,
         });
-
-      if (memberError) {
-        if (memberError.code === '23505') {
-          throw new Error("You are already in this team");
-        }
-        throw memberError;
+        setSubmitting(false);
+        return;
       }
+    }
 
-      setTeam(teamData);
-      setJoinTeamOpen(false);
-      setReferralCode('');
-      
-      toast({
-        title: "Success",
-        description: `Joined team "${teamData.name}" successfully!`,
+    // Join team
+    const { error: memberError } = await supabase
+      .from('team_members')
+      .insert({
+        team_id: teamData.id,
+        user_id: user.id,
       });
 
-      await fetchTeamMembers(teamData.id);
-    } catch (error: any) {
+    if (memberError) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to join team",
+        description: "Failed to join team",
       });
-    } finally {
       setSubmitting(false);
+      return;
     }
+
+    toast({
+      title: "Joined team!",
+      description: `You have successfully joined "${teamData.name}"`,
+    });
+
+    setJoinDialogOpen(false);
+    setReferralCode('');
+    setSubmitting(false);
+    fetchTeamData();
   };
 
   const copyReferralCode = () => {
@@ -415,127 +450,125 @@ export default function HackathonDashboard() {
               <CardTitle>Team Management</CardTitle>
             </div>
             <CardDescription>
-              {team ? `Your team: ${team.name}` : 'Create a new team or join an existing team'}
+              {team ? 'Your team for this hackathon' : 'Create a new team or join an existing team'}
               {event.team_size && ` (Max ${event.team_size} members per team)`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {!team ? (
+            {team ? (
               <>
-                <Dialog open={createTeamOpen} onOpenChange={setCreateTeamOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full">
-                      Create New Team
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New Team</DialogTitle>
-                      <DialogDescription>
-                        Enter a name for your team. A unique referral code will be generated.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="teamName">Team Name</Label>
-                        <Input
-                          id="teamName"
-                          placeholder="Enter team name"
-                          value={newTeamName}
-                          onChange={(e) => setNewTeamName(e.target.value)}
-                          disabled={submitting}
-                        />
-                      </div>
-                      <Button 
-                        onClick={handleCreateTeam} 
-                        disabled={submitting || !newTeamName.trim()}
-                        className="w-full"
-                      >
-                        {submitting ? "Creating..." : "Create Team"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                <Dialog open={joinTeamOpen} onOpenChange={setJoinTeamOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                      Join Existing Team
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Join Existing Team</DialogTitle>
-                      <DialogDescription>
-                        Enter the referral code shared by your team leader.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="referralCode">Referral Code</Label>
-                        <Input
-                          id="referralCode"
-                          placeholder="Enter referral code"
-                          value={referralCode}
-                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                          disabled={submitting}
-                        />
-                      </div>
-                      <Button 
-                        onClick={handleJoinTeam} 
-                        disabled={submitting || !referralCode.trim()}
-                        className="w-full"
-                      >
-                        {submitting ? "Joining..." : "Join Team"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Referral Code:</span>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">{team.name}</h4>
                     <div className="flex items-center gap-2">
-                      <code className="px-3 py-1 bg-background rounded text-sm font-mono">
+                      <code className="flex-1 px-3 py-2 bg-muted rounded text-sm font-mono">
                         {team.referral_code}
                       </code>
                       <Button
                         size="icon"
-                        variant="ghost"
+                        variant="outline"
                         onClick={copyReferralCode}
                       >
                         {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Share this code with others to join your team
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Share this code with others to invite them to your team
-                  </p>
+                  
+                  <div>
+                    <h5 className="font-medium mb-2">Team Members ({teamMembers.length}{event.team_size ? `/${event.team_size}` : ''})</h5>
+                    <div className="space-y-2">
+                      {teamMembers.map((member) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between p-2 bg-muted rounded"
+                        >
+                          <div>
+                            <p className="font-medium text-sm">
+                              {member.profiles.full_name || 'Anonymous'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {member.profiles.email}
+                            </p>
+                          </div>
+                          {member.user_id === team.created_by && (
+                            <Badge variant="secondary" className="text-xs">Leader</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">Team Members ({teamMembers.length}{event.team_size ? `/${event.team_size}` : ''})</h4>
-                  <div className="space-y-2">
-                    {teamMembers.map((member, index) => (
-                      <div key={member.id} className="flex items-center gap-2 p-2 bg-muted rounded">
-                        <Badge variant="secondary" className="text-xs">
-                          {index + 1}
-                        </Badge>
-                        <span className="text-sm">
-                          {member.profiles?.full_name || member.profiles?.email || 'Unknown User'}
-                        </span>
-                        {member.user_id === team.created_by && (
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            Leader
-                          </Badge>
-                        )}
+              </>
+            ) : (
+              <>
+                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">Create New Team</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create a New Team</DialogTitle>
+                      <DialogDescription>
+                        Give your team a name. A unique referral code will be generated for others to join.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="teamName">Team Name</Label>
+                        <Input
+                          id="teamName"
+                          placeholder="Enter team name"
+                          value={teamName}
+                          onChange={(e) => setTeamName(e.target.value)}
+                        />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                      <Button
+                        onClick={handleCreateTeam}
+                        disabled={submitting || !teamName.trim()}
+                        className="w-full"
+                      >
+                        {submitting ? 'Creating...' : 'Create Team'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">Join Existing Team</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Join a Team</DialogTitle>
+                      <DialogDescription>
+                        Enter the referral code shared by your team leader.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="referralCode">Referral Code</Label>
+                        <Input
+                          id="referralCode"
+                          placeholder="Enter 8-character code"
+                          value={referralCode}
+                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                          maxLength={8}
+                        />
+                      </div>
+                      <Button
+                        onClick={handleJoinTeam}
+                        disabled={submitting || !referralCode.trim()}
+                        className="w-full"
+                      >
+                        {submitting ? 'Joining...' : 'Join Team'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
           </CardContent>
         </Card>
@@ -579,7 +612,7 @@ export default function HackathonDashboard() {
         <Card className="mt-6 bg-muted/50">
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground text-center">
-              Start by creating a team or joining an existing one using a referral code. Project management will be available once you're part of a team.
+              Welcome to your hackathon dashboard! Create or join a team to get started. Project management features coming soon.
             </p>
           </CardContent>
         </Card>
