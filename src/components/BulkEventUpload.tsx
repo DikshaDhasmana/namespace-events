@@ -109,19 +109,40 @@ const BulkEventUpload = ({ onUploadComplete }: BulkEventUploadProps) => {
         throw new Error('No valid events found in CSV');
       }
 
-      const eventsToInsert = events.map(event => ({
-        name: event.name,
-        description: event.description || '',
-        event_type: event.event_type as 'hackathon' | 'webinar' | 'bootcamp' | 'meetup' | 'contest',
-        date: event.date,
-        venue: event.venue,
-        mode: event.mode || null,
-        is_bulk_uploaded: true,
-      }));
+      // Ensure unique short_id values by generating client-side and checking against existing ones
+      const { data: existingRows, error: selectError } = await supabase
+        .from('events')
+        .select('short_id');
+      if (selectError) throw selectError;
+      const used = new Set((existingRows ?? []).map((r: { short_id: string }) => r.short_id));
+      const ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const genShortId = () => {
+        let id = '';
+        for (let i = 0; i < 8; i++) {
+          id += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+        }
+        return id;
+      };
+
+      const eventsToInsert = events.map(event => {
+        let short_id = genShortId();
+        while (used.has(short_id)) short_id = genShortId();
+        used.add(short_id);
+        return {
+          name: event.name,
+          description: event.description || '',
+          event_type: event.event_type as 'hackathon' | 'webinar' | 'bootcamp' | 'meetup' | 'contest',
+          date: event.date,
+          venue: event.venue,
+          mode: event.mode || null,
+          is_bulk_uploaded: true,
+          short_id,
+        };
+      });
 
       const { error } = await supabase
         .from('events')
-        .insert(eventsToInsert as any);
+        .insert(eventsToInsert);
 
       if (error) throw error;
 
