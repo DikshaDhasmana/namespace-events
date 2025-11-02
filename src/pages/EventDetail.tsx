@@ -1,15 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, Users, ArrowLeft, Clock, Share2 } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowLeft, Clock, Share2, Trophy, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EmailService } from '@/services/emailService';
 import LeaderboardModal from '@/components/LeaderboardModal';
+
+interface TimelineEntry {
+  label: string;
+  datetime: string;
+}
+
+interface PrizeTrack {
+  title: string;
+  description: string;
+}
+
+interface JudgeMentor {
+  name: string;
+  role: string;
+  bio: string;
+}
 
 interface Event {
   id: string;
@@ -27,6 +44,9 @@ interface Event {
   created_at: string;
   approval_enabled: boolean | null;
   timezone: string;
+  timeline?: TimelineEntry[];
+  prizes_and_tracks?: PrizeTrack[];
+  judges_and_mentors?: JudgeMentor[];
 }
 
 // Timezone offset mapping (in hours)
@@ -123,8 +143,15 @@ export default function EventDetail() {
         description: "Failed to fetch event details",
       });
       navigate('/events');
-    } else {
-      setEvent(data);
+    } else if (data) {
+      // Parse Json fields to proper types
+      const eventData: Event = {
+        ...data,
+        timeline: Array.isArray(data.timeline) ? data.timeline as unknown as TimelineEntry[] : [],
+        prizes_and_tracks: Array.isArray(data.prizes_and_tracks) ? data.prizes_and_tracks as unknown as PrizeTrack[] : [],
+        judges_and_mentors: Array.isArray(data.judges_and_mentors) ? data.judges_and_mentors as unknown as JudgeMentor[] : [],
+      };
+      setEvent(eventData);
     }
     setLoading(false);
   };
@@ -465,55 +492,216 @@ export default function EventDetail() {
             <h1 className="text-3xl font-bold mb-4 font-heading">{event.name}</h1>
           </div>
 
-          {/* Event Description */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>About This Event</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="text-muted-foreground leading-relaxed prose prose-slate prose-sm max-w-none prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground"
-                dangerouslySetInnerHTML={{
-                  __html: event.description || 'No description available for this event.'
-                }}
-              />
-            </CardContent>
-          </Card>
+          {/* Tabs for Hackathon Events */}
+          {event.event_type === 'hackathon' ? (
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                <TabsTrigger value="prizes">Prizes & Tracks</TabsTrigger>
+                <TabsTrigger value="judges">Judges & Mentors</TabsTrigger>
+              </TabsList>
 
-          {/* Custom UTM Link for Registered Users */}
-          {isRegistered && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Your Custom UTM Link</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Share this link to invite others to this event. Your referrals will be tracked.
-                </p>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={customUtmLink}
-                    className="flex-grow rounded border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    onFocus={(e) => e.currentTarget.select()}
-                  />
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(customUtmLink);
-                      toast({
-                        title: "Copied!",
-                        description: "Your custom UTM link has been copied to clipboard.",
-                      });
+              <TabsContent value="overview">
+                {/* Event Description */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>About This Event</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div
+                      className="text-muted-foreground leading-relaxed prose prose-slate prose-sm max-w-none prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground"
+                      dangerouslySetInnerHTML={{
+                        __html: event.description || 'No description available for this event.'
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Custom UTM Link for Registered Users */}
+                {isRegistered && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle>Your Custom UTM Link</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Share this link to invite others to this event. Your referrals will be tracked.
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={customUtmLink}
+                          className="flex-grow rounded border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          onFocus={(e) => e.currentTarget.select()}
+                        />
+                        <Button
+                          onClick={() => {
+                            navigator.clipboard.writeText(customUtmLink);
+                            toast({
+                              title: "Copied!",
+                              description: "Your custom UTM link has been copied to clipboard.",
+                            });
+                          }}
+                          className="bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                          style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="timeline">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Event Timeline
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {event.timeline && event.timeline.length > 0 ? (
+                      <div className="space-y-4">
+                        {event.timeline.map((entry, index) => (
+                          <div key={index} className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1 pb-4 border-b last:border-b-0">
+                              <h4 className="font-semibold mb-1">{entry.label}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {formatDate(entry.datetime)} at {formatTime(entry.datetime)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">No timeline information available.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="prizes">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      Prizes & Tracks
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {event.prizes_and_tracks && event.prizes_and_tracks.length > 0 ? (
+                      <div className="space-y-4">
+                        {event.prizes_and_tracks.map((prize, index) => (
+                          <Card key={index} className="bg-muted/50">
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <Award className="h-5 w-5 text-primary" />
+                                {prize.title}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground">{prize.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">No prizes or tracks information available.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="judges">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Judges & Mentors
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {event.judges_and_mentors && event.judges_and_mentors.length > 0 ? (
+                      <div className="space-y-4">
+                        {event.judges_and_mentors.map((person, index) => (
+                          <Card key={index} className="bg-muted/50">
+                            <CardHeader>
+                              <CardTitle className="text-lg">{person.name}</CardTitle>
+                              <CardDescription>{person.role}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground">{person.bio}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">No judges or mentors information available.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <>
+              {/* Event Description */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>About This Event</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className="text-muted-foreground leading-relaxed prose prose-slate prose-sm max-w-none prose-headings:font-heading prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-ul:text-muted-foreground prose-ol:text-muted-foreground prose-li:text-muted-foreground"
+                    dangerouslySetInnerHTML={{
+                      __html: event.description || 'No description available for this event.'
                     }}
-                    className="bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
-                    style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
-                  >
-                    Copy
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Custom UTM Link for Registered Users */}
+              {isRegistered && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>Your Custom UTM Link</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Share this link to invite others to this event. Your referrals will be tracked.
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={customUtmLink}
+                        className="flex-grow rounded border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        onFocus={(e) => e.currentTarget.select()}
+                      />
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(customUtmLink);
+                          toast({
+                            title: "Copied!",
+                            description: "Your custom UTM link has been copied to clipboard.",
+                          });
+                        }}
+                        className="bg-primary hover:bg-primary/90 transition-colors button-hover button-hover-light dark:button-hover-dark"
+                        style={{backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)'}}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
 
