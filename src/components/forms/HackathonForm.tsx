@@ -243,11 +243,12 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
           <SelectContent>
             <SelectItem value="online">Online</SelectItem>
             <SelectItem value="offline">Offline</SelectItem>
+            <SelectItem value="hybrid">Hybrid</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {formData.mode === 'offline' && (
+      {(formData.mode === 'offline' || formData.mode === 'hybrid') && (
         <div className="space-y-2">
           <Label htmlFor="venue">Venue</Label>
           <Input
