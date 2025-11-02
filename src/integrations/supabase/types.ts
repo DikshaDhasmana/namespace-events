@@ -351,6 +351,80 @@ export type Database = {
           },
         ]
       }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          created_by: string
+          event_id: string
+          id: string
+          name: string
+          referral_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          event_id: string
+          id?: string
+          name: string
+          referral_code: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          event_id?: string
+          id?: string
+          name?: string
+          referral_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "registration_leaderboard"
+            referencedColumns: ["event_id"]
+          },
+        ]
+      }
     }
     Views: {
       registration_leaderboard: {
@@ -366,8 +440,13 @@ export type Database = {
     }
     Functions: {
       generate_short_id: { Args: never; Returns: string }
+      generate_team_referral_code: { Args: never; Returns: string }
       generate_unique_short_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_registered_for_event: {
+        Args: { event_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       event_type:
