@@ -732,6 +732,14 @@ export default function EventDetail() {
                       ✓ Registered
                     </div>
                   )}
+                  {event.event_type === 'hackathon' && registrationStatus === 'approved' && (
+                    <Button 
+                      onClick={() => navigate(`/hackathon-dashboard/${event.id}`)}
+                      className="w-full bg-primary hover:bg-primary/90"
+                    >
+                      View your hackathon dashboard
+                    </Button>
+                  )}
                   <Button 
                     variant="outline" 
                     onClick={handleUnregister}

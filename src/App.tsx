@@ -33,6 +33,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const EventRegistrations = lazy(() => import("./pages/EventRegistrations"));
 const EventReferrals = lazy(() => import("./pages/EventReferrals"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
+const HackathonDashboard = lazy(() => import("./pages/HackathonDashboard"));
 const AdminPendingApprovals = lazy(() => import("./pages/AdminPendingApprovals"));
 const FormsList = lazy(() => import("./pages/FormsList"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
@@ -76,6 +77,7 @@ const App = () => {
                         <Route path="/" element={<Index />} />
                         <Route path="/events" element={<Layout><Events /></Layout>} />
                         <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
+                        <Route path="/hackathon-dashboard/:eventId" element={<Layout><HackathonDashboard /></Layout>} />
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
                         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
                         <Route path="/admin/login" element={<AdminLogin />} />
