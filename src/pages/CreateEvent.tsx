@@ -336,7 +336,7 @@ const CreateEvent = () => {
         // Update existing event
         const { error: updateError } = await supabase
           .from('events')
-          .update(eventData)
+          .update(eventData as any)
           .eq('id', eventId);
         error = updateError;
       } else {

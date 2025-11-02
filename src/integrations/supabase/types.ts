@@ -361,7 +361,19 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      event_type: "webinar" | "hackathon" | "meetup" | "contest" | "bootcamp"
+      event_type:
+        | "webinar"
+        | "hackathon"
+        | "meetup"
+        | "contest"
+        | "bootcamp"
+        | "seminar"
+        | "workshop"
+        | "conference"
+        | "fellowship"
+        | "cohort"
+        | "hiring_challenge"
+        | "ideathon"
       form_field_type:
         | "text"
         | "email"
@@ -501,7 +513,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      event_type: ["webinar", "hackathon", "meetup", "contest", "bootcamp"],
+      event_type: [
+        "webinar",
+        "hackathon",
+        "meetup",
+        "contest",
+        "bootcamp",
+        "seminar",
+        "workshop",
+        "conference",
+        "fellowship",
+        "cohort",
+        "hiring_challenge",
+        "ideathon",
+      ],
       form_field_type: [
         "text",
         "email",
