@@ -50,6 +50,7 @@ const eventTypeColors = {
   cohort: 'bg-lime-100 text-lime-800 hover:bg-lime-200',
   hiring_challenge: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
   ideathon: 'bg-violet-100 text-violet-800 hover:bg-violet-200',
+  learnathon: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
 };
 
 export default function Events() {
@@ -430,6 +431,9 @@ export default function Events() {
             <DropdownMenuItem onClick={() => setSelectedType('bootcamp')}>
               Bootcamps
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('learnathon')}>
+              Learnathons
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -451,6 +455,7 @@ export default function Events() {
             <TabsTrigger value="meetup">Meetups</TabsTrigger>
             <TabsTrigger value="contest">Contests</TabsTrigger>
             <TabsTrigger value="bootcamp">Bootcamps</TabsTrigger>
+            <TabsTrigger value="learnathon">Learnathons</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
