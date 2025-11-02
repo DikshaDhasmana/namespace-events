@@ -435,60 +435,26 @@ const CreateEvent = () => {
 
               {formData.event_type && (
                 <>
-                  {formData.event_type === 'webinar' && (
-                    <WebinarForm 
-                      formData={formData} 
-                      onInputChange={handleInputChange}
-                      onSelectChange={handleSelectChange}
-                      bannerFile={bannerFile}
-                      bannerPreview={bannerPreview}
-                      displayImageFile={displayImageFile}
-                      displayImagePreview={displayImagePreview}
-                      fileInputRef={fileInputRef}
-                      displayImageInputRef={displayImageInputRef}
-                      onBannerSelect={handleFileSelect}
-                      onDisplayImageSelect={handleDisplayImageSelect}
-                      onRemoveBanner={removeBanner}
-                      onRemoveDisplayImage={removeDisplayImage}
-                    />
-                  )}
                   {formData.event_type === 'hackathon' && (
                     <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
-                  {formData.event_type === 'meetup' && (
-                    <MeetupForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'contest' && (
-                    <ContestForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'bootcamp' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'seminar' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'workshop' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'conference' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'fellowship' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'cohort' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'hiring_challenge' && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                  {formData.event_type === 'ideathon' && (
+                  {(formData.event_type === 'webinar' || 
+                    formData.event_type === 'contest' || 
+                    formData.event_type === 'meetup' || 
+                    formData.event_type === 'bootcamp' ||
+                    formData.event_type === 'seminar' ||
+                    formData.event_type === 'workshop' ||
+                    formData.event_type === 'conference' ||
+                    formData.event_type === 'fellowship' ||
+                    formData.event_type === 'cohort' ||
+                    formData.event_type === 'hiring_challenge' ||
+                    formData.event_type === 'ideathon') && (
                     <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                 </>
               )}
 
-              {formData.event_type !== 'webinar' && (
+              {formData.event_type && (
                 <div className="space-y-2">
                   <Label>Event Banner</Label>
                   <div className="space-y-4">
