@@ -49,6 +49,7 @@ export type Database = {
           end_date: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
+          judges_and_mentors: Json | null
           judging_criteria: string | null
           max_participants: number | null
           mode: string | null
@@ -56,6 +57,7 @@ export type Database = {
           networking: string | null
           prerequisites: string | null
           prizes: string | null
+          prizes_and_tracks: Json | null
           refreshments: string | null
           rules: string | null
           short_id: string
@@ -64,6 +66,7 @@ export type Database = {
           submission_format: string | null
           team_size: number | null
           tech_stack: string[] | null
+          timeline: Json | null
           timezone: string | null
           topics: string[] | null
           updated_at: string
@@ -82,6 +85,7 @@ export type Database = {
           end_date?: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id?: string
+          judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
           mode?: string | null
@@ -89,6 +93,7 @@ export type Database = {
           networking?: string | null
           prerequisites?: string | null
           prizes?: string | null
+          prizes_and_tracks?: Json | null
           refreshments?: string | null
           rules?: string | null
           short_id: string
@@ -97,6 +102,7 @@ export type Database = {
           submission_format?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
+          timeline?: Json | null
           timezone?: string | null
           topics?: string[] | null
           updated_at?: string
@@ -115,6 +121,7 @@ export type Database = {
           end_date?: string | null
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
+          judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
           mode?: string | null
@@ -122,6 +129,7 @@ export type Database = {
           networking?: string | null
           prerequisites?: string | null
           prizes?: string | null
+          prizes_and_tracks?: Json | null
           refreshments?: string | null
           rules?: string | null
           short_id?: string
@@ -130,6 +138,7 @@ export type Database = {
           submission_format?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
+          timeline?: Json | null
           timezone?: string | null
           topics?: string[] | null
           updated_at?: string

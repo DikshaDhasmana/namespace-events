@@ -49,7 +49,11 @@ const CreateEvent = () => {
     contest_type: '',
     rules: '',
     eligibility: '',
-    submission_format: ''
+    submission_format: '',
+    // Hackathon-specific dynamic fields
+    timeline: [] as any[],
+    prizes_and_tracks: [] as any[],
+    judges_and_mentors: [] as any[]
   });
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>('');
@@ -165,7 +169,10 @@ const CreateEvent = () => {
           contest_type: data.contest_type || '',
           rules: data.rules || '',
           eligibility: data.eligibility || '',
-          submission_format: data.submission_format || ''
+          submission_format: data.submission_format || '',
+          timeline: Array.isArray(data.timeline) ? data.timeline : [],
+          prizes_and_tracks: Array.isArray(data.prizes_and_tracks) ? data.prizes_and_tracks : [],
+          judges_and_mentors: Array.isArray(data.judges_and_mentors) ? data.judges_and_mentors : []
         });
 
         if (data.banner_url) {
@@ -200,6 +207,10 @@ const CreateEvent = () => {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDataChange = (field: string, data: any) => {
+    setFormData(prev => ({ ...prev, [field]: data }));
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,7 +339,10 @@ const CreateEvent = () => {
         contest_type: formData.contest_type || null,
         rules: formData.rules || null,
         eligibility: formData.eligibility || null,
-        submission_format: formData.submission_format || null
+        submission_format: formData.submission_format || null,
+        timeline: formData.timeline || [],
+        prizes_and_tracks: formData.prizes_and_tracks || [],
+        judges_and_mentors: formData.judges_and_mentors || []
       };
 
       let error;
@@ -436,7 +450,7 @@ const CreateEvent = () => {
               {formData.event_type && (
                 <>
                   {formData.event_type === 'hackathon' && (
-                    <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                    <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} onDataChange={handleDataChange} />
                   )}
                   {(formData.event_type === 'webinar' || 
                     formData.event_type === 'contest' || 

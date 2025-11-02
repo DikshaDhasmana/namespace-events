@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -37,9 +37,10 @@ interface HackathonFormProps {
   formData: any;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSelectChange: (name: string, value: string) => void;
+  onDataChange?: (field: string, data: any) => void;
 }
 
-const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, onSelectChange }) => {
+const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, onSelectChange, onDataChange }) => {
   const [timeline, setTimeline] = useState<TimelineEntry[]>([
     { id: '1', label: 'Start Date & Time', datetime: formData.date || '' },
     { id: '2', label: 'End Date & Time', datetime: formData.end_date || '' }
@@ -52,6 +53,40 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
   const [judgesAndMentors, setJudgesAndMentors] = useState<JudgeMentor[]>([
     { id: '1', name: '', role: '', bio: '' }
   ]);
+
+  // Load data from formData on mount
+  useEffect(() => {
+    if (formData.timeline && Array.isArray(formData.timeline) && formData.timeline.length > 0) {
+      setTimeline(formData.timeline);
+    }
+    if (formData.prizes_and_tracks && Array.isArray(formData.prizes_and_tracks) && formData.prizes_and_tracks.length > 0) {
+      setPrizesAndTracks(formData.prizes_and_tracks);
+    }
+    if (formData.judges_and_mentors && Array.isArray(formData.judges_and_mentors) && formData.judges_and_mentors.length > 0) {
+      setJudgesAndMentors(formData.judges_and_mentors);
+    }
+  }, []);
+
+  // Sync timeline changes back to parent
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange('timeline', timeline);
+    }
+  }, [timeline]);
+
+  // Sync prizes and tracks changes back to parent
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange('prizes_and_tracks', prizesAndTracks);
+    }
+  }, [prizesAndTracks]);
+
+  // Sync judges and mentors changes back to parent
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange('judges_and_mentors', judgesAndMentors);
+    }
+  }, [judgesAndMentors]);
 
   const addTimelineEntry = () => {
     setTimeline([...timeline, { id: Date.now().toString(), label: '', datetime: '' }]);
