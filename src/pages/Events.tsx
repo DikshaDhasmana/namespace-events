@@ -32,6 +32,7 @@ interface Event {
   banner_url: string | null;
   display_image_url: string | null;
   timezone: string;
+  is_bulk_uploaded: boolean | null;
   registrations?: { count: number }[];
 }
 
@@ -334,6 +335,7 @@ export default function Events() {
           <div className="space-y-2">
             <Button
               onClick={() => navigate(`/events/${event.short_id}`)}
+              disabled={event.is_bulk_uploaded === true}
               className={`w-full transition-colors button-hover button-hover-light dark:button-hover-dark ${isRegistered ? 'bg-green-500 hover:bg-green-600' : 'bg-primary hover:bg-primary/90'}`}
             >
               View Details
