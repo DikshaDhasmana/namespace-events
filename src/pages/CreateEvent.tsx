@@ -26,7 +26,7 @@ const CreateEvent = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | '',
+    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | '',
     date: '',
     venue: '',
     max_participants: '',
@@ -304,7 +304,7 @@ const CreateEvent = () => {
       const eventData = {
         name: formData.name,
         description: formData.description,
-        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp',
+        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon',
         date: formData.date ? convertLocalToUTC(formData.date, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -401,13 +401,20 @@ const CreateEvent = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="event_type">Event Type</Label>
-                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp') => setFormData(prev => ({ ...prev, event_type: value }))}>
+                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon') => setFormData(prev => ({ ...prev, event_type: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select event type first" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="webinar">Webinar</SelectItem>
                     <SelectItem value="hackathon">Hackathon</SelectItem>
+                    <SelectItem value="webinar">Webinar</SelectItem>
+                    <SelectItem value="seminar">Seminar</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="conference">Conference</SelectItem>
+                    <SelectItem value="fellowship">Fellowship</SelectItem>
+                    <SelectItem value="cohort">Cohort</SelectItem>
+                    <SelectItem value="hiring_challenge">Hiring Challenge</SelectItem>
+                    <SelectItem value="ideathon">Ideathon</SelectItem>
                     <SelectItem value="meetup">Meetup</SelectItem>
                     <SelectItem value="contest">Contest</SelectItem>
                     <SelectItem value="bootcamp">Bootcamp</SelectItem>
@@ -455,6 +462,27 @@ const CreateEvent = () => {
                     <ContestForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                   {formData.event_type === 'bootcamp' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'seminar' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'workshop' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'conference' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'fellowship' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'cohort' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'hiring_challenge' && (
+                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                  )}
+                  {formData.event_type === 'ideathon' && (
                     <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                 </>

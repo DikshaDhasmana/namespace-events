@@ -42,6 +42,13 @@ const eventTypeColors = {
   meetup: 'bg-green-100 text-green-800 hover:bg-green-200',
   contest: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
   bootcamp: 'bg-pink-100 text-pink-800 hover:bg-pink-200',
+  seminar: 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200',
+  workshop: 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200',
+  conference: 'bg-teal-100 text-teal-800 hover:bg-teal-200',
+  fellowship: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+  cohort: 'bg-lime-100 text-lime-800 hover:bg-lime-200',
+  hiring_challenge: 'bg-rose-100 text-rose-800 hover:bg-rose-200',
+  ideathon: 'bg-violet-100 text-violet-800 hover:bg-violet-200',
 };
 
 export default function Events() {
@@ -195,10 +202,16 @@ export default function Events() {
 
   const filterEvents = useMemo(() => {
     return (eventsList: Event[], type?: string) => {
-      if (!type || type === 'all') {
-        return eventsList;
+      let filtered = eventsList;
+      if (type && type !== 'all') {
+        filtered = eventsList.filter(event => event.event_type === type);
       }
-      return eventsList.filter(event => event.event_type === type);
+      // Sort so hackathons appear first
+      return filtered.sort((a, b) => {
+        if (a.event_type === 'hackathon' && b.event_type !== 'hackathon') return -1;
+        if (a.event_type !== 'hackathon' && b.event_type === 'hackathon') return 1;
+        return 0;
+      });
     };
   }, []);
 
