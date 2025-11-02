@@ -465,6 +465,7 @@ export type Database = {
         | "cohort"
         | "hiring_challenge"
         | "ideathon"
+        | "learnathon"
       form_field_type:
         | "text"
         | "email"
@@ -617,6 +618,7 @@ export const Constants = {
         "cohort",
         "hiring_challenge",
         "ideathon",
+        "learnathon",
       ],
       form_field_type: [
         "text",

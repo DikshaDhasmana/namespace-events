@@ -26,7 +26,7 @@ const CreateEvent = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | '',
+    event_type: '' as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon' | '',
     date: '',
     venue: '',
     max_participants: '',
@@ -315,7 +315,7 @@ const CreateEvent = () => {
       const eventData = {
         name: formData.name,
         description: formData.description,
-        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon',
+        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon',
         date: formData.date ? convertLocalToUTC(formData.date, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -415,7 +415,7 @@ const CreateEvent = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="event_type">Event Type</Label>
-                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon') => setFormData(prev => ({ ...prev, event_type: value }))}>
+                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon') => setFormData(prev => ({ ...prev, event_type: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select event type first" />
                   </SelectTrigger>
@@ -432,6 +432,7 @@ const CreateEvent = () => {
                     <SelectItem value="meetup">Meetup</SelectItem>
                     <SelectItem value="contest">Contest</SelectItem>
                     <SelectItem value="bootcamp">Bootcamp</SelectItem>
+                    <SelectItem value="learnathon">Learnathon</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -462,7 +463,8 @@ const CreateEvent = () => {
                     formData.event_type === 'fellowship' ||
                     formData.event_type === 'cohort' ||
                     formData.event_type === 'hiring_challenge' ||
-                    formData.event_type === 'ideathon') && (
+                    formData.event_type === 'ideathon' ||
+                    formData.event_type === 'learnathon') && (
                     <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
                   )}
                 </>
