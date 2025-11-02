@@ -386,11 +386,32 @@ export default function Events() {
             <DropdownMenuItem onClick={() => setSelectedType('all')}>
               All Events
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('hackathon')}>
+              Hackathons
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setSelectedType('webinar')}>
               Webinars
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSelectedType('hackathon')}>
-              Hackathons
+            <DropdownMenuItem onClick={() => setSelectedType('seminar')}>
+              Seminars
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('workshop')}>
+              Workshops
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('conference')}>
+              Conferences
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('fellowship')}>
+              Fellowships
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('cohort')}>
+              Cohorts
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('hiring_challenge')}>
+              Hiring Challenges
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedType('ideathon')}>
+              Ideathons
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setSelectedType('meetup')}>
               Meetups
@@ -408,10 +429,17 @@ export default function Events() {
       {/* Desktop Tabs for Event Type */}
       <div className="hidden md:block">
         <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="all">All Events</TabsTrigger>
-            <TabsTrigger value="webinar">Webinars</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1">
+            <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
+            <TabsTrigger value="webinar">Webinars</TabsTrigger>
+            <TabsTrigger value="seminar">Seminars</TabsTrigger>
+            <TabsTrigger value="workshop">Workshops</TabsTrigger>
+            <TabsTrigger value="conference">Conferences</TabsTrigger>
+            <TabsTrigger value="fellowship">Fellowships</TabsTrigger>
+            <TabsTrigger value="cohort">Cohorts</TabsTrigger>
+            <TabsTrigger value="hiring_challenge">Hiring</TabsTrigger>
+            <TabsTrigger value="ideathon">Ideathons</TabsTrigger>
             <TabsTrigger value="meetup">Meetups</TabsTrigger>
             <TabsTrigger value="contest">Contests</TabsTrigger>
             <TabsTrigger value="bootcamp">Bootcamps</TabsTrigger>
