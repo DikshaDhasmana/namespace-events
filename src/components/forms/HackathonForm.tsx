@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { Plus, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -11,6 +14,25 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface TimelineEntry {
+  id: string;
+  label: string;
+  datetime: string;
+}
+
+interface PrizeTrack {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface JudgeMentor {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+}
+
 interface HackathonFormProps {
   formData: any;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -18,22 +40,90 @@ interface HackathonFormProps {
 }
 
 const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, onSelectChange }) => {
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([
+    { id: '1', label: 'Start Date & Time', datetime: formData.date || '' },
+    { id: '2', label: 'End Date & Time', datetime: formData.end_date || '' }
+  ]);
+  
+  const [prizesAndTracks, setPrizesAndTracks] = useState<PrizeTrack[]>([
+    { id: '1', title: '', description: '' }
+  ]);
+  
+  const [judgesAndMentors, setJudgesAndMentors] = useState<JudgeMentor[]>([
+    { id: '1', name: '', role: '', bio: '' }
+  ]);
+
+  const addTimelineEntry = () => {
+    setTimeline([...timeline, { id: Date.now().toString(), label: '', datetime: '' }]);
+  };
+
+  const removeTimelineEntry = (id: string) => {
+    if (timeline.length > 2) {
+      setTimeline(timeline.filter(entry => entry.id !== id));
+    }
+  };
+
+  const updateTimelineEntry = (id: string, field: string, value: string) => {
+    setTimeline(timeline.map(entry => 
+      entry.id === id ? { ...entry, [field]: value } : entry
+    ));
+    
+    // Update formData for first two entries
+    if (id === '1') {
+      onInputChange({ target: { name: 'date', value } } as any);
+    } else if (id === '2') {
+      onInputChange({ target: { name: 'end_date', value } } as any);
+    }
+  };
+
+  const addPrizeTrack = () => {
+    setPrizesAndTracks([...prizesAndTracks, { id: Date.now().toString(), title: '', description: '' }]);
+  };
+
+  const removePrizeTrack = (id: string) => {
+    if (prizesAndTracks.length > 1) {
+      setPrizesAndTracks(prizesAndTracks.filter(prize => prize.id !== id));
+    }
+  };
+
+  const updatePrizeTrack = (id: string, field: string, value: string) => {
+    setPrizesAndTracks(prizesAndTracks.map(prize => 
+      prize.id === id ? { ...prize, [field]: value } : prize
+    ));
+  };
+
+  const addJudgeMentor = () => {
+    setJudgesAndMentors([...judgesAndMentors, { id: Date.now().toString(), name: '', role: '', bio: '' }]);
+  };
+
+  const removeJudgeMentor = (id: string) => {
+    if (judgesAndMentors.length > 1) {
+      setJudgesAndMentors(judgesAndMentors.filter(jm => jm.id !== id));
+    }
+  };
+
+  const updateJudgeMentor = (id: string, field: string, value: string) => {
+    setJudgesAndMentors(judgesAndMentors.map(jm => 
+      jm.id === id ? { ...jm, [field]: value } : jm
+    ));
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="name">Hackathon Name</Label>
+        <Label htmlFor="name">Title</Label>
         <Input
           id="name"
           name="name"
           value={formData.name}
           onChange={onInputChange}
-          placeholder="Enter hackathon name"
+          placeholder="Enter hackathon title"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Theme & Description</Label>
+        <Label htmlFor="description">Description</Label>
         <ReactQuill
           theme="snow"
           value={formData.description}
@@ -43,16 +133,46 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="date">Start Date & Time</Label>
-        <Input
-          id="date"
-          name="date"
-          type="datetime-local"
-          value={formData.date}
-          onChange={onInputChange}
-          required
-        />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Timeline</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addTimelineEntry}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Entry
+          </Button>
+        </div>
+        {timeline.map((entry, index) => (
+          <div key={entry.id} className="space-y-2 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                {index === 0 ? 'Start Date & Time' : index === 1 ? 'End Date & Time' : 'Timeline Entry'}
+              </Label>
+              {timeline.length > 2 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeTimelineEntry(entry.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {index > 1 && (
+              <Input
+                placeholder="Label (e.g., Registration Deadline)"
+                value={entry.label}
+                onChange={(e) => updateTimelineEntry(entry.id, 'label', e.target.value)}
+              />
+            )}
+            <Input
+              type="datetime-local"
+              value={entry.datetime}
+              onChange={(e) => updateTimelineEntry(entry.id, 'datetime', e.target.value)}
+              required={index < 2}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="space-y-2">
@@ -116,6 +236,87 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
           onChange={onInputChange}
           placeholder="e.g., 4"
         />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Prizes and Tracks</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addPrizeTrack}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Prize/Track
+          </Button>
+        </div>
+        {prizesAndTracks.map((prize, index) => (
+          <div key={prize.id} className="space-y-2 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Prize/Track {index + 1}</Label>
+              {prizesAndTracks.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removePrizeTrack(prize.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <Input
+              placeholder="Title (e.g., First Prize, Best AI Solution)"
+              value={prize.title}
+              onChange={(e) => updatePrizeTrack(prize.id, 'title', e.target.value)}
+            />
+            <Textarea
+              placeholder="Description and prize details"
+              value={prize.description}
+              onChange={(e) => updatePrizeTrack(prize.id, 'description', e.target.value)}
+              className="min-h-[80px]"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Judges and Mentors</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addJudgeMentor}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Person
+          </Button>
+        </div>
+        {judgesAndMentors.map((jm, index) => (
+          <div key={jm.id} className="space-y-2 p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Person {index + 1}</Label>
+              {judgesAndMentors.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeJudgeMentor(jm.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <Input
+              placeholder="Name"
+              value={jm.name}
+              onChange={(e) => updateJudgeMentor(jm.id, 'name', e.target.value)}
+            />
+            <Input
+              placeholder="Role (e.g., Judge, Mentor, Industry Expert)"
+              value={jm.role}
+              onChange={(e) => updateJudgeMentor(jm.id, 'role', e.target.value)}
+            />
+            <Textarea
+              placeholder="Bio and credentials"
+              value={jm.bio}
+              onChange={(e) => updateJudgeMentor(jm.id, 'bio', e.target.value)}
+              className="min-h-[80px]"
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
