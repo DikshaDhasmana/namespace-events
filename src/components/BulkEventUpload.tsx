@@ -128,11 +128,24 @@ const BulkEventUpload = ({ onUploadComplete }: BulkEventUploadProps) => {
         let short_id = genShortId();
         while (used.has(short_id)) short_id = genShortId();
         used.add(short_id);
+        
+        // Parse and format date to ISO 8601 timestamp
+        let formattedDate: string;
+        try {
+          const parsedDate = new Date(event.date);
+          if (isNaN(parsedDate.getTime())) {
+            throw new Error(`Invalid date: ${event.date}`);
+          }
+          formattedDate = parsedDate.toISOString();
+        } catch (error) {
+          throw new Error(`Failed to parse date "${event.date}" for event "${event.name}"`);
+        }
+        
         return {
           name: event.name,
           description: event.description || '',
           event_type: event.event_type as 'hackathon' | 'webinar' | 'bootcamp' | 'meetup' | 'contest',
-          date: event.date,
+          date: formattedDate,
           venue: event.venue,
           mode: event.mode || null,
           is_bulk_uploaded: true,
