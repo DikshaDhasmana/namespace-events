@@ -49,6 +49,7 @@ export type Database = {
           end_date: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
+          is_bulk_uploaded: boolean | null
           judges_and_mentors: Json | null
           judging_criteria: string | null
           max_participants: number | null
@@ -85,6 +86,7 @@ export type Database = {
           end_date?: string | null
           event_type: Database["public"]["Enums"]["event_type"]
           id?: string
+          is_bulk_uploaded?: boolean | null
           judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
@@ -121,6 +123,7 @@ export type Database = {
           end_date?: string | null
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
+          is_bulk_uploaded?: boolean | null
           judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
