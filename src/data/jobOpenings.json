@@ -228,7 +228,7 @@
     "applicationDeadline": "No deadline - Applications are reviewed on a rolling basis",
     "startDate": "On a rolling basis",
     "selectionProcess": "Applications are reviewed on a rolling basis. We will make a decision based on the information that you provide in the application form, and if shortlisted we will send out a meeting booking link for a short 15-min virtual interview. Further action is conveyed over the same call.",
-    "applicationStatus": "soon",
+    "applicationStatus": "open",
     "applicationLink": "https://forms.gle/namespace-learning-experts"
   },
   {
@@ -272,7 +272,7 @@
     "applicationDeadline": "No deadline - Applications are reviewed on a rolling basis",
     "startDate": "On a rolling basis",
     "selectionProcess": "Applications are reviewed on a rolling basis. We will make a decision based on the information that you provide in the application form, and if shortlisted we will send out a meeting booking link for a short 15-min virtual interview. Further action is conveyed over the same call.",
-    "applicationStatus": "soon",
+    "applicationStatus": "open",
     "applicationLink": "https://forms.gle/namespace-campus-ambassadors"
   }
 ]
