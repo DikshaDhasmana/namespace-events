@@ -298,10 +298,10 @@ const PublicFormView = () => {
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{form.title}</CardTitle>
+            <CardTitle className="text-2xl font-sora">{form.title}</CardTitle>
             {form.description && (
               <CardDescription 
-                className="text-base prose prose-sm max-w-none" 
+                className="text-base prose prose-sm max-w-none font-inter" 
                 dangerouslySetInnerHTML={{ __html: form.description }}
               />
             )}
@@ -317,13 +317,13 @@ const PublicFormView = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {fields.map((field) => (
                 <div key={field.id} className="space-y-2">
-                  <Label>
+                  <Label className="font-inter font-medium">
                     {field.label}
                     {field.required && <span className="text-destructive ml-1">*</span>}
                   </Label>
                   {field.description && (
                     <div 
-                      className="text-sm text-muted-foreground prose prose-sm max-w-none" 
+                      className="text-sm text-muted-foreground prose prose-sm max-w-none font-inter" 
                       dangerouslySetInnerHTML={{ __html: field.description }}
                     />
                   )}

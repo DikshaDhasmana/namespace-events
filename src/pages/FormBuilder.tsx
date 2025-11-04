@@ -250,33 +250,34 @@ const FormBuilder = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Form Details</CardTitle>
+            <CardTitle className="font-sora">Form Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="title">Form Title</Label>
+              <Label htmlFor="title" className="font-inter font-medium">Form Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter form title"
+                className="font-inter"
               />
             </div>
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="font-inter font-medium">Description</Label>
               <ReactQuill
                 theme="snow"
                 value={description}
                 onChange={setDescription}
                 placeholder="Enter form description"
-                className="bg-background"
+                className="bg-background font-inter"
               />
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Form Fields</h2>
+          <h2 className="text-xl font-semibold font-sora">Form Fields</h2>
           <Button onClick={addField} variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Add Field
@@ -302,7 +303,7 @@ const FormBuilder = () => {
                           <div className="flex-1 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label>Field Type</Label>
+                                <Label className="font-inter font-medium">Field Type</Label>
                                 <Select
                                   value={field.field_type}
                                   onValueChange={(value) => updateField(field.id, { field_type: value as FieldType })}
@@ -328,43 +329,46 @@ const FormBuilder = () => {
                                   checked={field.required}
                                   onCheckedChange={(checked) => updateField(field.id, { required: checked })}
                                 />
-                                <Label>Required</Label>
+                                <Label className="font-inter font-medium">Required</Label>
                               </div>
                             </div>
                             <div>
-                              <Label>Label</Label>
+                              <Label className="font-inter font-medium">Label</Label>
                               <Input
                                 value={field.label}
                                 onChange={(e) => updateField(field.id, { label: e.target.value })}
                                 placeholder="Field label"
+                                className="font-inter"
                               />
                             </div>
                             <div>
-                              <Label>Description</Label>
+                              <Label className="font-inter font-medium">Description</Label>
                               <ReactQuill
                                 theme="snow"
                                 value={field.description}
                                 onChange={(value) => updateField(field.id, { description: value })}
                                 placeholder="Optional field description"
-                                className="bg-background"
+                                className="bg-background font-inter"
                               />
                             </div>
                             <div>
-                              <Label>Placeholder</Label>
+                              <Label className="font-inter font-medium">Placeholder</Label>
                               <Input
                                 value={field.placeholder}
                                 onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                                 placeholder="Field placeholder"
+                                className="font-inter"
                               />
                             </div>
                             {['radio', 'checkbox', 'select'].includes(field.field_type) && (
                               <div>
-                                <Label>Options (one per line)</Label>
+                                <Label className="font-inter font-medium">Options (one per line)</Label>
                                 <Textarea
                                   value={field.options.join('\n')}
                                   onChange={(e) => updateField(field.id, { options: e.target.value.split('\n').filter(o => o.trim()) })}
                                   placeholder="Option 1&#10;Option 2&#10;Option 3"
                                   rows={3}
+                                  className="font-inter"
                                 />
                               </div>
                             )}
