@@ -339,10 +339,11 @@ const FormBuilder = () => {
                             </div>
                             <div>
                               <Label>Description</Label>
-                              <Input
+                              <Textarea
                                 value={field.description}
                                 onChange={(e) => updateField(field.id, { description: e.target.value })}
                                 placeholder="Optional field description"
+                                rows={2}
                               />
                             </div>
                             <div>
