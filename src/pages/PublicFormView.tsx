@@ -300,7 +300,10 @@ const PublicFormView = () => {
           <CardHeader>
             <CardTitle className="text-2xl">{form.title}</CardTitle>
             {form.description && (
-              <CardDescription className="text-base whitespace-pre-wrap">{form.description}</CardDescription>
+              <CardDescription 
+                className="text-base prose prose-sm max-w-none" 
+                dangerouslySetInnerHTML={{ __html: form.description }}
+              />
             )}
             {form.require_signin && (
               <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-md">
@@ -319,7 +322,10 @@ const PublicFormView = () => {
                     {field.required && <span className="text-destructive ml-1">*</span>}
                   </Label>
                   {field.description && (
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{field.description}</p>
+                    <div 
+                      className="text-sm text-muted-foreground prose prose-sm max-w-none" 
+                      dangerouslySetInnerHTML={{ __html: field.description }}
+                    />
                   )}
                   {renderField(field)}
                 </div>

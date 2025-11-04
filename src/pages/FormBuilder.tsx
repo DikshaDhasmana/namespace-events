@@ -12,6 +12,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, Trash2, GripVertical, Save, Eye } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file';
 
@@ -262,12 +264,12 @@ const FormBuilder = () => {
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
+              <ReactQuill
+                theme="snow"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={setDescription}
                 placeholder="Enter form description"
-                rows={3}
+                className="bg-background"
               />
             </div>
           </CardContent>
@@ -339,11 +341,12 @@ const FormBuilder = () => {
                             </div>
                             <div>
                               <Label>Description</Label>
-                              <Textarea
+                              <ReactQuill
+                                theme="snow"
                                 value={field.description}
-                                onChange={(e) => updateField(field.id, { description: e.target.value })}
+                                onChange={(value) => updateField(field.id, { description: value })}
                                 placeholder="Optional field description"
-                                rows={2}
+                                className="bg-background"
                               />
                             </div>
                             <div>
