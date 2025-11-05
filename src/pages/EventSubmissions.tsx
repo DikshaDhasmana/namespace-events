@@ -95,22 +95,30 @@ const EventSubmissions = () => {
         // Get all project members
         const { data: members } = await supabase
           .from('project_members')
-          .select(`
-            user_id,
-            role,
-            profiles!user_id (
-              full_name,
-              email
-            )
-          `)
+          .select('user_id, role')
           .eq('project_id', project.id);
 
-        const contributors: Contributor[] = (members || []).map((member: any) => ({
-          user_id: member.user_id,
-          role: member.role,
-          full_name: member.profiles?.full_name || null,
-          email: member.profiles?.email || 'No email',
-        }));
+        // Fetch profiles for all members
+        const userIds = (members || []).map(m => m.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        // Create a map of user profiles
+        const profilesMap = new Map(
+          (profilesData || []).map(p => [p.id, p])
+        );
+
+        const contributors: Contributor[] = (members || []).map((member: any) => {
+          const profile = profilesMap.get(member.user_id);
+          return {
+            user_id: member.user_id,
+            role: member.role,
+            full_name: profile?.full_name || null,
+            email: profile?.email || 'No email',
+          };
+        });
 
         return {
           id: project.id,
