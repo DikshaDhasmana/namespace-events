@@ -64,7 +64,9 @@ export type Database = {
           short_id: string
           speaker: string | null
           speakers: string[] | null
+          submission_end: string | null
           submission_format: string | null
+          submission_start: string | null
           team_size: number | null
           tech_stack: string[] | null
           timeline: Json | null
@@ -101,7 +103,9 @@ export type Database = {
           short_id: string
           speaker?: string | null
           speakers?: string[] | null
+          submission_end?: string | null
           submission_format?: string | null
+          submission_start?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
           timeline?: Json | null
@@ -138,7 +142,9 @@ export type Database = {
           short_id?: string
           speaker?: string | null
           speakers?: string[] | null
+          submission_end?: string | null
           submission_format?: string | null
+          submission_start?: string | null
           team_size?: number | null
           tech_stack?: string[] | null
           timeline?: Json | null
@@ -565,6 +571,7 @@ export type Database = {
       generate_team_referral_code: { Args: never; Returns: string }
       generate_unique_short_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_project_editable: { Args: { p_project_id: string }; Returns: boolean }
       is_registered_for_event: {
         Args: { event_uuid: string }
         Returns: boolean
