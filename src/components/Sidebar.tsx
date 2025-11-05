@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { User, Home, LogOut } from 'lucide-react';
+import { User, Home, LogOut, FolderGit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,12 @@ const Sidebar = () => {
       path: '/dashboard#myevents',
       icon: Home,
       description: 'Overview & registrations'
+    },
+    {
+      label: 'My Projects',
+      path: '/dashboard#projects',
+      icon: FolderGit2,
+      description: 'View & manage projects'
     },
     {
       label: 'My Profile',
@@ -60,7 +66,7 @@ const Sidebar = () => {
           if (profileSection) {
             profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        } else if (hash === 'myevents') {
+        } else if (hash === 'myevents' || hash === 'projects') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }, 100);

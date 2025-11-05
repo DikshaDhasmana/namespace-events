@@ -484,26 +484,9 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Mobile Layout: Dashboard title + Tabs */}
+        {/* Mobile Layout */}
         <div className="lg:hidden">
-          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-          
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="events" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Events
-              </TabsTrigger>
-              <TabsTrigger value="projects" className="flex items-center gap-2">
-                <FolderGit2 className="h-4 w-4" />
-                Projects
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </TabsTrigger>
-            </TabsList>
-
             <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
             {/* Welcome Section - Mobile */}
             <div className="p-6 bg-card rounded-lg border">
@@ -957,34 +940,6 @@ export default function Dashboard() {
 
         {/* Desktop Layout */}
         <div className="hidden lg:block space-y-6">
-          {/* Desktop Tabs Selector */}
-          <div className="flex gap-4 border-b pb-2">
-            <Button
-              variant={activeTab === 'events' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('events')}
-              className="gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Events
-            </Button>
-            <Button
-              variant={activeTab === 'projects' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('projects')}
-              className="gap-2"
-            >
-              <FolderGit2 className="h-4 w-4" />
-              Projects
-            </Button>
-            <Button
-              variant={activeTab === 'profile' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('profile')}
-              className="gap-2"
-            >
-              <User className="h-4 w-4" />
-              Profile
-            </Button>
-          </div>
-
           {activeTab === 'profile' ? (
             /* Profile Section */
             <Card id="profile-section">
