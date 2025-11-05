@@ -32,6 +32,7 @@ const CreateEvent = lazy(() => import("./pages/CreateEvent"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const EventRegistrations = lazy(() => import("./pages/EventRegistrations"));
 const EventReferrals = lazy(() => import("./pages/EventReferrals"));
+const EventSubmissions = lazy(() => import("./pages/EventSubmissions"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
 const HackathonDashboard = lazy(() => import("./pages/HackathonDashboard"));
 const AdminPendingApprovals = lazy(() => import("./pages/AdminPendingApprovals"));
@@ -89,6 +90,7 @@ const App = () => {
                         <Route path="/admin/events/:eventId/edit" element={<CreateEvent />} />
                         <Route path="/admin/events/:eventId/registrations" element={<EventRegistrations />} />
                         <Route path="/admin/events/:eventId/referrals" element={<EventReferrals />} />
+                        <Route path="/admin/events/:eventId/submissions" element={<EventSubmissions />} />
                         <Route path="/admin/pending-approvals" element={<AdminPendingApprovals />} />
                         <Route path="/admin/users" element={<AdminUsers />} />
                         <Route path="/admin/forms" element={<FormsList />} />

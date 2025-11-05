@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Edit, Trash2, Users, Calendar, MapPin, LinkIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Users, Calendar, MapPin, LinkIcon, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import BulkEventUpload from '@/components/BulkEventUpload';
@@ -242,6 +242,17 @@ const AdminEvents = () => {
                             <LinkIcon className="h-4 w-4 mr-1" />
                             View Referrals
                           </Button>
+                          {event.event_type === 'hackathon' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/admin/events/${event.id}/submissions`)}
+                              disabled={event.is_bulk_uploaded}
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              View Submissions
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
