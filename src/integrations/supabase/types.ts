@@ -572,6 +572,10 @@ export type Database = {
       generate_unique_short_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_project_editable: { Args: { p_project_id: string }; Returns: boolean }
+      is_project_member: {
+        Args: { p_project_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_registered_for_event: {
         Args: { event_uuid: string }
         Returns: boolean
