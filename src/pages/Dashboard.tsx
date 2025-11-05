@@ -262,16 +262,29 @@ export default function Dashboard() {
   const fetchProjects = async () => {
     if (!user) return;
 
+    // First get project IDs where user is a member
+    const { data: memberData, error: memberError } = await supabase
+      .from('project_members')
+      .select('project_id')
+      .eq('user_id', user.id);
+
+    if (memberError) {
+      console.error('Error fetching project members:', memberError);
+      return;
+    }
+
+    const projectIds = memberData?.map(m => m.project_id) || [];
+    
+    if (projectIds.length === 0) {
+      setProjects([]);
+      return;
+    }
+
+    // Then fetch those projects
     const { data, error } = await supabase
       .from('projects')
-      .select(`
-        *,
-        project_members (
-          role,
-          profiles (full_name)
-        )
-      `)
-      .eq('project_members.user_id', user.id)
+      .select('*')
+      .in('id', projectIds)
       .is('event_id', null)
       .order('created_at', { ascending: false });
 

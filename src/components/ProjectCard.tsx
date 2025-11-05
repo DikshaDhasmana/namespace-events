@@ -1,14 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Github, ExternalLink, Video, FileText, Users } from 'lucide-react';
-
-interface ProjectMember {
-  role: 'owner' | 'contributor';
-  profiles?: {
-    full_name: string | null;
-  };
-}
+import { Github, ExternalLink, Video, FileText } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -22,7 +15,6 @@ interface Project {
   created_at: string;
   event_id: string | null;
   team_id: string | null;
-  project_members?: ProjectMember[];
 }
 
 interface ProjectCardProps {
@@ -30,9 +22,6 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const owners = project.project_members?.filter(m => m.role === 'owner') || [];
-  const contributors = project.project_members?.filter(m => m.role === 'contributor') || [];
-
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -67,16 +56,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 {tag}
               </Badge>
             ))}
-          </div>
-        )}
-
-        {(owners.length > 0 || contributors.length > 0) && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground font-inter">
-            <Users className="h-4 w-4" />
-            <span>
-              {owners.length} owner{owners.length !== 1 ? 's' : ''}
-              {contributors.length > 0 && `, ${contributors.length} contributor${contributors.length !== 1 ? 's' : ''}`}
-            </span>
           </div>
         )}
 
