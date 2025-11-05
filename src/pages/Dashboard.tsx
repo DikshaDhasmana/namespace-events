@@ -177,6 +177,9 @@ export default function Dashboard() {
     } else if (hash === '#myevents') {
       setActiveTab('events');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (hash === '#projects') {
+      setActiveTab('projects');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Listen for hash changes
@@ -194,6 +197,9 @@ export default function Dashboard() {
         });
       } else if (newHash === '#myevents') {
         setActiveTab('events');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (newHash === '#projects') {
+        setActiveTab('projects');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
