@@ -312,17 +312,54 @@ export type Database = {
         }
         Relationships: []
       }
+      project_members: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          id: string
+          project_id: string
+          role: Database["public"]["Enums"]["project_role"]
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          id?: string
+          project_id: string
+          role: Database["public"]["Enums"]["project_role"]
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          id?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["project_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string
           demo_video_link: string | null
           description: string | null
+          event_id: string | null
           github_link: string | null
           id: string
           live_link: string | null
           ppt_link: string | null
           project_name: string
           tags: string[] | null
+          team_id: string | null
           updated_at: string
           user_id: string
         }
@@ -330,12 +367,14 @@ export type Database = {
           created_at?: string
           demo_video_link?: string | null
           description?: string | null
+          event_id?: string | null
           github_link?: string | null
           id?: string
           live_link?: string | null
           ppt_link?: string | null
           project_name: string
           tags?: string[] | null
+          team_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -343,16 +382,40 @@ export type Database = {
           created_at?: string
           demo_video_link?: string | null
           description?: string | null
+          event_id?: string | null
           github_link?: string | null
           id?: string
           live_link?: string | null
           ppt_link?: string | null
           project_name?: string
           tags?: string[] | null
+          team_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "registration_leaderboard"
+            referencedColumns: ["event_id"]
+          },
+          {
+            foreignKeyName: "projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registrations: {
         Row: {
@@ -484,6 +547,20 @@ export type Database = {
       }
     }
     Functions: {
+      create_project_with_owner: {
+        Args: {
+          p_demo_video_link?: string
+          p_description?: string
+          p_event_id?: string
+          p_github_link?: string
+          p_live_link?: string
+          p_ppt_link?: string
+          p_project_name: string
+          p_tags?: string[]
+          p_team_id?: string
+        }
+        Returns: string
+      }
       generate_short_id: { Args: never; Returns: string }
       generate_team_referral_code: { Args: never; Returns: string }
       generate_unique_short_id: { Args: never; Returns: string }
@@ -519,6 +596,7 @@ export type Database = {
         | "date"
         | "time"
         | "file"
+      project_role: "owner" | "contributor"
       registration_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -674,6 +752,7 @@ export const Constants = {
         "time",
         "file",
       ],
+      project_role: ["owner", "contributor"],
       registration_status: ["pending", "approved", "rejected"],
     },
   },
