@@ -468,41 +468,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* Header Section - Desktop Only */}
-      <div className="border-b hidden lg:block">
-        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Welcome back!</h1>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                Here's what's happening with your events
-              </p>
-            </div>
-            <Button onClick={() => navigate('/events')} className="gap-2 w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              Browse Events
-            </Button>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Mobile Layout */}
         <div className="lg:hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
-            {/* Welcome Section - Mobile */}
-            <div className="p-6 bg-card rounded-lg border">
-              <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome back!</h2>
-              <p className="text-muted-foreground text-sm sm:text-base mb-4">
-                Here's what's happening with your events
-              </p>
-              <Button onClick={() => navigate('/events')} className="gap-2 w-full">
-                <Plus className="h-4 w-4" />
-                Browse Events
-              </Button>
-            </div>
-
             {registrations.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
