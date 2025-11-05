@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2 } from 'lucide-react';
+import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2, FolderGit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { ProjectForm } from '@/components/ProjectForm';
+import { ProjectCard } from '@/components/ProjectCard';
 
 interface Registration {
   id: string;
@@ -89,12 +91,14 @@ const getCurrentTimeInTimezone = (timezone: string): Date => {
 export default function Dashboard() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('events');
   const [eventTimeView, setEventTimeView] = useState<'live-upcoming' | 'past'>('live-upcoming');
+  const [showProjectForm, setShowProjectForm] = useState(false);
   const [profileForm, setProfileForm] = useState(() => {
     // Try to restore unsaved form data from localStorage
     const savedFormData = localStorage.getItem('profileFormDraft');
@@ -149,6 +153,7 @@ export default function Dashboard() {
     }
     fetchProfile();
     fetchRegistrations();
+    fetchProjects();
 
     // Check if there's a stored redirect URL from event detail
     const storedRedirectUrl = localStorage.getItem('profileRedirectUrl');
@@ -252,6 +257,34 @@ export default function Dashboard() {
       setRegistrations(data || []);
     }
     setLoading(false);
+  };
+
+  const fetchProjects = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        project_members (
+          role,
+          profiles (full_name)
+        )
+      `)
+      .eq('project_members.user_id', user.id)
+      .is('event_id', null)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching projects:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch your projects",
+      });
+    } else {
+      setProjects(data || []);
+    }
   };
 
   const handleUnregister = async (registrationId: string, eventName: string) => {
@@ -437,10 +470,14 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="events" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Events
+              </TabsTrigger>
+              <TabsTrigger value="projects" className="flex items-center gap-2">
+                <FolderGit2 className="h-4 w-4" />
+                Projects
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -682,6 +719,47 @@ export default function Dashboard() {
             )}
             </TabsContent>
 
+            <TabsContent value="projects" className="space-y-6 mt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold font-sora">My Projects</h2>
+                  <p className="text-muted-foreground font-inter">
+                    Personal projects you've created and manage
+                  </p>
+                </div>
+                <Button onClick={() => setShowProjectForm(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Project
+                </Button>
+              </div>
+
+              {projects.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent className="space-y-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <FolderGit2 className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl mb-2 font-sora">No Projects Yet</CardTitle>
+                      <CardDescription className="text-lg font-inter">
+                        Create your first project to showcase your work
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => setShowProjectForm(true)} size="lg" className="mt-4">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="profile" className="space-y-6 mt-6" id="profile-section">
               <Card>
                 <CardHeader>
@@ -860,6 +938,34 @@ export default function Dashboard() {
 
         {/* Desktop Layout */}
         <div className="hidden lg:block space-y-6">
+          {/* Desktop Tabs Selector */}
+          <div className="flex gap-4 border-b pb-2">
+            <Button
+              variant={activeTab === 'events' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('events')}
+              className="gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Events
+            </Button>
+            <Button
+              variant={activeTab === 'projects' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('projects')}
+              className="gap-2"
+            >
+              <FolderGit2 className="h-4 w-4" />
+              Projects
+            </Button>
+            <Button
+              variant={activeTab === 'profile' ? 'default' : 'ghost'}
+              onClick={() => setActiveTab('profile')}
+              className="gap-2"
+            >
+              <User className="h-4 w-4" />
+              Profile
+            </Button>
+          </div>
+
           {activeTab === 'profile' ? (
             /* Profile Section */
             <Card id="profile-section">
@@ -1043,6 +1149,48 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+          ) : activeTab === 'projects' ? (
+            /* Projects Section */
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold font-sora">My Projects</h2>
+                  <p className="text-muted-foreground font-inter">
+                    Personal projects you've created and manage
+                  </p>
+                </div>
+                <Button onClick={() => setShowProjectForm(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Project
+                </Button>
+              </div>
+
+              {projects.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent className="space-y-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <FolderGit2 className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl mb-2 font-sora">No Projects Yet</CardTitle>
+                      <CardDescription className="text-lg font-inter">
+                        Create your first project to showcase your work
+                      </CardDescription>
+                    </div>
+                    <Button onClick={() => setShowProjectForm(true)} size="lg" className="mt-4">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
             /* Events Section with Tabs */
             <Tabs value={eventTimeView} onValueChange={(v) => setEventTimeView(v as 'live-upcoming' | 'past')} className="w-full">
@@ -1312,6 +1460,12 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ProjectForm 
+        open={showProjectForm} 
+        onOpenChange={setShowProjectForm}
+        onProjectCreated={fetchProjects}
+      />
     </div>
   );
 }
