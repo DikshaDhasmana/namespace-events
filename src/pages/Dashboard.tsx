@@ -286,10 +286,14 @@ export default function Dashboard() {
       return;
     }
 
-    // Then fetch those projects
+    // Then fetch those projects with event and team info
     const { data, error } = await supabase
       .from('projects')
-      .select('*')
+      .select(`
+        *,
+        events (name),
+        teams (name)
+      `)
       .in('id', projectIds)
       .is('event_id', null)
       .order('created_at', { ascending: false });

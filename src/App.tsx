@@ -38,6 +38,7 @@ const AdminPendingApprovals = lazy(() => import("./pages/AdminPendingApprovals")
 const FormsList = lazy(() => import("./pages/FormsList"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 const FormSubmissions = lazy(() => import("./pages/FormSubmissions"));
+const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => {
                         <Route path="/hackathon-dashboard/:eventId" element={<Layout><HackathonDashboard /></Layout>} />
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
                         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+                        <Route path="/projects/:projectId" element={<Layout><ProjectDetail /></Layout>} />
                         <Route path="/admin/login" element={<AdminLogin />} />
                         <Route path="/admin" element={<AdminDashboard />} />
                         <Route path="/admin/events" element={<AdminEvents />} />
