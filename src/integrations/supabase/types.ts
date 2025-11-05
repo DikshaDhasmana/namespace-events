@@ -312,6 +312,48 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          created_at: string
+          demo_video_link: string | null
+          description: string | null
+          github_link: string | null
+          id: string
+          live_link: string | null
+          ppt_link: string | null
+          project_name: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          demo_video_link?: string | null
+          description?: string | null
+          github_link?: string | null
+          id?: string
+          live_link?: string | null
+          ppt_link?: string | null
+          project_name: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          demo_video_link?: string | null
+          description?: string | null
+          github_link?: string | null
+          id?: string
+          live_link?: string | null
+          ppt_link?: string | null
+          project_name?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       registrations: {
         Row: {
           event_id: string
