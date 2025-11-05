@@ -295,7 +295,6 @@ export default function Dashboard() {
         teams (name)
       `)
       .in('id', projectIds)
-      .is('event_id', null)
       .order('created_at', { ascending: false });
 
     if (error) {
