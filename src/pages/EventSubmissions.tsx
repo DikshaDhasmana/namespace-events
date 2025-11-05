@@ -98,7 +98,7 @@ const EventSubmissions = () => {
           .select(`
             user_id,
             role,
-            profiles:user_id (
+            profiles!user_id (
               full_name,
               email
             )
