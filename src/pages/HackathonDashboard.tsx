@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, FolderKanban, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Users, FolderKanban, Copy, Check, Plus, ExternalLink } from 'lucide-react';
+import { ProjectForm } from '@/components/ProjectForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +55,8 @@ export default function HackathonDashboard() {
   const [referralCode, setReferralCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [teamProject, setTeamProject] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -73,6 +76,7 @@ export default function HackathonDashboard() {
     if (!user || !eventId || !isRegistered) return;
 
     fetchTeamData();
+    fetchTeamProject();
 
     // Set up realtime subscription for team updates
     const channel = supabase
@@ -94,6 +98,12 @@ export default function HackathonDashboard() {
       supabase.removeChannel(channel);
     };
   }, [user, eventId, isRegistered]);
+
+  useEffect(() => {
+    if (team?.id) {
+      fetchTeamProject();
+    }
+  }, [team?.id]);
 
   const fetchEventAndVerifyRegistration = async () => {
     if (!user) return;
@@ -200,6 +210,23 @@ export default function HackathonDashboard() {
           setTeamMembers(membersWithProfiles);
         }
       }
+    }
+  };
+
+  const fetchTeamProject = async () => {
+    if (!team?.id) return;
+
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('team_id', team.id)
+      .eq('event_id', eventId)
+      .maybeSingle();
+
+    if (!error && data) {
+      setTeamProject(data);
+    } else {
+      setTeamProject(null);
     }
   };
 
@@ -375,6 +402,19 @@ export default function HackathonDashboard() {
     setReferralCode('');
     setSubmitting(false);
     fetchTeamData();
+  };
+
+  const handleCreateProject = async () => {
+    if (!team) {
+      toast({
+        variant: 'destructive',
+        title: 'No team',
+        description: 'You must be part of a team to submit a project',
+      });
+      return;
+    }
+
+    setShowProjectForm(true);
   };
 
   const copyReferralCode = () => {
@@ -580,29 +620,72 @@ export default function HackathonDashboard() {
               <div className="p-3 bg-primary/10 rounded-lg">
                 <FolderKanban className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle>Project Management</CardTitle>
+              <CardTitle>Project Submission</CardTitle>
             </div>
             <CardDescription>
-              Create and manage your hackathon project submission
+              {teamProject 
+                ? 'Manage your hackathon project submission' 
+                : 'Submit your project for this hackathon'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button 
-              className="w-full"
-              disabled
-            >
-              Create New Project
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              disabled
-            >
-              View My Project
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Project management feature coming soon
-            </p>
+            {teamProject ? (
+              <>
+                <div className="p-4 border rounded-lg space-y-2">
+                  <h4 className="font-semibold">{teamProject.project_name}</h4>
+                  {teamProject.description && (
+                    <div 
+                      className="text-sm text-muted-foreground line-clamp-2"
+                      dangerouslySetInnerHTML={{ __html: teamProject.description }}
+                    />
+                  )}
+                  {teamProject.tags && teamProject.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {teamProject.tags.slice(0, 3).map((tag: string, idx: number) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {teamProject.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{teamProject.tags.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button 
+                  className="w-full gap-2"
+                  onClick={() => navigate(`/projects/${teamProject.id}`)}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View Project Details
+                </Button>
+              </>
+            ) : (
+              <>
+                {team ? (
+                  <>
+                    <Button 
+                      className="w-full gap-2"
+                      onClick={handleCreateProject}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Submit Project
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      All team members will be added as project owners
+                    </p>
+                  </>
+                ) : (
+                  <div className="p-4 border rounded-lg bg-muted/50">
+                    <p className="text-sm text-center text-muted-foreground">
+                      Create or join a team to submit a project
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -612,10 +695,24 @@ export default function HackathonDashboard() {
         <Card className="mt-6 bg-muted/50">
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground text-center">
-              Welcome to your hackathon dashboard! Create or join a team to get started. Project management features coming soon.
+              Welcome to your hackathon dashboard! Create or join a team to get started and submit your project.
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Project Form Dialog */}
+      {team && (
+        <ProjectForm
+          open={showProjectForm}
+          onOpenChange={setShowProjectForm}
+          onProjectCreated={() => {
+            fetchTeamProject();
+            setShowProjectForm(false);
+          }}
+          teamId={team.id}
+          eventId={eventId}
+        />
       )}
     </div>
   );

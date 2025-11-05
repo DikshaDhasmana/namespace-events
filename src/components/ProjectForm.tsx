@@ -14,20 +14,34 @@ interface ProjectFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProjectCreated: () => void;
+  projectId?: string;
+  teamId?: string;
+  eventId?: string;
+  initialData?: {
+    project_name: string;
+    github_link: string;
+    live_link: string;
+    demo_video_link: string;
+    description: string;
+    ppt_link: string;
+    tags: string;
+  };
 }
 
-export function ProjectForm({ open, onOpenChange, onProjectCreated }: ProjectFormProps) {
+export function ProjectForm({ open, onOpenChange, onProjectCreated, projectId, teamId, eventId, initialData }: ProjectFormProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    project_name: '',
-    github_link: '',
-    live_link: '',
-    demo_video_link: '',
-    description: '',
-    ppt_link: '',
-    tags: '',
-  });
+  const [formData, setFormData] = useState(
+    initialData || {
+      project_name: '',
+      github_link: '',
+      live_link: '',
+      demo_video_link: '',
+      description: '',
+      ppt_link: '',
+      tags: '',
+    }
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,24 +52,48 @@ export function ProjectForm({ open, onOpenChange, onProjectCreated }: ProjectFor
         ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
         : [];
 
-      const { data, error } = await supabase.rpc('create_project_with_owner', {
-        p_project_name: formData.project_name,
-        p_github_link: formData.github_link || null,
-        p_live_link: formData.live_link || null,
-        p_demo_video_link: formData.demo_video_link || null,
-        p_description: formData.description || null,
-        p_ppt_link: formData.ppt_link || null,
-        p_tags: tagsArray.length > 0 ? tagsArray : null,
-        p_event_id: null,
-        p_team_id: null,
-      });
+      if (projectId) {
+        // Update existing project
+        const { error } = await supabase
+          .from('projects')
+          .update({
+            project_name: formData.project_name,
+            github_link: formData.github_link || null,
+            live_link: formData.live_link || null,
+            demo_video_link: formData.demo_video_link || null,
+            description: formData.description || null,
+            ppt_link: formData.ppt_link || null,
+            tags: tagsArray.length > 0 ? tagsArray : null,
+          })
+          .eq('id', projectId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: 'Success',
-        description: 'Project created successfully!',
-      });
+        toast({
+          title: 'Success',
+          description: 'Project updated successfully!',
+        });
+      } else {
+        // Create new project
+        const { error } = await supabase.rpc('create_project_with_owner', {
+          p_project_name: formData.project_name,
+          p_github_link: formData.github_link || null,
+          p_live_link: formData.live_link || null,
+          p_demo_video_link: formData.demo_video_link || null,
+          p_description: formData.description || null,
+          p_ppt_link: formData.ppt_link || null,
+          p_tags: tagsArray.length > 0 ? tagsArray : null,
+          p_event_id: eventId || null,
+          p_team_id: teamId || null,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Success',
+          description: 'Project created successfully!',
+        });
+      }
 
       setFormData({
         project_name: '',
@@ -70,11 +108,11 @@ export function ProjectForm({ open, onOpenChange, onProjectCreated }: ProjectFor
       onOpenChange(false);
       onProjectCreated();
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error('Error saving project:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to create project. Please try again.',
+        description: `Failed to ${projectId ? 'update' : 'create'} project. Please try again.`,
       });
     } finally {
       setLoading(false);
@@ -85,9 +123,9 @@ export function ProjectForm({ open, onOpenChange, onProjectCreated }: ProjectFor
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto font-inter">
         <DialogHeader>
-          <DialogTitle className="font-sora">Create New Project</DialogTitle>
+          <DialogTitle className="font-sora">{projectId ? 'Edit Project' : 'Create New Project'}</DialogTitle>
           <DialogDescription className="font-inter">
-            Add a new project to your portfolio. All fields except project name are optional.
+            {projectId ? 'Update your project details.' : 'Add a new project to your portfolio.'} All fields except project name are optional.
           </DialogDescription>
         </DialogHeader>
 
@@ -195,7 +233,7 @@ export function ProjectForm({ open, onOpenChange, onProjectCreated }: ProjectFor
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? (projectId ? 'Updating...' : 'Creating...') : (projectId ? 'Update Project' : 'Create Project')}
             </Button>
           </div>
         </form>

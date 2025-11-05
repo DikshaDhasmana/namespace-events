@@ -18,7 +18,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Github, ExternalLink, Video, FileText, ArrowLeft, Users, Calendar, Trophy, Trash2 } from 'lucide-react';
+import { Github, ExternalLink, Video, FileText, ArrowLeft, Users, Calendar, Trophy, Trash2, Edit, UserPlus } from 'lucide-react';
+import { ProjectForm } from '@/components/ProjectForm';
+import { ProjectMemberManager } from '@/components/ProjectMemberManager';
 
 interface ProjectMember {
   id: string;
@@ -61,6 +63,8 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showMemberManager, setShowMemberManager] = useState(false);
 
   useEffect(() => {
     fetchProject();
@@ -192,14 +196,32 @@ export default function ProjectDetail() {
           </Button>
 
           {isOwner && (
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteDialog(true)}
-              className="gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Project
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(true)}
+                className="gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowMemberManager(true)}
+                className="gap-2"
+              >
+                <UserPlus className="h-4 w-4" />
+                Manage Members
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+                className="gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </div>
           )}
         </div>
 
@@ -442,6 +464,39 @@ export default function ProjectDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {project && (
+        <>
+          <ProjectForm
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            onProjectCreated={() => {
+              fetchProject();
+              setShowEditDialog(false);
+            }}
+            projectId={project.id}
+            initialData={{
+              project_name: project.project_name,
+              github_link: project.github_link || '',
+              live_link: project.live_link || '',
+              demo_video_link: project.demo_video_link || '',
+              description: project.description || '',
+              ppt_link: project.ppt_link || '',
+              tags: project.tags?.join(', ') || '',
+            }}
+          />
+
+          <ProjectMemberManager
+            open={showMemberManager}
+            onOpenChange={setShowMemberManager}
+            projectId={project.id}
+            members={members}
+            currentUserId={user?.id || ''}
+            onMembersUpdated={fetchMembers}
+            teamId={project.team_id}
+          />
+        </>
+      )}
     </div>
   );
 }
