@@ -440,7 +440,7 @@ export default function Events() {
 
       {/* Desktop Tabs for Event Type */}
       <div className="hidden md:block">
-        <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedType}>
+        <Tabs defaultValue="all" className="w-full pb-4" onValueChange={setSelectedType}>
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 xl:grid-cols-7 gap-1">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="hackathon">Hackathons</TabsTrigger>
