@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
-const handler = async (req) => {
+const handler = async (req: Request) => {
   console.log(`Received ${req.method} request to send-email function`);
   
   if (req.method === "OPTIONS") {
@@ -75,7 +75,7 @@ const handler = async (req) => {
     }
   } catch (error) {
     console.error("Error in send-email function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders }
     });
