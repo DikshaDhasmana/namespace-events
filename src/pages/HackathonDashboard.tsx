@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, FolderKanban, Copy, Check, Plus, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Users, FolderKanban, Copy, Check, Plus, ExternalLink, UserMinus, LogOut } from 'lucide-react';
 import { ProjectForm } from '@/components/ProjectForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -417,6 +417,77 @@ export default function HackathonDashboard() {
     setShowProjectForm(true);
   };
 
+  const handleLeaveTeam = async () => {
+    if (!user || !team) return;
+
+    setSubmitting(true);
+
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('team_id', team.id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to leave team",
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    toast({
+      title: "Left team",
+      description: "You have successfully left the team",
+    });
+
+    setSubmitting(false);
+    setTeam(null);
+    setTeamMembers([]);
+    setTeamProject(null);
+  };
+
+  const handleKickMember = async (memberId: string, memberName: string) => {
+    if (!user || !team) return;
+
+    // Verify user is team leader
+    if (team.created_by !== user.id) {
+      toast({
+        variant: "destructive",
+        title: "Access denied",
+        description: "Only the team leader can remove members",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', memberId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove team member",
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    toast({
+      title: "Member removed",
+      description: `${memberName} has been removed from the team`,
+    });
+
+    setSubmitting(false);
+    fetchTeamData();
+  };
+
   const copyReferralCode = () => {
     if (team?.referral_code) {
       navigator.clipboard.writeText(team.referral_code);
@@ -528,18 +599,44 @@ export default function HackathonDashboard() {
                           <div>
                             <p className="font-medium text-sm">
                               {member.profiles.full_name || 'Anonymous'}
+                              {member.user_id === user?.id && (
+                                <span className="text-muted-foreground ml-1">(You)</span>
+                              )}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {member.profiles.email}
                             </p>
                           </div>
-                          {member.user_id === team.created_by && (
-                            <Badge variant="secondary" className="text-xs">Leader</Badge>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {member.user_id === team.created_by && (
+                              <Badge variant="secondary" className="text-xs">Leader</Badge>
+                            )}
+                            {team.created_by === user?.id && member.user_id !== user?.id && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-destructive hover:text-destructive"
+                                onClick={() => handleKickMember(member.id, member.profiles.full_name || 'Anonymous')}
+                                disabled={submitting}
+                              >
+                                <UserMinus className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2 text-destructive hover:text-destructive"
+                    onClick={handleLeaveTeam}
+                    disabled={submitting}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Leave Team
+                  </Button>
                 </div>
               </>
             ) : (
