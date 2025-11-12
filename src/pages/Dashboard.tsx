@@ -1526,7 +1526,7 @@ export default function Dashboard() {
                     {/* Social Media */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Social Media</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="linkedin_url_desktop">LinkedIn</Label>
                           <div className="flex items-center space-x-3">
