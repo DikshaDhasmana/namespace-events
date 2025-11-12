@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file';
+type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file' | 'profile_field';
 
 export interface FormField {
   id: string;
@@ -23,6 +23,7 @@ export interface FormField {
   options: string[];
   order_index: number;
   is_default?: boolean; // Flag for default fields that cannot be removed
+  profile_field?: string; // Maps to profile table column name
 }
 
 interface EventFormBuilderProps {
@@ -128,6 +129,7 @@ const EventFormBuilder = ({ fields, onFieldsChange }: EventFormBuilderProps) => 
                                   <SelectItem value="date">Date</SelectItem>
                                   <SelectItem value="time">Time</SelectItem>
                                   <SelectItem value="file">File</SelectItem>
+                                  <SelectItem value="profile_field">Profile Field</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -169,6 +171,46 @@ const EventFormBuilder = ({ fields, onFieldsChange }: EventFormBuilderProps) => 
                               className="font-inter"
                             />
                           </div>
+                          {field.field_type === 'profile_field' && (
+                            <div>
+                              <Label className="font-inter font-medium">Profile Field</Label>
+                              <Select
+                                value={field.profile_field || ''}
+                                onValueChange={(value) => updateField(field.id, { profile_field: value })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select profile field" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="full_name">Full Name</SelectItem>
+                                  <SelectItem value="phone_number">Phone Number</SelectItem>
+                                  <SelectItem value="address">Address</SelectItem>
+                                  <SelectItem value="city_state">City/State</SelectItem>
+                                  <SelectItem value="pin_code">PIN Code</SelectItem>
+                                  <SelectItem value="country">Country</SelectItem>
+                                  <SelectItem value="college">College</SelectItem>
+                                  <SelectItem value="branch">Branch</SelectItem>
+                                  <SelectItem value="degree">Degree</SelectItem>
+                                  <SelectItem value="graduation_year">Graduation Year</SelectItem>
+                                  <SelectItem value="organisation">Organisation</SelectItem>
+                                  <SelectItem value="current_role">Current Role</SelectItem>
+                                  <SelectItem value="role">Role</SelectItem>
+                                  <SelectItem value="skills">Skills</SelectItem>
+                                  <SelectItem value="github_url">GitHub URL</SelectItem>
+                                  <SelectItem value="linkedin_url">LinkedIn URL</SelectItem>
+                                  <SelectItem value="portfolio_url">Portfolio URL</SelectItem>
+                                  <SelectItem value="leetcode_url">LeetCode URL</SelectItem>
+                                  <SelectItem value="codechef_handle">CodeChef Handle</SelectItem>
+                                  <SelectItem value="codeforces_handle">CodeForces Handle</SelectItem>
+                                  <SelectItem value="twitter_handle">Twitter Handle</SelectItem>
+                                  <SelectItem value="instagram_handle">Instagram Handle</SelectItem>
+                                  <SelectItem value="discord_username">Discord Username</SelectItem>
+                                  <SelectItem value="resume_link">Resume Link</SelectItem>
+                                  <SelectItem value="date_of_birth">Date of Birth</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
                           {['radio', 'checkbox', 'select'].includes(field.field_type) && (
                             <div>
                               <Label className="font-inter font-medium">Options (one per line)</Label>

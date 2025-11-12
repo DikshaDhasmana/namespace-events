@@ -13,13 +13,14 @@ import { EmailService } from '@/services/emailService';
 
 interface FormField {
   id: string;
-  field_type: 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file';
+  field_type: 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file' | 'profile_field';
   label: string;
   description: string;
   placeholder: string;
   required: boolean;
   options: string[];
   order_index: number;
+  profile_field?: string;
 }
 
 interface EventRegistrationModalProps {
@@ -43,6 +44,8 @@ const EventRegistrationModal = ({
 }: EventRegistrationModalProps) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [profileData, setProfileData] = useState<Record<string, any>>({});
+  const [profileSaveFlags, setProfileSaveFlags] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const { user } = useAuth();
@@ -100,21 +103,44 @@ const EventRegistrationModal = ({
         placeholder: f.placeholder || '',
         required: f.required,
         options: Array.isArray(f.options) ? f.options.map(String) : [],
-        order_index: f.order_index
+        order_index: f.order_index,
+        profile_field: (f as any).profile_field || undefined
       }));
 
       setFormFields(formattedFields);
 
-      // Initialize form data
-      const initialData: Record<string, any> = {};
-      formattedFields.forEach(field => {
-        if (field.field_type === 'checkbox') {
-          initialData[field.id] = [];
-        } else {
-          initialData[field.id] = '';
+      // Fetch user profile data for pre-filling
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          setProfileData(profile);
+
+          // Initialize form data and profile save flags
+          const initialData: Record<string, any> = {};
+          const initialSaveFlags: Record<string, boolean> = {};
+
+          formattedFields.forEach(field => {
+            if (field.field_type === 'checkbox') {
+              initialData[field.id] = [];
+            } else if (field.field_type === 'profile_field' && field.profile_field && profile[field.profile_field]) {
+              // Pre-fill with profile data
+              initialData[field.id] = profile[field.profile_field];
+              // Set save flag to false for fields that already have profile data
+              initialSaveFlags[field.id] = false;
+            } else {
+              initialData[field.id] = '';
+            }
+          });
+
+          setFormData(initialData);
+          setProfileSaveFlags(initialSaveFlags);
         }
-      });
-      setFormData(initialData);
+      }
 
     } catch (error: any) {
       toast({
@@ -193,6 +219,29 @@ const EventRegistrationModal = ({
         .single();
 
       if (eventError) throw eventError;
+
+      // Save profile data for profile fields
+      const profileUpdates: Record<string, any> = {};
+      formFields.forEach(field => {
+        if (field.field_type === 'profile_field' && field.profile_field) {
+          const fieldValue = formData[field.id];
+          const shouldSave = !profileData[field.profile_field] || profileSaveFlags[field.id];
+
+          if (shouldSave && fieldValue) {
+            profileUpdates[field.profile_field] = fieldValue;
+          }
+        }
+      });
+
+      // Update profile if there are changes to save
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
+      }
 
       // Create form submission
       const { data: submission, error: submissionError } = await supabase
@@ -428,6 +477,31 @@ const EventRegistrationModal = ({
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             required={field.required}
           />
+        );
+
+      case 'profile_field':
+        return (
+          <div className="space-y-2">
+            <Input
+              type="text"
+              placeholder={field.placeholder}
+              value={value || ''}
+              onChange={(e) => handleInputChange(field.id, e.target.value)}
+              required={field.required}
+            />
+            {profileData[field.profile_field!] && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`save-profile-${field.id}`}
+                  checked={profileSaveFlags[field.id] || false}
+                  onCheckedChange={(checked) => setProfileSaveFlags(prev => ({ ...prev, [field.id]: checked as boolean }))}
+                />
+                <Label htmlFor={`save-profile-${field.id}`} className="text-sm">
+                  Save changes to profile
+                </Label>
+              </div>
+            )}
+          </div>
         );
 
       default:
