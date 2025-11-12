@@ -1289,6 +1289,7 @@ export default function Dashboard() {
                               placeholder="e.g., India"
                             />
                           </div>
+                        </div>
                       </div>
                     </div>
                     <Separator />
