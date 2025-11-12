@@ -182,6 +182,7 @@ const EventFormBuilder = ({ fields, onFieldsChange }: EventFormBuilderProps) => 
                                   <SelectValue placeholder="Select profile field" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  <SelectItem value="email">Email</SelectItem>
                                   <SelectItem value="full_name">Full Name</SelectItem>
                                   <SelectItem value="phone_number">Phone Number</SelectItem>
                                   <SelectItem value="address">Address</SelectItem>
