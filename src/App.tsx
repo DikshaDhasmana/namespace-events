@@ -40,6 +40,7 @@ const FormsList = lazy(() => import("./pages/FormsList"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 const FormSubmissions = lazy(() => import("./pages/FormSubmissions"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
+const EventRegister = lazy(() => import("./pages/EventRegister"));
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const App = () => {
                         <Route path="/" element={<Index />} />
                         <Route path="/events" element={<Layout><Events /></Layout>} />
                         <Route path="/events/:eventId" element={<Layout><EventDetail /></Layout>} />
+                        <Route path="/events/:eventId/register" element={<Layout><EventRegister /></Layout>} />
                         <Route path="/hackathon-dashboard/:eventId" element={<Layout><HackathonDashboard /></Layout>} />
                         <Route path="/auth" element={<Layout showFooter={false}><Auth /></Layout>} />
                         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
