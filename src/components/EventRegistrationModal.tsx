@@ -244,7 +244,7 @@ const EventRegistrationModal = ({
       formFields.forEach(field => {
         if (field.field_type === 'profile_field' && field.profile_field) {
           const fieldValue = formData[field.id];
-          const shouldSave = !profileData[field.profile_field] || profileSaveFlags[field.id];
+          const shouldSave = profileSaveFlags[field.id];
 
           if (shouldSave && fieldValue) {
             profileUpdates[field.profile_field] = fieldValue;
@@ -254,12 +254,17 @@ const EventRegistrationModal = ({
 
       // Update profile if there are changes to save
       if (Object.keys(profileUpdates).length > 0) {
+        console.log('Updating profile with:', profileUpdates);
         const { error: profileError } = await supabase
           .from('profiles')
           .update(profileUpdates)
           .eq('id', user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          throw profileError;
+        }
+        console.log('Profile updated successfully');
       }
 
       // Create form submission
