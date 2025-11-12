@@ -115,6 +115,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('events');
   const [eventTimeView, setEventTimeView] = useState<'live-upcoming' | 'past'>('live-upcoming');
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
   const [profileForm, setProfileForm] = useState(() => {
     // Try to restore unsaved form data from localStorage
     const savedFormData = localStorage.getItem('profileFormDraft');
@@ -250,7 +251,29 @@ export default function Dashboard() {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [user, navigate]);
+  }, [user, navigate, profileRefreshTrigger]);
+
+  // Trigger profile refresh when profileRefreshTrigger changes
+  useEffect(() => {
+    if (profileRefreshTrigger > 0) {
+      fetchProfile();
+    }
+  }, [profileRefreshTrigger]);
+
+  // Listen for visibility changes to refresh profile data when user returns to tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setProfileRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const fetchProfile = async () => {
     if (!user) return;
