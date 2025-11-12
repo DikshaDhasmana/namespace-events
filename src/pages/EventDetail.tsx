@@ -845,6 +845,7 @@ export default function EventDetail() {
         eventId={event?.id || ''}
         eventName={event?.name || ''}
         approvalEnabled={event?.approval_enabled || false}
+        utmSource={utmSource}
         onRegistrationSuccess={() => {
           setRegistrationModalOpen(false);
           // Refresh registration status

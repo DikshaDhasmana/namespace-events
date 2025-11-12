@@ -28,6 +28,7 @@ interface EventRegistrationModalProps {
   eventId: string;
   eventName: string;
   approvalEnabled: boolean;
+  utmSource?: string | null;
   onRegistrationSuccess: () => void;
 }
 
@@ -37,6 +38,7 @@ const EventRegistrationModal = ({
   eventId,
   eventName,
   approvalEnabled,
+  utmSource,
   onRegistrationSuccess
 }: EventRegistrationModalProps) => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -45,6 +47,12 @@ const EventRegistrationModal = ({
   const [fetchLoading, setFetchLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Helper to validate UUID format
+  const isValidUUID = (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
 
   // Fetch form fields when modal opens
   useEffect(() => {
@@ -91,7 +99,7 @@ const EventRegistrationModal = ({
         description: f.description || '',
         placeholder: f.placeholder || '',
         required: f.required,
-        options: Array.isArray(f.options) ? f.options : [],
+        options: Array.isArray(f.options) ? f.options.map(String) : [],
         order_index: f.order_index
       }));
 
@@ -204,6 +212,11 @@ const EventRegistrationModal = ({
         event_id: eventId,
         form_submission_id: submission.id
       };
+
+      // Include utm_source if present, valid UUID, and it's not the same user (prevent self-referrals)
+      if (utmSource && isValidUUID(utmSource) && utmSource !== user.id) {
+        registrationData.utm_source = utmSource;
+      }
 
       const { error: registrationError } = await supabase
         .from('registrations')
