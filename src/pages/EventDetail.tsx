@@ -93,6 +93,7 @@ export default function EventDetail() {
   const [registrationCount, setRegistrationCount] = useState(0);
   const [applicationsCount, setApplicationsCount] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -209,54 +210,9 @@ export default function EventDetail() {
       navigate('/auth');
       return;
     }
-    
-    const registrationData: any = { 
-      user_id: user.id, 
-      event_id: event?.id
-    };
-    // Include utm_source if present, valid UUID, and it's not the same user (prevent self-referrals)
-    if (utmSource && isValidUUID(utmSource) && utmSource !== user.id) {
-      registrationData.utm_source = utmSource;
-    }
 
-    const { error } = await supabase
-      .from('registrations')
-      .insert([registrationData]);
-
-    if (error) {
-      if (error.code === '23505') {
-        toast({
-          variant: "destructive",
-          title: "Already registered",
-          description: "You are already registered for this event",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Registration failed",
-          description: error.message,
-        });
-      }
-    } else {
-      const newStatus = event?.approval_enabled ? 'pending' : 'approved';
-      setRegistrationStatus(newStatus);
-      
-      toast({
-        title: "Success!",
-        description: event?.approval_enabled 
-          ? "Your registration request has been submitted. You will receive an email once reviewed."
-          : "You have been registered for the event",
-      });
-      setIsRegistered(true);
-      setRegistrationCount(prev => prev + 1);
-      
-      // Send appropriate email
-      if (event?.approval_enabled) {
-        sendPendingEmail();
-      } else {
-        sendConfirmationEmail();
-      }
-    }
+    // Since every event has a registration form, always open the modal
+    setRegistrationModalOpen(true);
   };
 
   const handleUnregister = async () => {
@@ -881,6 +837,22 @@ export default function EventDetail() {
         onClose={() => setLeaderboardOpen(false)}
         eventId={event?.id || ''}
         eventName={event?.name || ''}
+      />
+
+      <EventRegistrationModal
+        isOpen={registrationModalOpen}
+        onClose={() => setRegistrationModalOpen(false)}
+        eventId={event?.id || ''}
+        eventName={event?.name || ''}
+        approvalEnabled={event?.approval_enabled || false}
+        onRegistrationSuccess={() => {
+          setRegistrationModalOpen(false);
+          // Refresh registration status
+          if (user && event) {
+            checkRegistration();
+            fetchRegistrationCount();
+          }
+        }}
       />
     </div>
   );
