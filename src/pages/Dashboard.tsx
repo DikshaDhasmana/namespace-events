@@ -865,15 +865,6 @@ export default function Dashboard() {
                               />
                             </div>
                           </div>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Address Information */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">Address</h3>
-                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <Label htmlFor="address">Street Address</Label>
                             <div className="flex items-center space-x-3">
@@ -913,8 +904,8 @@ export default function Dashboard() {
                                 onChange={(e) => setProfileForm(prev => ({ ...prev, country: e.target.value }))}
                                 placeholder="e.g., India"
                               />
-                            </div>
-                          </div>
+                            </div> 
+                          </div>                         
                         </div>
                       </div>
 
@@ -1454,32 +1445,6 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="linkedin_url_desktop">LinkedIn</Label>
-                          <div className="flex items-center space-x-3">
-                            <Linkedin className="h-4 w-4 text-muted-foreground" />
-                            <Input
-                              id="linkedin_url_desktop"
-                              type="url"
-                              value={profileForm.linkedin_url}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin_url: e.target.value }))}
-                              placeholder="https://linkedin.com/in/username"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="leetcode_url_desktop">LeetCode</Label>
-                          <div className="flex items-center space-x-3">
-                            <Link2 className="h-4 w-4 text-muted-foreground" />
-                            <Input
-                              id="leetcode_url_desktop"
-                              type="url"
-                              value={profileForm.leetcode_url}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
-                              placeholder="https://leetcode.com/username"
-                            />
-                          </div>
-                        </div>
-                        <div>
                           <Label htmlFor="resume_link_desktop">Resume</Label>
                           <div className="flex items-center space-x-3">
                             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -1500,6 +1465,19 @@ export default function Dashboard() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Coding Profiles</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="leetcode_url_desktop">LeetCode</Label>
+                          <div className="flex items-center space-x-3">
+                            <Link2 className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="leetcode_url_desktop"
+                              type="url"
+                              value={profileForm.leetcode_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
+                              placeholder="https://leetcode.com/username"
+                            />
+                          </div>
+                        </div>
                         <div>
                           <Label htmlFor="codeforces_handle_desktop">Codeforces Handle</Label>
                           <div className="flex items-center space-x-3">
@@ -1533,6 +1511,19 @@ export default function Dashboard() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Social Media</h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="linkedin_url_desktop">LinkedIn</Label>
+                          <div className="flex items-center space-x-3">
+                            <Linkedin className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="linkedin_url_desktop"
+                              type="url"
+                              value={profileForm.linkedin_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, linkedin_url: e.target.value }))}
+                              placeholder="https://linkedin.com/in/username"
+                            />
+                          </div>
+                        </div>
                         <div>
                           <Label htmlFor="instagram_handle_desktop">Instagram</Label>
                           <div className="flex items-center space-x-3">
