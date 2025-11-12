@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -18,6 +18,7 @@ import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
 import BootcampForm from '@/components/forms/BootcampForm';
+import EventFormBuilder, { FormField } from '@/components/EventFormBuilder';
 
 const CreateEvent = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -55,12 +56,39 @@ const CreateEvent = () => {
     prizes_and_tracks: [] as any[],
     judges_and_mentors: [] as any[]
   });
+
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>('');
   const [displayImageFile, setDisplayImageFile] = useState<File | null>(null);
   const [displayImagePreview, setDisplayImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [registrationFormFields, setRegistrationFormFields] = useState<FormField[]>([
+    {
+      id: 'default-name',
+      field_type: 'text',
+      label: 'Full Name',
+      description: '',
+      placeholder: 'Enter your full name',
+      required: true,
+      options: [],
+      order_index: 0,
+      is_default: true
+    },
+    {
+      id: 'default-email',
+      field_type: 'email',
+      label: 'Email Address',
+      description: '',
+      placeholder: 'Enter your email',
+      required: true,
+      options: [],
+      order_index: 1,
+      is_default: true
+    }
+  ]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const displayImageInputRef = useRef<HTMLInputElement>(null);
   const { isAdminAuthenticated } = useAdminAuth();
@@ -75,7 +103,7 @@ const CreateEvent = () => {
     }
   }, [eventId, isEditMode]);
 
-  // Helper to convert UTC timestamp to local datetime-local format for the event's timezone
+  // Helper functions for timezone conversion
   const convertUTCToLocal = (utcDateString: string, timezone: string): string => {
     const date = new Date(utcDateString);
     const timezoneOffsets: Record<string, number> = {
@@ -98,7 +126,6 @@ const CreateEvent = () => {
     return localTime.toISOString().slice(0, 16);
   };
 
-  // Helper to convert local datetime-local format to UTC for storage
   const convertLocalToUTC = (localDateString: string, timezone: string): string => {
     const timezoneOffsets: Record<string, number> = {
       'Asia/Kolkata': 5.5,
@@ -119,14 +146,12 @@ const CreateEvent = () => {
     const offsetHours = timezoneOffsets[timezone] || 0;
     const offsetMs = offsetHours * 60 * 60 * 1000;
 
-    // Parse "YYYY-MM-DDTHH:mm" as if it's in the selected timezone (not the browser timezone)
     const [datePart, timePart] = localDateString.split('T');
     const [year, month, day] = datePart.split('-').map(Number);
     const [hour, minute] = timePart.split(':').map(Number);
 
-    // Build a UTC timestamp from the selected timezone local time
     const localAsUTC = Date.UTC(year, (month - 1), day, hour, minute);
-    const utcMs = localAsUTC - offsetMs; // subtract tz offset to get true UTC
+    const utcMs = localAsUTC - offsetMs;
 
     return new Date(utcMs).toISOString();
   };
@@ -178,7 +203,7 @@ const CreateEvent = () => {
         if (data.banner_url) {
           setBannerPreview(data.banner_url);
         }
-        
+
         if (data.display_image_url) {
           setDisplayImagePreview(data.display_image_url);
         }
@@ -270,13 +295,69 @@ const CreateEvent = () => {
     }
   };
 
+  const handleNext = () => {
+    if (currentStep === 1) {
+      // Validate step 1
+      if (!formData.name.trim() || !formData.event_type) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+      setCurrentStep(2);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep === 2) {
+      setCurrentStep(1);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      let banner_url = bannerPreview; // Keep existing banner if no new file
-      let display_image_url = displayImagePreview; // Keep existing display image if no new file
+      // First create the registration form
+      const formDataToInsert = {
+        title: `${formData.name} Registration Form`,
+        description: `Registration form for ${formData.name}`,
+        is_published: true,
+        require_signin: false
+      };
+
+      const { data: newForm, error: formError } = await supabase
+        .from('forms')
+        .insert([formDataToInsert])
+        .select()
+        .single();
+
+      if (formError) throw formError;
+
+      // Insert form fields
+      const fieldsToInsert = registrationFormFields.map(field => ({
+        form_id: newForm.id,
+        field_type: field.field_type,
+        label: field.label,
+        description: field.description,
+        placeholder: field.placeholder,
+        required: field.required,
+        options: field.options.length > 0 ? field.options : null,
+        order_index: field.order_index
+      }));
+
+      const { error: fieldsError } = await supabase
+        .from('form_fields')
+        .insert(fieldsToInsert);
+
+      if (fieldsError) throw fieldsError;
+
+      // Now create the event with the form reference
+      let banner_url = bannerPreview;
+      let display_image_url = displayImagePreview;
 
       if (bannerFile) {
         const uploadedUrl = await uploadBanner(bannerFile);
@@ -286,36 +367,16 @@ const CreateEvent = () => {
       }
 
       if (displayImageFile) {
-        const uploadedDisplayImageUrl = await uploadBanner(displayImageFile); // Using same upload function
+        const uploadedDisplayImageUrl = await uploadBanner(displayImageFile);
         if (uploadedDisplayImageUrl) {
           display_image_url = uploadedDisplayImageUrl;
         }
       }
 
-      // Create additional data object for event-specific fields
-      const additionalData = {
-        ...(formData.end_date && { end_date: formData.end_date }),
-        ...(formData.speaker && { speaker: formData.speaker }),
-        ...(formData.prerequisites && { prerequisites: formData.prerequisites }),
-        ...(formData.team_size && { team_size: parseInt(formData.team_size) }),
-        ...(formData.prizes && { prizes: formData.prizes }),
-        ...(formData.tech_stack && { tech_stack: formData.tech_stack }),
-        ...(formData.judging_criteria && { judging_criteria: formData.judging_criteria }),
-        ...(formData.duration && { duration: parseFloat(formData.duration) }),
-        ...(formData.networking && { networking: formData.networking }),
-        ...(formData.speakers && { speakers: formData.speakers }),
-        ...(formData.topics && { topics: formData.topics }),
-        ...(formData.refreshments && { refreshments: formData.refreshments }),
-        ...(formData.contest_type && { contest_type: formData.contest_type }),
-        ...(formData.rules && { rules: formData.rules }),
-        ...(formData.eligibility && { eligibility: formData.eligibility }),
-        ...(formData.submission_format && { submission_format: formData.submission_format })
-      };
-
       const eventData = {
         name: formData.name,
         description: formData.description,
-        event_type: formData.event_type as 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon',
+        event_type: formData.event_type,
         date: formData.date ? convertLocalToUTC(formData.date, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -325,6 +386,7 @@ const CreateEvent = () => {
         timezone: formData.timezone,
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
+        registration_form_id: newForm.id,
         end_date: formData.end_date ? convertLocalToUTC(formData.end_date, formData.timezone) : null,
         speaker: formData.speaker || null,
         prerequisites: formData.prerequisites || null,
@@ -347,17 +409,15 @@ const CreateEvent = () => {
 
       let error;
       if (isEditMode && eventId) {
-        // Update existing event
         const { error: updateError } = await supabase
           .from('events')
-          .update(eventData as any)
+          .update(eventData)
           .eq('id', eventId);
         error = updateError;
       } else {
-        // Create new event - short_id will be auto-generated by trigger
         const { error: insertError } = await supabase
           .from('events')
-          .insert([eventData as any]);
+          .insert([eventData]);
         error = insertError;
       }
 
@@ -406,132 +466,200 @@ const CreateEvent = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>{isEditMode ? 'Edit Event Details' : 'Event Details'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="event_type">Event Type</Label>
-                <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon') => setFormData(prev => ({ ...prev, event_type: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select event type first" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hackathon">Hackathon</SelectItem>
-                    <SelectItem value="webinar">Webinar</SelectItem>
-                    <SelectItem value="seminar">Seminar</SelectItem>
-                    <SelectItem value="workshop">Workshop</SelectItem>
-                    <SelectItem value="conference">Conference</SelectItem>
-                    <SelectItem value="fellowship">Fellowship</SelectItem>
-                    <SelectItem value="cohort">Cohort</SelectItem>
-                    <SelectItem value="hiring_challenge">Hiring Challenge</SelectItem>
-                    <SelectItem value="ideathon">Ideathon</SelectItem>
-                    <SelectItem value="meetup">Meetup</SelectItem>
-                    <SelectItem value="contest">Contest</SelectItem>
-                    <SelectItem value="bootcamp">Bootcamp</SelectItem>
-                    <SelectItem value="learnathon">Learnathon</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+        {/* Step Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-4">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+              1
+            </div>
+            <div className={`flex-1 h-1 ${currentStep >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+              2
+            </div>
+          </div>
+          <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+            <span>Event Details</span>
+            <span>Registration Form</span>
+          </div>
+        </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="approval_enabled"
-                  checked={formData.approval_enabled}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, approval_enabled: checked as boolean }))}
-                />
-                <Label htmlFor="approval_enabled" className="cursor-pointer">
-                  Require approval for registrations
-                </Label>
-              </div>
-
-              {formData.event_type && (
-                <>
-                  {formData.event_type === 'hackathon' && (
-                    <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} onDataChange={handleDataChange} />
-                  )}
-                  {(formData.event_type === 'webinar' || 
-                    formData.event_type === 'contest' || 
-                    formData.event_type === 'meetup' || 
-                    formData.event_type === 'bootcamp' ||
-                    formData.event_type === 'seminar' ||
-                    formData.event_type === 'workshop' ||
-                    formData.event_type === 'conference' ||
-                    formData.event_type === 'fellowship' ||
-                    formData.event_type === 'cohort' ||
-                    formData.event_type === 'hiring_challenge' ||
-                    formData.event_type === 'ideathon' ||
-                    formData.event_type === 'learnathon') && (
-                    <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
-                  )}
-                </>
-              )}
-
-              {formData.event_type && (
+        {currentStep === 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Step 1: Event Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-6">
                 <div className="space-y-2">
-                  <Label>Event Banner</Label>
-                  <div className="space-y-4">
-                    {bannerPreview ? (
-                      <div className="relative">
-                        <img
-                          src={bannerPreview}
-                          alt="Banner preview"
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2"
-                          onClick={removeBanner}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div
-                        className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">Click to upload event banner</p>
-                        <p className="text-sm text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
-                      </div>
-                    )}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                  </div>
+                  <Label htmlFor="event_type">Event Type *</Label>
+                  <Select value={formData.event_type} onValueChange={(value: 'webinar' | 'hackathon' | 'meetup' | 'contest' | 'bootcamp' | 'seminar' | 'workshop' | 'conference' | 'fellowship' | 'cohort' | 'hiring_challenge' | 'ideathon' | 'learnathon') => setFormData(prev => ({ ...prev, event_type: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select event type first" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hackathon">Hackathon</SelectItem>
+                      <SelectItem value="webinar">Webinar</SelectItem>
+                      <SelectItem value="seminar">Seminar</SelectItem>
+                      <SelectItem value="workshop">Workshop</SelectItem>
+                      <SelectItem value="conference">Conference</SelectItem>
+                      <SelectItem value="fellowship">Fellowship</SelectItem>
+                      <SelectItem value="cohort">Cohort</SelectItem>
+                      <SelectItem value="hiring_challenge">Hiring Challenge</SelectItem>
+                      <SelectItem value="ideathon">Ideathon</SelectItem>
+                      <SelectItem value="meetup">Meetup</SelectItem>
+                      <SelectItem value="contest">Contest</SelectItem>
+                      <SelectItem value="bootcamp">Bootcamp</SelectItem>
+                      <SelectItem value="learnathon">Learnathon</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/admin/events')}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1"
-                >
-                  {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Event Name *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter event name"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="approval_enabled"
+                    checked={formData.approval_enabled}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, approval_enabled: checked as boolean }))}
+                  />
+                  <Label htmlFor="approval_enabled" className="cursor-pointer">
+                    Require approval for registrations
+                  </Label>
+                </div>
+
+                {formData.event_type && (
+                  <>
+                    {formData.event_type === 'hackathon' && (
+                      <HackathonForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} onDataChange={handleDataChange} />
+                    )}
+                    {(formData.event_type === 'webinar' ||
+                      formData.event_type === 'contest' ||
+                      formData.event_type === 'meetup' ||
+                      formData.event_type === 'bootcamp' ||
+                      formData.event_type === 'seminar' ||
+                      formData.event_type === 'workshop' ||
+                      formData.event_type === 'conference' ||
+                      formData.event_type === 'fellowship' ||
+                      formData.event_type === 'cohort' ||
+                      formData.event_type === 'hiring_challenge' ||
+                      formData.event_type === 'ideathon' ||
+                      formData.event_type === 'learnathon') && (
+                      <BootcampForm formData={formData} onInputChange={handleInputChange} onSelectChange={handleSelectChange} />
+                    )}
+                  </>
+                )}
+
+                {formData.event_type && (
+                  <div className="space-y-2">
+                    <Label>Event Banner</Label>
+                    <div className="space-y-4">
+                      {bannerPreview ? (
+                        <div className="relative">
+                          <img
+                            src={bannerPreview}
+                            alt="Banner preview"
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={removeBanner}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">Click to upload event banner</p>
+                          <p className="text-sm text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                        </div>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/admin/events')}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="ml-auto"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {currentStep === 2 && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Step 2: Registration Form</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Configure the registration form for your event. Name and Email fields are required and cannot be removed.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <EventFormBuilder
+                  fields={registrationFormFields}
+                  onFieldsChange={setRegistrationFormFields}
+                />
+              </CardContent>
+            </Card>
+
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="ml-auto"
+              >
+                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Event' : 'Create Event')}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

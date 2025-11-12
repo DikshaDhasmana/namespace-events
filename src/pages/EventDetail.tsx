@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { EmailService } from '@/services/emailService';
 import LeaderboardModal from '@/components/LeaderboardModal';
+import EventRegistrationModal from '@/components/EventRegistrationModal';
 
 interface TimelineEntry {
   label: string;
