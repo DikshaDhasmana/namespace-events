@@ -67,25 +67,27 @@ const CreateEvent = () => {
   const [registrationFormFields, setRegistrationFormFields] = useState<FormField[]>([
     {
       id: 'default-name',
-      field_type: 'text',
+      field_type: 'profile_field',
       label: 'Full Name',
       description: '',
       placeholder: 'Enter your full name',
       required: true,
       options: [],
       order_index: 0,
-      is_default: true
+      is_default: true,
+      profile_field: 'full_name'
     },
     {
       id: 'default-email',
-      field_type: 'email',
+      field_type: 'profile_field',
       label: 'Email Address',
       description: '',
       placeholder: 'Enter your email',
       required: true,
       options: [],
       order_index: 1,
-      is_default: true
+      is_default: true,
+      profile_field: 'email'
     }
   ]);
 
@@ -340,13 +342,14 @@ const CreateEvent = () => {
       // Insert form fields
       const fieldsToInsert = registrationFormFields.map(field => ({
         form_id: newForm.id,
-        field_type: field.field_type,
+        field_type: field.field_type === 'profile_field' ? 'text' : field.field_type,
         label: field.label,
         description: field.description,
         placeholder: field.placeholder,
         required: field.required,
         options: field.options.length > 0 ? field.options : null,
-        order_index: field.order_index
+        order_index: field.order_index,
+        profile_field: field.profile_field || null
       }));
 
       const { error: fieldsError } = await supabase
@@ -376,7 +379,7 @@ const CreateEvent = () => {
       const eventData = {
         name: formData.name,
         description: formData.description,
-        event_type: formData.event_type,
+        event_type: formData.event_type as any,
         date: formData.date ? convertLocalToUTC(formData.date, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
@@ -387,6 +390,7 @@ const CreateEvent = () => {
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
         registration_form_id: newForm.id,
+        short_id: Math.random().toString(36).substring(2, 8).toUpperCase(),
         end_date: formData.end_date ? convertLocalToUTC(formData.end_date, formData.timezone) : null,
         speaker: formData.speaker || null,
         prerequisites: formData.prerequisites || null,
