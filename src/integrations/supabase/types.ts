@@ -287,6 +287,7 @@ export type Database = {
           organisation: string | null
           phone_number: string | null
           pin_code: string | null
+          portfolio_url: string | null
           profile_completed: boolean | null
           resume_link: string | null
           role: string | null
@@ -319,6 +320,7 @@ export type Database = {
           organisation?: string | null
           phone_number?: string | null
           pin_code?: string | null
+          portfolio_url?: string | null
           profile_completed?: boolean | null
           resume_link?: string | null
           role?: string | null
@@ -351,6 +353,7 @@ export type Database = {
           organisation?: string | null
           phone_number?: string | null
           pin_code?: string | null
+          portfolio_url?: string | null
           profile_completed?: boolean | null
           resume_link?: string | null
           role?: string | null

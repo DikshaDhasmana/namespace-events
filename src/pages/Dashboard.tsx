@@ -52,6 +52,7 @@ interface Profile {
   github_url: string | null;
   linkedin_url: string | null;
   leetcode_url: string | null;
+  portfolio_url?: string | null;
   instagram_handle?: string | null;
   discord_username?: string | null;
   twitter_handle?: string | null;
@@ -1038,14 +1039,14 @@ export default function Dashboard() {
                         <h3 className="text-lg font-semibold">Professional Links</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="github_url">GitHub</Label>
+                            <Label htmlFor="portfolio_url">Portfolio Website</Label>
                             <div className="flex items-center space-x-3">
-                              <Github className="h-4 w-4 text-muted-foreground" />
+                              <Link2 className="h-4 w-4 text-muted-foreground" />
                               <Input
-                                id="github_url"
-                                value={profileForm.github_url}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
-                                placeholder="https://github.com/username"
+                                id="portfolio_url"
+                                value={profileForm.portfolio_url}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, portfolio_url: e.target.value }))}
+                                placeholder="https://yourportfolio.com"
                               />
                             </div>
                           </div>
@@ -1070,6 +1071,18 @@ export default function Dashboard() {
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Coding Profiles</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="github_url">GitHub</Label>
+                            <div className="flex items-center space-x-3">
+                              <Github className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="github_url"
+                                value={profileForm.github_url}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
+                                placeholder="https://github.com/username"
+                              />
+                            </div>
+                          </div>
                           <div>
                             <Label htmlFor="leetcode_url">LeetCode</Label>
                             <div className="flex items-center space-x-3">
@@ -1422,15 +1435,15 @@ export default function Dashboard() {
                       <h3 className="text-lg font-semibold">Professional Links</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="github_url_desktop">GitHub</Label>
+                          <Label htmlFor="portfolio_url_desktop">Portfolio Website</Label>
                           <div className="flex items-center space-x-3">
-                            <Github className="h-4 w-4 text-muted-foreground" />
+                            <Link2 className="h-4 w-4 text-muted-foreground" />
                             <Input
-                              id="github_url_desktop"
+                              id="portfolio_url_desktop"
                               type="url"
-                              value={profileForm.github_url}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
-                              placeholder="https://github.com/username"
+                              value={profileForm.portfolio_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, portfolio_url: e.target.value }))}
+                              placeholder="https://yourportfolio.com"
                             />
                           </div>
                         </div>
@@ -1455,6 +1468,19 @@ export default function Dashboard() {
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Coding Profiles</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="github_url_desktop">GitHub</Label>
+                          <div className="flex items-center space-x-3">
+                            <Github className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="github_url_desktop"
+                              type="url"
+                              value={profileForm.github_url}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, github_url: e.target.value }))}
+                              placeholder="https://github.com/username"
+                            />
+                          </div>
+                        </div>
                         <div>
                           <Label htmlFor="leetcode_url_desktop">LeetCode</Label>
                           <div className="flex items-center space-x-3">
