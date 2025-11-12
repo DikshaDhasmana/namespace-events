@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2, FolderGit2 } from 'lucide-react';
+import { Calendar, MapPin, Users, X, TrendingUp, Clock, CheckCircle, Plus, User, Mail, Phone, GraduationCap, Code, Award, Calendar as CalendarIcon, ClockIcon, Github, Linkedin, Link2, FolderGit2, Instagram, MessageCircle, Twitter, MapPin as MapPinIcon, Code2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +52,20 @@ interface Profile {
   github_url: string | null;
   linkedin_url: string | null;
   leetcode_url: string | null;
+  instagram_handle?: string | null;
+  discord_username?: string | null;
+  twitter_handle?: string | null;
+  address?: string | null;
+  city_state?: string | null;
+  pin_code?: string | null;
+  country?: string | null;
+  branch?: string | null;
+  role?: string | null;
+  codeforces_handle?: string | null;
+  codechef_handle?: string | null;
+  current_role?: string | null;
+  organisation?: string | null;
+  resume_link?: string | null;
   profile_completed: boolean;
   created_at: string;
   updated_at: string;
@@ -117,6 +132,20 @@ export default function Dashboard() {
           github_url: '',
           linkedin_url: '',
           leetcode_url: '',
+          instagram_handle: '',
+          discord_username: '',
+          twitter_handle: '',
+          address: '',
+          city_state: '',
+          pin_code: '',
+          country: '',
+          branch: '',
+          role: '',
+          codeforces_handle: '',
+          codechef_handle: '',
+          current_role: '',
+          organisation: '',
+          resume_link: '',
         };
       }
     }
@@ -131,6 +160,20 @@ export default function Dashboard() {
       github_url: '',
       linkedin_url: '',
       leetcode_url: '',
+      instagram_handle: '',
+      discord_username: '',
+      twitter_handle: '',
+      address: '',
+      city_state: '',
+      pin_code: '',
+      country: '',
+      branch: '',
+      role: '',
+      codeforces_handle: '',
+      codechef_handle: '',
+      current_role: '',
+      organisation: '',
+      resume_link: '',
     };
   });
   const { user } = useAuth();
@@ -236,6 +279,20 @@ export default function Dashboard() {
           github_url: data.github_url || '',
           linkedin_url: data.linkedin_url || '',
           leetcode_url: data.leetcode_url || '',
+          instagram_handle: data.instagram_handle || '',
+          discord_username: data.discord_username || '',
+          twitter_handle: data.twitter_handle || '',
+          address: data.address || '',
+          city_state: data.city_state || '',
+          pin_code: data.pin_code || '',
+          country: data.country || '',
+          branch: data.branch || '',
+          role: data.role || '',
+          codeforces_handle: data.codeforces_handle || '',
+          codechef_handle: data.codechef_handle || '',
+          current_role: data.current_role || '',
+          organisation: data.organisation || '',
+          resume_link: data.resume_link || '',
         });
       }
     }
@@ -360,6 +417,20 @@ export default function Dashboard() {
         github_url: profileForm.github_url || null,
         linkedin_url: profileForm.linkedin_url || null,
         leetcode_url: profileForm.leetcode_url || null,
+        instagram_handle: profileForm.instagram_handle || null,
+        discord_username: profileForm.discord_username || null,
+        twitter_handle: profileForm.twitter_handle || null,
+        address: profileForm.address || null,
+        city_state: profileForm.city_state || null,
+        pin_code: profileForm.pin_code || null,
+        country: profileForm.country || null,
+        branch: profileForm.branch || null,
+        role: profileForm.role || null,
+        codeforces_handle: profileForm.codeforces_handle || null,
+        codechef_handle: profileForm.codechef_handle || null,
+        current_role: profileForm.current_role || null,
+        organisation: profileForm.organisation || null,
+        resume_link: profileForm.resume_link || null,
         profile_completed: isProfileCompleted,
         updated_at: new Date().toISOString(),
       };
