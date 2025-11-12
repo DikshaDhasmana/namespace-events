@@ -131,11 +131,11 @@ const EventRegistrationModal = ({
           formattedFields.forEach(field => {
             if (field.field_type === 'checkbox') {
               initialData[field.id] = [];
-            } else if (field.field_type === 'profile_field' && field.profile_field && profile[field.profile_field]) {
-              // Pre-fill with profile data
-              initialData[field.id] = profile[field.profile_field];
-              // Set save flag to false for fields that already have profile data
-              initialSaveFlags[field.id] = false;
+            } else if (field.field_type === 'profile_field' && field.profile_field) {
+              // Pre-fill with profile data if it exists
+              initialData[field.id] = profile[field.profile_field] || '';
+              // Set save flag to true for new data (no existing profile data), false for existing data
+              initialSaveFlags[field.id] = !profile[field.profile_field];
             } else {
               initialData[field.id] = '';
             }
@@ -513,18 +513,16 @@ const EventRegistrationModal = ({
               onChange={(e) => handleInputChange(field.id, e.target.value)}
               required={field.required}
             />
-            {profileData[field.profile_field!] && (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={`save-profile-${field.id}`}
-                  checked={profileSaveFlags[field.id] || false}
-                  onCheckedChange={(checked) => setProfileSaveFlags(prev => ({ ...prev, [field.id]: checked as boolean }))}
-                />
-                <Label htmlFor={`save-profile-${field.id}`} className="text-sm">
-                  Save changes to profile
-                </Label>
-              </div>
-            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`save-profile-${field.id}`}
+                checked={profileSaveFlags[field.id] || false}
+                onCheckedChange={(checked) => setProfileSaveFlags(prev => ({ ...prev, [field.id]: checked as boolean }))}
+              />
+              <Label htmlFor={`save-profile-${field.id}`} className="text-sm">
+                Save changes to profile
+              </Label>
+            </div>
           </div>
         );
 
