@@ -89,7 +89,7 @@ const EventRegistrationModal = ({
       // Fetch form fields
       const { data: fields, error: fieldsError } = await supabase
         .from('form_fields')
-        .select('*')
+        .select('*, profile_field')
         .eq('form_id', event.registration_form_id)
         .order('order_index');
 
