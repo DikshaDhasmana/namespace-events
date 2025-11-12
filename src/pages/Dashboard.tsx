@@ -394,17 +394,9 @@ export default function Dashboard() {
     try {
       const skills = profileForm.skills ? profileForm.skills.split(',').map(s => s.trim()).filter(s => s) : [];
       
-      // Check if profile is completed (all required fields filled including ALL professional links)
+      // Check if profile has basic required info (optional - for completion tracking)
       const isProfileCompleted = !!profileForm.full_name && 
-        !!profileForm.phone_number && 
-        !!profileForm.date_of_birth && 
-        !!profileForm.college && 
-        !!profileForm.degree && 
-        !!profileForm.graduation_year && 
-        skills.length > 0 && 
-        !!profileForm.github_url && 
-        !!profileForm.linkedin_url && 
-        !!profileForm.leetcode_url;
+        !!profileForm.email;
 
       const updatedProfile = {
         full_name: profileForm.full_name || null,
@@ -814,16 +806,18 @@ export default function Dashboard() {
                     Profile Information
                   </CardTitle>
                   <CardDescription>
-                    Manage your personal information and preferences. All fields are required to complete your profile.
+                    Manage your personal information and preferences
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {profile && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
+                  <div className="space-y-6">
+                      {/* Personal Information */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Personal Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="full_name">* Full Name</Label>
+                            <Label htmlFor="full_name">Full Name</Label>
                             <div className="flex items-center space-x-3">
                               <User className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -835,7 +829,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="email">* Email</Label>
+                            <Label htmlFor="email">Email</Label>
                             <div className="flex items-center space-x-3">
                               <Mail className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -848,7 +842,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="phone_number">* Phone Number</Label>
+                            <Label htmlFor="phone_number">Phone Number</Label>
                             <div className="flex items-center space-x-3">
                               <Phone className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -860,7 +854,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="date_of_birth">* Date of Birth</Label>
+                            <Label htmlFor="date_of_birth">Date of Birth</Label>
                             <div className="flex items-center space-x-3">
                               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -872,67 +866,188 @@ export default function Dashboard() {
                             </div>
                           </div>
                         </div>
-                        <div className="space-y-4">
+                      </div>
+
+                      <Separator />
+
+                      {/* Address Information */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Address</h3>
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
-                            <Label htmlFor="college">* College</Label>
-                            <div className="flex items-start space-x-3">
-                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
-                              <Input
-                                id="college"
-                                value={profileForm.college}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
-                                placeholder="Enter your college name"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="degree">* Degree</Label>
-                            <div className="flex items-start space-x-3">
-                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
-                              <Input
-                                id="degree"
-                                value={profileForm.degree}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
-                                placeholder="Enter your degree (e.g., B.Tech, M.Sc)"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="graduation_year">* Graduation Year</Label>
-                            <div className="flex items-start space-x-3">
-                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
-                              <Input
-                                id="graduation_year"
-                                type="number"
-                                value={profileForm.graduation_year}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
-                                placeholder="Enter graduation year (e.g., 2024)"
-                                min="1950"
-                                max="2050"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="skills">* Skills</Label>
+                            <Label htmlFor="address">Street Address</Label>
                             <div className="flex items-center space-x-3">
-                              <Award className="h-4 w-4 text-muted-foreground" />
+                              <MapPinIcon className="h-4 w-4 text-muted-foreground" />
                               <Input
-                                id="skills"
-                                value={profileForm.skills}
-                                onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
-                                placeholder="e.g., Leadership, Communication"
+                                id="address"
+                                value={profileForm.address}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, address: e.target.value }))}
+                                placeholder="Enter your street address"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <Label htmlFor="city_state">City, State</Label>
+                              <Input
+                                id="city_state"
+                                value={profileForm.city_state}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, city_state: e.target.value }))}
+                                placeholder="e.g., Mumbai, Maharashtra"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="pin_code">Pin Code</Label>
+                              <Input
+                                id="pin_code"
+                                value={profileForm.pin_code}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, pin_code: e.target.value }))}
+                                placeholder="e.g., 400001"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="country">Country</Label>
+                              <Input
+                                id="country"
+                                value={profileForm.country}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, country: e.target.value }))}
+                                placeholder="e.g., India"
                               />
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Professional Links Section */}
+                      <Separator />
+
+                      {/* Professional Status */}
                       <div className="space-y-4">
-                        <h4 className="text-sm font-semibold">Professional Links</h4>
-                        <div className="grid grid-cols-1 gap-4">
+                        <h3 className="text-lg font-semibold">Professional Status</h3>
+                        <div>
+                          <Label htmlFor="role">Role</Label>
+                          <Select
+                            value={profileForm.role}
+                            onValueChange={(value) => setProfileForm(prev => ({ ...prev, role: value }))}
+                          >
+                            <SelectTrigger id="role">
+                              <SelectValue placeholder="Select your role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="student">Student</SelectItem>
+                              <SelectItem value="working_professional">Working Professional</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Conditional Fields for Students */}
+                        {profileForm.role === 'student' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="college">College/University</Label>
+                              <div className="flex items-start space-x-3">
+                                <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="college"
+                                  value={profileForm.college}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
+                                  placeholder="Enter your college name"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="degree">Degree</Label>
+                              <div className="flex items-start space-x-3">
+                                <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="degree"
+                                  value={profileForm.degree}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
+                                  placeholder="e.g., B.Tech, M.Sc"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="branch">Branch/Specialization</Label>
+                              <div className="flex items-start space-x-3">
+                                <Code2 className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="branch"
+                                  value={profileForm.branch}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, branch: e.target.value }))}
+                                  placeholder="e.g., Computer Science"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="graduation_year">Graduation Year</Label>
+                              <div className="flex items-start space-x-3">
+                                <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="graduation_year"
+                                  type="number"
+                                  value={profileForm.graduation_year}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
+                                  placeholder="e.g., 2024"
+                                  min="1950"
+                                  max="2050"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Conditional Fields for Working Professionals */}
+                        {profileForm.role === 'working_professional' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="current_role">Current Role/Position</Label>
+                              <div className="flex items-start space-x-3">
+                                <User className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="current_role"
+                                  value={profileForm.current_role}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, current_role: e.target.value }))}
+                                  placeholder="e.g., Software Engineer"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="organisation">Organization</Label>
+                              <div className="flex items-start space-x-3">
+                                <User className="h-4 w-4 text-muted-foreground mt-3" />
+                                <Input
+                                  id="organisation"
+                                  value={profileForm.organisation}
+                                  onChange={(e) => setProfileForm(prev => ({ ...prev, organisation: e.target.value }))}
+                                  placeholder="e.g., Google"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <Label htmlFor="skills">Skills</Label>
+                          <div className="flex items-center space-x-3">
+                            <Award className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="skills"
+                              value={profileForm.skills}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                              placeholder="e.g., React, Python, Leadership (comma-separated)"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Professional Links */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Professional Links</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="github_url">* GitHub Profile</Label>
+                            <Label htmlFor="github_url">GitHub</Label>
                             <div className="flex items-center space-x-3">
                               <Github className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -944,7 +1059,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="linkedin_url">* LinkedIn Profile</Label>
+                            <Label htmlFor="linkedin_url">LinkedIn</Label>
                             <div className="flex items-center space-x-3">
                               <Linkedin className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -956,7 +1071,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="leetcode_url">* LeetCode Profile</Label>
+                            <Label htmlFor="leetcode_url">LeetCode</Label>
                             <div className="flex items-center space-x-3">
                               <Link2 className="h-4 w-4 text-muted-foreground" />
                               <Input
@@ -964,6 +1079,96 @@ export default function Dashboard() {
                                 value={profileForm.leetcode_url}
                                 onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
                                 placeholder="https://leetcode.com/username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="resume_link">Resume</Label>
+                            <div className="flex items-center space-x-3">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="resume_link"
+                                value={profileForm.resume_link}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, resume_link: e.target.value }))}
+                                placeholder="https://drive.google.com/..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Coding Profiles */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Coding Profiles</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="codeforces_handle">Codeforces Handle</Label>
+                            <div className="flex items-center space-x-3">
+                              <Code className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="codeforces_handle"
+                                value={profileForm.codeforces_handle}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, codeforces_handle: e.target.value }))}
+                                placeholder="Your Codeforces username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="codechef_handle">CodeChef Handle</Label>
+                            <div className="flex items-center space-x-3">
+                              <Code className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="codechef_handle"
+                                value={profileForm.codechef_handle}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, codechef_handle: e.target.value }))}
+                                placeholder="Your CodeChef username"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Social Media */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Social Media</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="instagram_handle">Instagram</Label>
+                            <div className="flex items-center space-x-3">
+                              <Instagram className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="instagram_handle"
+                                value={profileForm.instagram_handle}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, instagram_handle: e.target.value }))}
+                                placeholder="@username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="twitter_handle">Twitter/X</Label>
+                            <div className="flex items-center space-x-3">
+                              <Twitter className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="twitter_handle"
+                                value={profileForm.twitter_handle}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, twitter_handle: e.target.value }))}
+                                placeholder="@username"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="discord_username">Discord</Label>
+                            <div className="flex items-center space-x-3">
+                              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="discord_username"
+                                value={profileForm.discord_username}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, discord_username: e.target.value }))}
+                                placeholder="username#1234"
                               />
                             </div>
                           </div>
@@ -993,16 +1198,18 @@ export default function Dashboard() {
                   Profile Information
                 </CardTitle>
                 <CardDescription>
-                  Manage your personal information and preferences. All fields are required to complete your profile.
+                  Manage your personal information and preferences
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {profile && (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
+                    {/* Same structure as mobile - Personal Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Personal Information</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="full_name_desktop">* Full Name</Label>
+                          <Label htmlFor="full_name_desktop">Full Name</Label>
                           <div className="flex items-center space-x-3">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1014,7 +1221,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="email_desktop">* Email</Label>
+                          <Label htmlFor="email_desktop">Email</Label>
                           <div className="flex items-center space-x-3">
                             <Mail className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1027,7 +1234,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="phone_number_desktop">* Phone Number</Label>
+                          <Label htmlFor="phone_number_desktop">Phone Number</Label>
                           <div className="flex items-center space-x-3">
                             <Phone className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1040,7 +1247,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="date_of_birth_desktop">* Date of Birth</Label>
+                          <Label htmlFor="date_of_birth_desktop">Date of Birth</Label>
                           <div className="flex items-center space-x-3">
                             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1052,56 +1259,52 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="space-y-4">
+                    </div>
+
+                    <Separator />
+
+                    {/* Address Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Address</h3>
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
-                          <Label htmlFor="college_desktop">* College</Label>
-                          <div className="flex items-start space-x-3">
-                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                          <Label htmlFor="address_desktop">Street Address</Label>
+                          <div className="flex items-center space-x-3">
+                            <MapPinIcon className="h-4 w-4 text-muted-foreground" />
                             <Input
-                              id="college_desktop"
-                              value={profileForm.college}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
-                              placeholder="Enter your college name"
+                              id="address_desktop"
+                              value={profileForm.address}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, address: e.target.value }))}
+                              placeholder="Enter your street address"
                             />
                           </div>
                         </div>
-                        <div>
-                          <Label htmlFor="degree_desktop">* Degree</Label>
-                          <div className="flex items-start space-x-3">
-                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="city_state_desktop">City, State</Label>
                             <Input
-                              id="degree_desktop"
-                              value={profileForm.degree}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
-                              placeholder="Enter your degree (e.g., B.Tech, M.Sc)"
+                              id="city_state_desktop"
+                              value={profileForm.city_state}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, city_state: e.target.value }))}
+                              placeholder="e.g., Mumbai, Maharashtra"
                             />
                           </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="graduation_year_desktop">* Graduation Year</Label>
-                          <div className="flex items-start space-x-3">
-                            <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                          <div>
+                            <Label htmlFor="pin_code_desktop">Pin Code</Label>
                             <Input
-                              id="graduation_year_desktop"
-                              type="number"
-                              value={profileForm.graduation_year}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
-                              placeholder="Enter graduation year (e.g., 2024)"
-                              min="1950"
-                              max="2050"
+                              id="pin_code_desktop"
+                              value={profileForm.pin_code}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, pin_code: e.target.value }))}
+                              placeholder="e.g., 400001"
                             />
                           </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="skills_desktop">* Skills</Label>
-                          <div className="flex items-start space-x-3">
-                            <Award className="h-4 w-4 text-muted-foreground mt-3" />
-                            <Textarea
-                              id="skills_desktop"
-                              value={profileForm.skills}
-                              onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
-                              placeholder="Enter your skills (comma-separated)"
-                              rows={2}
+                          <div>
+                            <Label htmlFor="country_desktop">Country</Label>
+                            <Input
+                              id="country_desktop"
+                              value={profileForm.country}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, country: e.target.value }))}
+                              placeholder="e.g., India"
                             />
                           </div>
                         </div>
@@ -1110,14 +1313,135 @@ export default function Dashboard() {
 
                     <Separator />
 
+                    {/* Professional Status */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Professional Status</h3>
+                      <div>
+                        <Label htmlFor="role_desktop">Role</Label>
+                        <Select
+                          value={profileForm.role}
+                          onValueChange={(value) => setProfileForm(prev => ({ ...prev, role: value }))}
+                        >
+                          <SelectTrigger id="role_desktop">
+                            <SelectValue placeholder="Select your role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="student">Student</SelectItem>
+                            <SelectItem value="working_professional">Working Professional</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Conditional Fields for Students */}
+                      {profileForm.role === 'student' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="college_desktop">College/University</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="college_desktop"
+                                value={profileForm.college}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, college: e.target.value }))}
+                                placeholder="Enter your college name"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="degree_desktop">Degree</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="degree_desktop"
+                                value={profileForm.degree}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, degree: e.target.value }))}
+                                placeholder="e.g., B.Tech, M.Sc"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="branch_desktop">Branch/Specialization</Label>
+                            <div className="flex items-start space-x-3">
+                              <Code2 className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="branch_desktop"
+                                value={profileForm.branch}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, branch: e.target.value }))}
+                                placeholder="e.g., Computer Science"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="graduation_year_desktop">Graduation Year</Label>
+                            <div className="flex items-start space-x-3">
+                              <GraduationCap className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="graduation_year_desktop"
+                                type="number"
+                                value={profileForm.graduation_year}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, graduation_year: e.target.value }))}
+                                placeholder="e.g., 2024"
+                                min="1950"
+                                max="2050"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Conditional Fields for Working Professionals */}
+                      {profileForm.role === 'working_professional' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="current_role_desktop">Current Role/Position</Label>
+                            <div className="flex items-start space-x-3">
+                              <User className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="current_role_desktop"
+                                value={profileForm.current_role}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, current_role: e.target.value }))}
+                                placeholder="e.g., Software Engineer"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="organisation_desktop">Organization</Label>
+                            <div className="flex items-start space-x-3">
+                              <User className="h-4 w-4 text-muted-foreground mt-3" />
+                              <Input
+                                id="organisation_desktop"
+                                value={profileForm.organisation}
+                                onChange={(e) => setProfileForm(prev => ({ ...prev, organisation: e.target.value }))}
+                                placeholder="e.g., Google"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <Label htmlFor="skills_desktop">Skills</Label>
+                        <div className="flex items-start space-x-3">
+                          <Award className="h-4 w-4 text-muted-foreground mt-3" />
+                          <Textarea
+                            id="skills_desktop"
+                            value={profileForm.skills}
+                            onChange={(e) => setProfileForm(prev => ({ ...prev, skills: e.target.value }))}
+                            placeholder="Enter your skills (comma-separated)"
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Professional Links */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Professional Links</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Follow the exact format for URLs to ensure they are valid.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="github_url_desktop">* GitHub URL</Label>
+                          <Label htmlFor="github_url_desktop">GitHub</Label>
                           <div className="flex items-center space-x-3">
                             <Github className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1130,7 +1454,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="linkedin_url_desktop">* LinkedIn URL</Label>
+                          <Label htmlFor="linkedin_url_desktop">LinkedIn</Label>
                           <div className="flex items-center space-x-3">
                             <Linkedin className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1143,7 +1467,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="leetcode_url_desktop">* LeetCode URL</Label>
+                          <Label htmlFor="leetcode_url_desktop">LeetCode</Label>
                           <div className="flex items-center space-x-3">
                             <Link2 className="h-4 w-4 text-muted-foreground" />
                             <Input
@@ -1152,6 +1476,96 @@ export default function Dashboard() {
                               value={profileForm.leetcode_url}
                               onChange={(e) => setProfileForm(prev => ({ ...prev, leetcode_url: e.target.value }))}
                               placeholder="https://leetcode.com/username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="resume_link_desktop">Resume</Label>
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="resume_link_desktop"
+                              value={profileForm.resume_link}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, resume_link: e.target.value }))}
+                              placeholder="https://drive.google.com/..."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Coding Profiles */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Coding Profiles</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="codeforces_handle_desktop">Codeforces Handle</Label>
+                          <div className="flex items-center space-x-3">
+                            <Code className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="codeforces_handle_desktop"
+                              value={profileForm.codeforces_handle}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, codeforces_handle: e.target.value }))}
+                              placeholder="Your Codeforces username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="codechef_handle_desktop">CodeChef Handle</Label>
+                          <div className="flex items-center space-x-3">
+                            <Code className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="codechef_handle_desktop"
+                              value={profileForm.codechef_handle}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, codechef_handle: e.target.value }))}
+                              placeholder="Your CodeChef username"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Social Media */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Social Media</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="instagram_handle_desktop">Instagram</Label>
+                          <div className="flex items-center space-x-3">
+                            <Instagram className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="instagram_handle_desktop"
+                              value={profileForm.instagram_handle}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, instagram_handle: e.target.value }))}
+                              placeholder="@username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="twitter_handle_desktop">Twitter/X</Label>
+                          <div className="flex items-center space-x-3">
+                            <Twitter className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="twitter_handle_desktop"
+                              value={profileForm.twitter_handle}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, twitter_handle: e.target.value }))}
+                              placeholder="@username"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="discord_username_desktop">Discord</Label>
+                          <div className="flex items-center space-x-3">
+                            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="discord_username_desktop"
+                              value={profileForm.discord_username}
+                              onChange={(e) => setProfileForm(prev => ({ ...prev, discord_username: e.target.value }))}
+                              placeholder="username#1234"
                             />
                           </div>
                         </div>

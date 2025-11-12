@@ -263,57 +263,99 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          branch: string | null
+          city_state: string | null
+          codechef_handle: string | null
+          codeforces_handle: string | null
           college: string | null
+          country: string | null
           created_at: string
+          current_role: string | null
           date_of_birth: string | null
           degree: string | null
+          discord_username: string | null
           email: string
           full_name: string | null
           github_url: string | null
           graduation_year: number | null
           id: string
+          instagram_handle: string | null
           leetcode_url: string | null
           linkedin_url: string | null
+          organisation: string | null
           phone_number: string | null
+          pin_code: string | null
           profile_completed: boolean | null
+          resume_link: string | null
+          role: string | null
           skills: string[] | null
+          twitter_handle: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          branch?: string | null
+          city_state?: string | null
+          codechef_handle?: string | null
+          codeforces_handle?: string | null
           college?: string | null
+          country?: string | null
           created_at?: string
+          current_role?: string | null
           date_of_birth?: string | null
           degree?: string | null
+          discord_username?: string | null
           email: string
           full_name?: string | null
           github_url?: string | null
           graduation_year?: number | null
           id: string
+          instagram_handle?: string | null
           leetcode_url?: string | null
           linkedin_url?: string | null
+          organisation?: string | null
           phone_number?: string | null
+          pin_code?: string | null
           profile_completed?: boolean | null
+          resume_link?: string | null
+          role?: string | null
           skills?: string[] | null
+          twitter_handle?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          branch?: string | null
+          city_state?: string | null
+          codechef_handle?: string | null
+          codeforces_handle?: string | null
           college?: string | null
+          country?: string | null
           created_at?: string
+          current_role?: string | null
           date_of_birth?: string | null
           degree?: string | null
+          discord_username?: string | null
           email?: string
           full_name?: string | null
           github_url?: string | null
           graduation_year?: number | null
           id?: string
+          instagram_handle?: string | null
           leetcode_url?: string | null
           linkedin_url?: string | null
+          organisation?: string | null
           phone_number?: string | null
+          pin_code?: string | null
           profile_completed?: boolean | null
+          resume_link?: string | null
+          role?: string | null
           skills?: string[] | null
+          twitter_handle?: string | null
           updated_at?: string
         }
         Relationships: []
