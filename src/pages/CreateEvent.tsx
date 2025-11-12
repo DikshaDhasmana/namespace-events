@@ -342,7 +342,7 @@ const CreateEvent = () => {
       // Insert form fields
       const fieldsToInsert = registrationFormFields.map(field => ({
         form_id: newForm.id,
-        field_type: field.field_type === 'profile_field' ? 'text' : field.field_type,
+        field_type: field.field_type,
         label: field.label,
         description: field.description,
         placeholder: field.placeholder,

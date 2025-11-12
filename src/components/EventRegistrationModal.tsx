@@ -111,11 +111,15 @@ const EventRegistrationModal = ({
 
       // Fetch user profile data for pre-filling
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+        }
 
         if (profile) {
           setProfileData(profile);
@@ -132,6 +136,21 @@ const EventRegistrationModal = ({
               initialData[field.id] = profile[field.profile_field];
               // Set save flag to false for fields that already have profile data
               initialSaveFlags[field.id] = false;
+            } else {
+              initialData[field.id] = '';
+            }
+          });
+
+          setFormData(initialData);
+          setProfileSaveFlags(initialSaveFlags);
+        } else {
+          // Initialize empty form data if no profile
+          const initialData: Record<string, any> = {};
+          const initialSaveFlags: Record<string, boolean> = {};
+
+          formattedFields.forEach(field => {
+            if (field.field_type === 'checkbox') {
+              initialData[field.id] = [];
             } else {
               initialData[field.id] = '';
             }
