@@ -288,6 +288,21 @@ const EventRegistrationModal = ({
           title: "Profile Updated",
           description: `${Object.keys(profileUpdates).length} field(s) saved to your profile`,
         });
+
+        // Sync Dashboard draft and notify app
+        try {
+          const saved = localStorage.getItem('profileFormDraft');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            localStorage.setItem('profileFormDraft', JSON.stringify({ ...parsed, ...profileUpdates }));
+          }
+        } catch {}
+        
+        // Update local profileData state
+        setProfileData(prev => ({ ...prev, ...profileUpdates }));
+        
+        // Dispatch a custom event so other pages can react
+        window.dispatchEvent(new CustomEvent('profile-updated', { detail: { updates: profileUpdates } }));
       } else {
         console.log('No profile updates to apply');
       }
