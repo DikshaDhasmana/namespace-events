@@ -241,10 +241,21 @@ const EventRegistrationModal = ({
 
       // Save profile data for profile fields
       const profileUpdates: Record<string, any> = {};
+      
+      console.log('=== Profile Save Debug ===');
+      console.log('Current profileSaveFlags:', profileSaveFlags);
+      console.log('Current formData:', formData);
+      
       formFields.forEach(field => {
         if (field.field_type === 'profile_field' && field.profile_field) {
           const fieldValue = formData[field.id];
           const shouldSave = profileSaveFlags[field.id];
+          
+          console.log(`Field ${field.label} (${field.profile_field}):`, {
+            value: fieldValue,
+            shouldSave: shouldSave,
+            willSave: shouldSave && fieldValue
+          });
 
           if (shouldSave && fieldValue) {
             profileUpdates[field.profile_field] = fieldValue;
@@ -253,6 +264,8 @@ const EventRegistrationModal = ({
       });
 
       // Update profile if there are changes to save
+      console.log('Profile updates to apply:', profileUpdates);
+      
       if (Object.keys(profileUpdates).length > 0) {
         console.log('Updating profile with:', profileUpdates);
         const { error: profileError } = await supabase
@@ -262,9 +275,21 @@ const EventRegistrationModal = ({
 
         if (profileError) {
           console.error('Profile update error:', profileError);
+          toast({
+            title: "Profile Update Failed",
+            description: profileError.message,
+            variant: "destructive",
+          });
           throw profileError;
         }
         console.log('Profile updated successfully');
+        
+        toast({
+          title: "Profile Updated",
+          description: `${Object.keys(profileUpdates).length} field(s) saved to your profile`,
+        });
+      } else {
+        console.log('No profile updates to apply');
       }
 
       // Create form submission
@@ -504,6 +529,9 @@ const EventRegistrationModal = ({
         );
 
       case 'profile_field':
+        const hasExistingData = profileData[field.profile_field || ''];
+        const willAutoSave = profileSaveFlags[field.id];
+        
         return (
           <div className="space-y-2">
             <Input
@@ -513,15 +541,22 @@ const EventRegistrationModal = ({
               onChange={(e) => handleInputChange(field.id, e.target.value)}
               required={field.required}
             />
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id={`save-profile-${field.id}`}
-                checked={profileSaveFlags[field.id] || false}
-                onCheckedChange={(checked) => setProfileSaveFlags(prev => ({ ...prev, [field.id]: checked as boolean }))}
-              />
-              <Label htmlFor={`save-profile-${field.id}`} className="text-sm">
-                Save changes to profile
-              </Label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`save-profile-${field.id}`}
+                  checked={profileSaveFlags[field.id] || false}
+                  onCheckedChange={(checked) => setProfileSaveFlags(prev => ({ ...prev, [field.id]: checked as boolean }))}
+                />
+                <Label htmlFor={`save-profile-${field.id}`} className="text-sm">
+                  Save to profile
+                </Label>
+              </div>
+              {!hasExistingData && willAutoSave && (
+                <span className="text-xs text-muted-foreground">
+                  Will auto-save
+                </span>
+              )}
             </div>
           </div>
         );
