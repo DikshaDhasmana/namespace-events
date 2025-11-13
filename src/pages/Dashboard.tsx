@@ -275,6 +275,30 @@ export default function Dashboard() {
     };
   }, []);
 
+  // Listen for profile updates triggered from other pages (e.g., registration modal)
+  useEffect(() => {
+    const handleProfileUpdated = (e: any) => {
+      const updates = (e as CustomEvent).detail?.updates || {};
+      // Refresh the server copy
+      fetchProfile();
+      // Merge into editable form and local draft so UI reflects latest
+      setProfileForm(prev => ({ ...prev, ...updates }));
+      try {
+        const saved = localStorage.getItem('profileFormDraft');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          localStorage.setItem('profileFormDraft', JSON.stringify({ ...parsed, ...updates }));
+        }
+      } catch {}
+    };
+
+    window.addEventListener('profile-updated', handleProfileUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('profile-updated', handleProfileUpdated as EventListener);
+    };
+  }, []);
+
   const fetchProfile = async () => {
     if (!user) return;
 
