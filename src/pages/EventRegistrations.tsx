@@ -44,11 +44,20 @@ interface Event {
   event_type: string;
   date: string;
   venue: string;
+  registration_form_id: string | null;
+}
+
+interface FormField {
+  id: string;
+  label: string;
+  field_type: string;
+  order_index: number;
 }
 
 const EventRegistrations = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [event, setEvent] = useState<Event | null>(null);
+  const [formFields, setFormFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const { eventId } = useParams<{ eventId: string }>();
@@ -69,7 +78,7 @@ const EventRegistrations = () => {
   const fetchEventAndRegistrations = async () => {
     try {
       const [eventResponse, registrationsResponse] = await Promise.all([
-        supabase.from('events').select('*, forms!events_registration_form_id_fkey(id, title)').eq('id', eventId).single(),
+        supabase.from('events').select('id, name, event_type, date, venue, registration_form_id').eq('id', eventId).single(),
         supabase
           .from('registrations')
           .select('id, registered_at, user_id, status, form_submission_id')
@@ -79,6 +88,17 @@ const EventRegistrations = () => {
 
       if (eventResponse.error) throw eventResponse.error;
       if (registrationsResponse.error) throw registrationsResponse.error;
+
+      // Fetch form fields if there's a registration form
+      if (eventResponse.data?.registration_form_id) {
+        const { data: fields } = await supabase
+          .from('form_fields')
+          .select('id, label, field_type, order_index')
+          .eq('form_id', eventResponse.data.registration_form_id)
+          .order('order_index');
+        
+        setFormFields(fields || []);
+      }
 
       // Fetch profiles separately
       const userIds = registrationsResponse.data?.map(r => r.user_id) || [];
@@ -170,22 +190,25 @@ const EventRegistrations = () => {
       return;
     }
 
-    const worksheetData = registrations.map((reg, index) => ({
-      'S.No': index + 1,
-      'Full Name': reg.profiles.full_name || 'Not provided',
-      'Email': reg.profiles.email,
-      'Phone Number': reg.profiles.phone_number || 'Not provided',
-      'Date of Birth': reg.profiles.date_of_birth ? format(new Date(reg.profiles.date_of_birth), 'dd/MM/yyyy') : 'Not provided',
-      'College': reg.profiles.college || 'Not provided',
-      'Degree': reg.profiles.degree || 'Not provided',
-      'Graduation Year': reg.profiles.graduation_year || 'Not provided',
-      'Skills': reg.profiles.skills?.join(', ') || 'Not provided',
-      'GitHub': reg.profiles.github_url || 'Not provided',
-      'LinkedIn': reg.profiles.linkedin_url || 'Not provided',
-      'LeetCode': reg.profiles.leetcode_url || 'Not provided',
-      'Profile Completed': reg.profiles.profile_completed ? 'Yes' : 'No',
-      'Registration Date': format(new Date(reg.registered_at), 'dd/MM/yyyy hh:mm a')
-    }));
+    const worksheetData = registrations.map((reg, index) => {
+      const baseData: any = {
+        'S.No': index + 1,
+        'Full Name': reg.profiles.full_name || 'Not provided',
+        'Email': reg.profiles.email,
+        'Status': reg.status,
+        'Registration Date': format(new Date(reg.registered_at), 'dd/MM/yyyy hh:mm a')
+      };
+
+      // Add form submission data with proper field labels
+      if (reg.form_submission?.submission_data) {
+        formFields.forEach(field => {
+          const value = reg.form_submission!.submission_data[field.id];
+          baseData[field.label] = Array.isArray(value) ? value.join(', ') : (value || 'Not provided');
+        });
+      }
+
+      return baseData;
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
@@ -341,114 +364,30 @@ const EventRegistrations = () => {
                     </CardHeader>
                     <CardContent>
                       {/* Form Submission Data */}
-                      {registration.form_submission?.submission_data && (
-                        <div className="space-y-2 pb-4 mb-4 border-b">
+                      {registration.form_submission?.submission_data && formFields.length > 0 ? (
+                        <div className="space-y-2">
                           <div className="text-sm font-semibold mb-3">Registration Form Responses</div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {Object.entries(registration.form_submission.submission_data).map(([key, value]) => (
-                              <div key={key} className="space-y-1">
-                                <div className="text-xs font-medium text-muted-foreground capitalize">
-                                  {key.replace(/_/g, ' ')}
+                            {formFields.map(field => {
+                              const value = registration.form_submission!.submission_data[field.id];
+                              return (
+                                <div key={field.id} className="space-y-1">
+                                  <div className="text-xs font-medium text-muted-foreground">
+                                    {field.label}
+                                  </div>
+                                  <div className="text-sm">
+                                    {Array.isArray(value) ? value.join(', ') : String(value || '-')}
+                                  </div>
                                 </div>
-                                <div className="text-sm">
-                                  {Array.isArray(value) ? value.join(', ') : String(value || '-')}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          No registration form data available
                         </div>
                       )}
-
-                      {/* Profile Data */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <User className="h-4 w-4" />
-                            Contact Info
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.phone_number && (
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-3 w-3" />
-                                {registration.profiles.phone_number}
-                              </div>
-                            )}
-                            {registration.profiles.date_of_birth && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-3 w-3" />
-                                Born: {format(new Date(registration.profiles.date_of_birth), 'MMM d, yyyy')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <GraduationCap className="h-4 w-4" />
-                            Academic Background
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.college && <div><span className="font-medium">College:</span> {registration.profiles.college}</div>}
-                            {registration.profiles.degree && <div><span className="font-medium">Degree:</span> {registration.profiles.degree}</div>}
-                            {registration.profiles.graduation_year && <div><span className="font-medium">Graduation Year:</span> {registration.profiles.graduation_year}</div>}
-                            {!registration.profiles.college && !registration.profiles.degree && !registration.profiles.graduation_year && 'Not provided'}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Code className="h-4 w-4" />
-                            Skills
-                          </div>
-                          <div className="space-y-2">
-                            {registration.profiles.skills && registration.profiles.skills.length > 0 && (
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">Skills:</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {registration.profiles.skills.map((skill, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Github className="h-4 w-4" />
-                            Professional Links
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.github_url && (
-                              <div className="flex items-center gap-2">
-                                <Github className="h-3 w-3" />
-                                <a href={registration.profiles.github_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  GitHub Profile
-                                </a>
-                              </div>
-                            )}
-                            {registration.profiles.linkedin_url && (
-                              <div className="flex items-center gap-2">
-                                <Linkedin className="h-3 w-3" />
-                                <a href={registration.profiles.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  LinkedIn Profile
-                                </a>
-                              </div>
-                            )}
-                            {registration.profiles.leetcode_url && (
-                              <div className="flex items-center gap-2">
-                                <Code className="h-3 w-3" />
-                                <a href={registration.profiles.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  LeetCode Profile
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
                 ))
@@ -493,114 +432,30 @@ const EventRegistrations = () => {
                     </CardHeader>
                     <CardContent>
                       {/* Form Submission Data */}
-                      {registration.form_submission?.submission_data && (
-                        <div className="space-y-2 pb-4 mb-4 border-b">
+                      {registration.form_submission?.submission_data && formFields.length > 0 ? (
+                        <div className="space-y-2">
                           <div className="text-sm font-semibold mb-3">Registration Form Responses</div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {Object.entries(registration.form_submission.submission_data).map(([key, value]) => (
-                              <div key={key} className="space-y-1">
-                                <div className="text-xs font-medium text-muted-foreground capitalize">
-                                  {key.replace(/_/g, ' ')}
+                            {formFields.map(field => {
+                              const value = registration.form_submission!.submission_data[field.id];
+                              return (
+                                <div key={field.id} className="space-y-1">
+                                  <div className="text-xs font-medium text-muted-foreground">
+                                    {field.label}
+                                  </div>
+                                  <div className="text-sm">
+                                    {Array.isArray(value) ? value.join(', ') : String(value || '-')}
+                                  </div>
                                 </div>
-                                <div className="text-sm">
-                                  {Array.isArray(value) ? value.join(', ') : String(value || '-')}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          No registration form data available
                         </div>
                       )}
-
-                      {/* Profile Data */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <User className="h-4 w-4" />
-                            Contact Info
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.phone_number && (
-                              <div className="flex items-center gap-2">
-                                <Phone className="h-3 w-3" />
-                                {registration.profiles.phone_number}
-                              </div>
-                            )}
-                            {registration.profiles.date_of_birth && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-3 w-3" />
-                                Born: {format(new Date(registration.profiles.date_of_birth), 'MMM d, yyyy')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <GraduationCap className="h-4 w-4" />
-                            Academic Background
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.college && <div><span className="font-medium">College:</span> {registration.profiles.college}</div>}
-                            {registration.profiles.degree && <div><span className="font-medium">Degree:</span> {registration.profiles.degree}</div>}
-                            {registration.profiles.graduation_year && <div><span className="font-medium">Graduation Year:</span> {registration.profiles.graduation_year}</div>}
-                            {!registration.profiles.college && !registration.profiles.degree && !registration.profiles.graduation_year && 'Not provided'}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Code className="h-4 w-4" />
-                            Skills
-                          </div>
-                          <div className="space-y-2">
-                            {registration.profiles.skills && registration.profiles.skills.length > 0 && (
-                              <div>
-                                <div className="text-xs text-muted-foreground mb-1">Skills:</div>
-                                <div className="flex flex-wrap gap-1">
-                                  {registration.profiles.skills.map((skill, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs">
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-medium">
-                            <Github className="h-4 w-4" />
-                            Professional Links
-                          </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
-                            {registration.profiles.github_url && (
-                              <div className="flex items-center gap-2">
-                                <Github className="h-3 w-3" />
-                                <a href={registration.profiles.github_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  GitHub Profile
-                                </a>
-                              </div>
-                            )}
-                            {registration.profiles.linkedin_url && (
-                              <div className="flex items-center gap-2">
-                                <Linkedin className="h-3 w-3" />
-                                <a href={registration.profiles.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  LinkedIn Profile
-                                </a>
-                              </div>
-                            )}
-                            {registration.profiles.leetcode_url && (
-                              <div className="flex items-center gap-2">
-                                <Code className="h-3 w-3" />
-                                <a href={registration.profiles.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                  LeetCode Profile
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
                 ))
