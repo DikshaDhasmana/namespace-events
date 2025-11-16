@@ -45,6 +45,7 @@ interface Event {
   date: string;
   venue: string;
   registration_form_id: string | null;
+  confirmation_email_enabled: boolean | null;
 }
 
 interface FormField {
@@ -78,7 +79,7 @@ const EventRegistrations = () => {
   const fetchEventAndRegistrations = async () => {
     try {
       const [eventResponse, registrationsResponse] = await Promise.all([
-        supabase.from('events').select('id, name, event_type, date, venue, registration_form_id').eq('id', eventId).single(),
+        supabase.from('events').select('id, name, event_type, date, venue, registration_form_id, confirmation_email_enabled').eq('id', eventId).single(),
         supabase
           .from('registrations')
           .select('id, registered_at, user_id, status, form_submission_id')
@@ -148,21 +149,23 @@ const EventRegistrations = () => {
 
       if (error) throw error;
 
-      // Send approval email
-      const emailTemplate = EmailService.generateEventEmailTemplate({
-        eventName: event?.name || '',
-        applicantName: registration.profiles.full_name || 'Participant',
-        message: `Congratulations! Your registration request for ${event?.name} has been approved. We look forward to seeing you at the event!`,
-        eventDate: event ? format(new Date(event.date), 'PPP') : '',
-        eventVenue: event?.venue || '',
-        subject: `Registration Approved: ${event?.name}`
-      });
+      // Send approval email only if confirmation emails are enabled
+      if (event?.confirmation_email_enabled !== false) {
+        const emailTemplate = EmailService.generateEventEmailTemplate({
+          eventName: event?.name || '',
+          applicantName: registration.profiles.full_name || 'Participant',
+          message: `Congratulations! Your registration request for ${event?.name} has been approved. We look forward to seeing you at the event!`,
+          eventDate: event ? format(new Date(event.date), 'PPP') : '',
+          eventVenue: event?.venue || '',
+          subject: `Registration Approved: ${event?.name}`
+        });
 
-      await EmailService.sendEmail({
-        to: registration.profiles.email,
-        subject: `Registration Approved: ${event?.name}`,
-        html: emailTemplate
-      });
+        await EmailService.sendEmail({
+          to: registration.profiles.email,
+          subject: `Registration Approved: ${event?.name}`,
+          html: emailTemplate
+        });
+      }
 
       toast({
         title: 'Registration Approved',

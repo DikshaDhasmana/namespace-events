@@ -12,6 +12,7 @@ interface Event {
   id: string;
   name: string;
   approval_enabled: boolean | null;
+  confirmation_email_enabled: boolean | null;
 }
 
 const EventRegister = () => {
@@ -39,7 +40,7 @@ const EventRegister = () => {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select('id, name, approval_enabled')
+        .select('id, name, approval_enabled, confirmation_email_enabled')
         .eq('id', eventId)
         .single();
 
@@ -123,6 +124,7 @@ const EventRegister = () => {
                 eventId={event.id}
                 eventName={event.name}
                 approvalEnabled={event.approval_enabled || false}
+                confirmationEmailEnabled={event.confirmation_email_enabled ?? true}
                 onRegistrationSuccess={handleRegistrationSuccess}
               />
             )}

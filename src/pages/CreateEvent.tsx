@@ -51,6 +51,7 @@ const CreateEvent = () => {
     rules: '',
     eligibility: '',
     submission_format: '',
+    confirmation_email_enabled: true,
     // Hackathon-specific dynamic fields
     timeline: [] as any[],
     prizes_and_tracks: [] as any[],
@@ -197,6 +198,7 @@ const CreateEvent = () => {
           rules: data.rules || '',
           eligibility: data.eligibility || '',
           submission_format: data.submission_format || '',
+          confirmation_email_enabled: data.confirmation_email_enabled ?? true,
           timeline: Array.isArray(data.timeline) ? data.timeline : [],
           prizes_and_tracks: Array.isArray(data.prizes_and_tracks) ? data.prizes_and_tracks : [],
           judges_and_mentors: Array.isArray(data.judges_and_mentors) ? data.judges_and_mentors : []
@@ -488,6 +490,7 @@ const CreateEvent = () => {
         rules: formData.rules || null,
         eligibility: formData.eligibility || null,
         submission_format: formData.submission_format || null,
+        confirmation_email_enabled: formData.confirmation_email_enabled ?? true,
         timeline: formData.timeline || [],
         prizes_and_tracks: formData.prizes_and_tracks || [],
         judges_and_mentors: formData.judges_and_mentors || []
@@ -626,6 +629,17 @@ const CreateEvent = () => {
                   />
                   <Label htmlFor="approval_enabled" className="cursor-pointer">
                     Require approval for registrations
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="confirmation_email_enabled"
+                    checked={formData.confirmation_email_enabled}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, confirmation_email_enabled: checked as boolean }))}
+                  />
+                  <Label htmlFor="confirmation_email_enabled" className="cursor-pointer">
+                    Send confirmation email to applicants
                   </Label>
                 </div>
 
