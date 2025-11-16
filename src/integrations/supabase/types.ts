@@ -250,6 +250,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_event_form: boolean | null
           is_published: boolean | null
           require_signin: boolean
           title: string
@@ -259,6 +260,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_event_form?: boolean | null
           is_published?: boolean | null
           require_signin?: boolean
           title: string
@@ -268,6 +270,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_event_form?: boolean | null
           is_published?: boolean | null
           require_signin?: boolean
           title?: string

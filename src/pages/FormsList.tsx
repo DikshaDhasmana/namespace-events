@@ -49,6 +49,7 @@ const FormsList = () => {
       const { data, error } = await supabase
         .from('forms')
         .select('*')
+        .eq('is_event_form', false)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
