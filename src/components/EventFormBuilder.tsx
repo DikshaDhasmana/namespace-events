@@ -11,7 +11,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file' | 'profile_field';
+export type FieldType = 'text' | 'email' | 'number' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'date' | 'time' | 'file' | 'profile_field';
 
 export interface FormField {
   id: string;
