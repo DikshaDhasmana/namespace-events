@@ -583,7 +583,13 @@ export default function Dashboard() {
         {/* Mobile Layout */}
         <div className="lg:hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-6">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="events">My Events</TabsTrigger>
+              <TabsTrigger value="projects">My Projects</TabsTrigger>
+              <TabsTrigger value="profile">My Profile</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="events" className="space-y-6 sm:space-y-8 mt-0">
             {registrations.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent className="space-y-4">
@@ -805,7 +811,7 @@ export default function Dashboard() {
             )}
             </TabsContent>
 
-            <TabsContent value="projects" className="space-y-6 mt-6">
+            <TabsContent value="projects" className="space-y-6 mt-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold font-sora">My Projects</h2>
@@ -846,7 +852,7 @@ export default function Dashboard() {
               )}
             </TabsContent>
 
-            <TabsContent value="profile" className="space-y-6 mt-6" id="profile-section">
+            <TabsContent value="profile" className="space-y-6 mt-0" id="profile-section">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
