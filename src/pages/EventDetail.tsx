@@ -44,6 +44,7 @@ interface Event {
   banner_url: string | null;
   created_at: string;
   approval_enabled: boolean | null;
+  confirmation_email_enabled: boolean | null;
   timezone: string;
   timeline?: TimelineEntry[];
   prizes_and_tracks?: PrizeTrack[];
@@ -293,6 +294,11 @@ export default function EventDetail() {
   };
   const sendConfirmationEmail = async () => {
     if (!user || !event) return;
+    
+    // Check if confirmation emails are enabled for this event
+    if (event.confirmation_email_enabled === false) {
+      return;
+    }
     
     try {
       console.log('Attempting to send confirmation email...');
@@ -845,6 +851,7 @@ export default function EventDetail() {
         eventId={event?.id || ''}
         eventName={event?.name || ''}
         approvalEnabled={event?.approval_enabled || false}
+        confirmationEmailEnabled={event?.confirmation_email_enabled ?? true}
         utmSource={utmSource}
         onRegistrationSuccess={() => {
           setRegistrationModalOpen(false);

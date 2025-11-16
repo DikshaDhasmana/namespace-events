@@ -39,6 +39,7 @@ export type Database = {
         Row: {
           approval_enabled: boolean | null
           banner_url: string | null
+          confirmation_email_enabled: boolean | null
           contest_type: string | null
           created_at: string
           date: string
@@ -79,6 +80,7 @@ export type Database = {
         Insert: {
           approval_enabled?: boolean | null
           banner_url?: string | null
+          confirmation_email_enabled?: boolean | null
           contest_type?: string | null
           created_at?: string
           date: string
@@ -119,6 +121,7 @@ export type Database = {
         Update: {
           approval_enabled?: boolean | null
           banner_url?: string | null
+          confirmation_email_enabled?: boolean | null
           contest_type?: string | null
           created_at?: string
           date?: string

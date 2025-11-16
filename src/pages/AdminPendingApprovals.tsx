@@ -18,6 +18,7 @@ interface PendingRegistration {
   event_name: string;
   event_date: string;
   event_venue: string;
+  event_confirmation_email_enabled: boolean | null;
   user_name: string;
   user_email: string;
   user_phone: string;
@@ -74,26 +75,28 @@ export default function AdminPendingApprovals() {
 
       if (error) throw error;
 
-      // Send approval email
-      const emailTemplate = EmailService.generateEventEmailTemplate({
-        eventName: registration.event_name,
-        applicantName: registration.user_name,
-        message: `Congratulations! Your registration request for ${registration.event_name} has been approved. We look forward to seeing you at the event!`,
-        eventDate: new Date(registration.event_date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        eventVenue: registration.event_venue,
-        subject: `Registration Approved: ${registration.event_name}`
-      });
+      // Send approval email only if confirmation emails are enabled
+      if (registration.event_confirmation_email_enabled !== false) {
+        const emailTemplate = EmailService.generateEventEmailTemplate({
+          eventName: registration.event_name,
+          applicantName: registration.user_name,
+          message: `Congratulations! Your registration request for ${registration.event_name} has been approved. We look forward to seeing you at the event!`,
+          eventDate: new Date(registration.event_date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          eventVenue: registration.event_venue,
+          subject: `Registration Approved: ${registration.event_name}`
+        });
 
-      await EmailService.sendEmail({
-        to: registration.user_email,
-        subject: `Registration Approved: ${registration.event_name}`,
-        html: emailTemplate
-      });
+        await EmailService.sendEmail({
+          to: registration.user_email,
+          subject: `Registration Approved: ${registration.event_name}`,
+          html: emailTemplate
+        });
+      }
 
       toast({
         title: 'Registration Approved',

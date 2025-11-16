@@ -29,6 +29,7 @@ interface EventRegistrationModalProps {
   eventId: string;
   eventName: string;
   approvalEnabled: boolean;
+  confirmationEmailEnabled?: boolean;
   utmSource?: string | null;
   onRegistrationSuccess: () => void;
 }
@@ -39,6 +40,7 @@ const EventRegistrationModal = ({
   eventId,
   eventName,
   approvalEnabled,
+  confirmationEmailEnabled = true,
   utmSource,
   onRegistrationSuccess
 }: EventRegistrationModalProps) => {
@@ -347,10 +349,12 @@ const EventRegistrationModal = ({
       });
 
       // Send appropriate email
-      if (approvalEnabled) {
-        await sendPendingEmail(event.date, event.venue);
-      } else {
-        await sendConfirmationEmail(event.date, event.venue);
+      if (confirmationEmailEnabled) {
+        if (approvalEnabled) {
+          await sendPendingEmail(event.date, event.venue);
+        } else {
+          await sendConfirmationEmail(event.date, event.venue);
+        }
       }
 
       onRegistrationSuccess();
