@@ -18,6 +18,7 @@ interface Registration {
   registered_at: string;
   user_id: string;
   status: 'pending' | 'approved' | 'rejected';
+  form_submission_id: string | null;
   profiles: {
     email: string;
     full_name: string;
@@ -31,6 +32,9 @@ interface Registration {
     github_url: string;
     linkedin_url: string;
     leetcode_url: string;
+  };
+  form_submission?: {
+    submission_data: any;
   };
 }
 
@@ -65,10 +69,10 @@ const EventRegistrations = () => {
   const fetchEventAndRegistrations = async () => {
     try {
       const [eventResponse, registrationsResponse] = await Promise.all([
-        supabase.from('events').select('*').eq('id', eventId).single(),
+        supabase.from('events').select('*, forms!events_registration_form_id_fkey(id, title)').eq('id', eventId).single(),
         supabase
           .from('registrations')
-          .select('id, registered_at, user_id, status')
+          .select('id, registered_at, user_id, status, form_submission_id')
           .eq('event_id', eventId)
           .order('registered_at', { ascending: false })
       ]);
@@ -83,7 +87,14 @@ const EventRegistrations = () => {
         .select('id, email, full_name, phone_number, date_of_birth, college, degree, graduation_year, skills, profile_completed, github_url, linkedin_url, leetcode_url')
         .in('id', userIds);
 
-      // Merge registrations with profiles
+      // Fetch form submissions
+      const submissionIds = registrationsResponse.data?.map(r => r.form_submission_id).filter(Boolean) || [];
+      const { data: submissions } = await supabase
+        .from('form_submissions')
+        .select('id, submission_data')
+        .in('id', submissionIds);
+
+      // Merge registrations with profiles and form submissions
       const registrationsWithProfiles = registrationsResponse.data?.map(reg => ({
         ...reg,
         status: reg.status as 'pending' | 'approved' | 'rejected',
@@ -91,7 +102,8 @@ const EventRegistrations = () => {
           email: '', full_name: '', phone_number: '', date_of_birth: '',
           college: '', degree: '', graduation_year: 0, skills: [], profile_completed: false,
           github_url: '', linkedin_url: '', leetcode_url: ''
-        }
+        },
+        form_submission: submissions?.find(s => s.id === reg.form_submission_id)
       })) || [];
 
       setEvent(eventResponse.data);
@@ -328,6 +340,26 @@ const EventRegistrations = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
+                      {/* Form Submission Data */}
+                      {registration.form_submission?.submission_data && (
+                        <div className="space-y-2 pb-4 mb-4 border-b">
+                          <div className="text-sm font-semibold mb-3">Registration Form Responses</div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Object.entries(registration.form_submission.submission_data).map(([key, value]) => (
+                              <div key={key} className="space-y-1">
+                                <div className="text-xs font-medium text-muted-foreground capitalize">
+                                  {key.replace(/_/g, ' ')}
+                                </div>
+                                <div className="text-sm">
+                                  {Array.isArray(value) ? value.join(', ') : String(value || '-')}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Profile Data */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm font-medium">
@@ -460,6 +492,26 @@ const EventRegistrations = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
+                      {/* Form Submission Data */}
+                      {registration.form_submission?.submission_data && (
+                        <div className="space-y-2 pb-4 mb-4 border-b">
+                          <div className="text-sm font-semibold mb-3">Registration Form Responses</div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {Object.entries(registration.form_submission.submission_data).map(([key, value]) => (
+                              <div key={key} className="space-y-1">
+                                <div className="text-xs font-medium text-muted-foreground capitalize">
+                                  {key.replace(/_/g, ' ')}
+                                </div>
+                                <div className="text-sm">
+                                  {Array.isArray(value) ? value.join(', ') : String(value || '-')}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Profile Data */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm font-medium">

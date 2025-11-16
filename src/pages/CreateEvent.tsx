@@ -323,42 +323,97 @@ const CreateEvent = () => {
     setLoading(true);
 
     try {
-      // First create the registration form
-      const formDataToInsert = {
-        title: `${formData.name} Registration Form`,
-        description: `Registration form for ${formData.name}`,
-        is_published: true,
-        require_signin: false
-      };
+      let formId = null;
 
-      const { data: newForm, error: formError } = await supabase
-        .from('forms')
-        .insert([formDataToInsert])
-        .select()
-        .single();
+      if (isEditMode && eventId) {
+        // In edit mode, fetch existing form and update it
+        const { data: existingEvent } = await supabase
+          .from('events')
+          .select('registration_form_id')
+          .eq('id', eventId)
+          .single();
 
-      if (formError) throw formError;
+        if (existingEvent?.registration_form_id) {
+          formId = existingEvent.registration_form_id;
 
-      // Insert form fields
-      const fieldsToInsert = registrationFormFields.map(field => ({
-        form_id: newForm.id,
-        field_type: field.field_type,
-        label: field.label,
-        description: field.description,
-        placeholder: field.placeholder,
-        required: field.required,
-        options: field.options.length > 0 ? field.options : null,
-        order_index: field.order_index,
-        profile_field: field.profile_field || null
-      }));
+          // Update the form
+          const { error: formUpdateError } = await supabase
+            .from('forms')
+            .update({
+              title: `${formData.name} Registration Form`,
+              description: `Registration form for ${formData.name}`,
+            })
+            .eq('id', formId);
 
-      const { error: fieldsError } = await supabase
-        .from('form_fields')
-        .insert(fieldsToInsert);
+          if (formUpdateError) throw formUpdateError;
 
-      if (fieldsError) throw fieldsError;
+          // Delete existing form fields
+          const { error: deleteFieldsError } = await supabase
+            .from('form_fields')
+            .delete()
+            .eq('form_id', formId);
 
-      // Now create the event with the form reference
+          if (deleteFieldsError) throw deleteFieldsError;
+
+          // Insert updated form fields
+          const fieldsToInsert = registrationFormFields.map(field => ({
+            form_id: formId,
+            field_type: field.field_type,
+            label: field.label,
+            description: field.description,
+            placeholder: field.placeholder,
+            required: field.required,
+            options: field.options.length > 0 ? field.options : null,
+            order_index: field.order_index,
+            profile_field: field.profile_field || null
+          }));
+
+          const { error: fieldsError } = await supabase
+            .from('form_fields')
+            .insert(fieldsToInsert);
+
+          if (fieldsError) throw fieldsError;
+        }
+      } else {
+        // Create new form for new event
+        const formDataToInsert = {
+          title: `${formData.name} Registration Form`,
+          description: `Registration form for ${formData.name}`,
+          is_published: true,
+          require_signin: false,
+          is_event_form: true
+        };
+
+        const { data: newForm, error: formError } = await supabase
+          .from('forms')
+          .insert([formDataToInsert])
+          .select()
+          .single();
+
+        if (formError) throw formError;
+        formId = newForm.id;
+
+        // Insert form fields
+        const fieldsToInsert = registrationFormFields.map(field => ({
+          form_id: formId,
+          field_type: field.field_type,
+          label: field.label,
+          description: field.description,
+          placeholder: field.placeholder,
+          required: field.required,
+          options: field.options.length > 0 ? field.options : null,
+          order_index: field.order_index,
+          profile_field: field.profile_field || null
+        }));
+
+        const { error: fieldsError } = await supabase
+          .from('form_fields')
+          .insert(fieldsToInsert);
+
+        if (fieldsError) throw fieldsError;
+      }
+
+      // Now create/update the event
       let banner_url = bannerPreview;
       let display_image_url = displayImagePreview;
 
@@ -376,7 +431,7 @@ const CreateEvent = () => {
         }
       }
 
-      const eventData = {
+      const eventData: any = {
         name: formData.name,
         description: formData.description,
         event_type: formData.event_type as any,
@@ -389,9 +444,7 @@ const CreateEvent = () => {
         timezone: formData.timezone,
         banner_url: banner_url || null,
         display_image_url: display_image_url || null,
-        registration_form_id: newForm.id,
-        short_id: Math.random().toString(36).substring(2, 8).toUpperCase(),
-        end_date: formData.end_date ? convertLocalToUTC(formData.end_date, formData.timezone) : null,
+        registration_form_id: formId,
         speaker: formData.speaker || null,
         prerequisites: formData.prerequisites || null,
         prizes: formData.prizes || null,
@@ -410,6 +463,11 @@ const CreateEvent = () => {
         prizes_and_tracks: formData.prizes_and_tracks || [],
         judges_and_mentors: formData.judges_and_mentors || []
       };
+
+      // Only set short_id for new events
+      if (!isEditMode) {
+        eventData.short_id = Math.random().toString(36).substring(2, 8).toUpperCase();
+      }
 
       let error;
       if (isEditMode && eventId) {
