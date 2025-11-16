@@ -18,7 +18,7 @@ import HackathonForm from '@/components/forms/HackathonForm';
 import MeetupForm from '@/components/forms/MeetupForm';
 import ContestForm from '@/components/forms/ContestForm';
 import BootcampForm from '@/components/forms/BootcampForm';
-import EventFormBuilder, { FormField } from '@/components/EventFormBuilder';
+import EventFormBuilder, { FormField, FieldType } from '@/components/EventFormBuilder';
 
 const CreateEvent = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -208,6 +208,35 @@ const CreateEvent = () => {
 
         if (data.display_image_url) {
           setDisplayImagePreview(data.display_image_url);
+        }
+
+        // Fetch form fields if the event has a registration form
+        if (data.registration_form_id) {
+          const { data: formFields, error: fieldsError } = await supabase
+            .from('form_fields')
+            .select('*')
+            .eq('form_id', data.registration_form_id)
+            .order('order_index', { ascending: true });
+
+          if (fieldsError) throw fieldsError;
+
+          if (formFields && formFields.length > 0) {
+            // Map database fields to FormField type
+            const mappedFields: FormField[] = formFields.map(field => ({
+              id: field.id,
+              field_type: field.field_type as FieldType,
+              label: field.label,
+              description: field.description || '',
+              placeholder: field.placeholder || '',
+              required: field.required || false,
+              options: Array.isArray(field.options) ? field.options as string[] : [],
+              order_index: field.order_index,
+              is_default: field.profile_field === 'full_name' || field.profile_field === 'email',
+              profile_field: field.profile_field || undefined
+            }));
+
+            setRegistrationFormFields(mappedFields);
+          }
         }
       }
     } catch (error) {
