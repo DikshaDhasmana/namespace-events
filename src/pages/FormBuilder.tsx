@@ -151,13 +151,55 @@ const FormBuilder = () => {
 
         if (updateError) throw updateError;
 
-        // Delete existing fields
-        const { error: deleteError } = await supabase
+        // Get existing field IDs
+        const { data: existingFields } = await supabase
           .from('form_fields')
-          .delete()
+          .select('id')
           .eq('form_id', formId);
 
-        if (deleteError) throw deleteError;
+        const existingFieldIds = existingFields?.map(f => f.id) || [];
+        const currentFieldIds = fields.filter(f => !f.id.startsWith('temp-')).map(f => f.id);
+        
+        // Delete only removed fields (preserve existing ones to keep submission data)
+        const fieldsToDelete = existingFieldIds.filter(id => !currentFieldIds.includes(id));
+        if (fieldsToDelete.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('form_fields')
+            .delete()
+            .in('id', fieldsToDelete);
+
+          if (deleteError) throw deleteError;
+        }
+
+        // Update existing fields and insert new ones
+        for (let index = 0; index < fields.length; index++) {
+          const field = fields[index];
+          const fieldData = {
+            form_id: savedFormId,
+            field_type: field.field_type as any,
+            label: field.label,
+            description: field.description,
+            placeholder: field.placeholder,
+            required: field.required,
+            options: field.options.length > 0 ? (field.options as any) : null,
+            order_index: index
+          };
+
+          if (field.id.startsWith('temp-')) {
+            // Insert new field
+            const { error } = await supabase
+              .from('form_fields')
+              .insert(fieldData);
+            if (error) throw error;
+          } else {
+            // Update existing field (preserve ID to maintain submission data)
+            const { error } = await supabase
+              .from('form_fields')
+              .update(fieldData)
+              .eq('id', field.id);
+            if (error) throw error;
+          }
+        }
       } else {
         // Create new form
         const { data: newForm, error: createError } = await supabase
@@ -168,26 +210,26 @@ const FormBuilder = () => {
 
         if (createError) throw createError;
         savedFormId = newForm.id;
-      }
 
-      // Insert fields
-      const fieldsToInsert = fields.map(f => ({
-        form_id: savedFormId,
-        field_type: f.field_type as any,
-        label: f.label,
-        description: f.description,
-        placeholder: f.placeholder,
-        required: f.required,
-        options: f.options.length > 0 ? (f.options as any) : null,
-        order_index: f.order_index
-      }));
+        // Insert all fields for new form
+        const fieldsToInsert = fields.map((f, index) => ({
+          form_id: savedFormId,
+          field_type: f.field_type as any,
+          label: f.label,
+          description: f.description,
+          placeholder: f.placeholder,
+          required: f.required,
+          options: f.options.length > 0 ? (f.options as any) : null,
+          order_index: index
+        }));
 
-      if (fieldsToInsert.length > 0) {
-        const { error: fieldsError } = await supabase
-          .from('form_fields')
-          .insert(fieldsToInsert);
+        if (fieldsToInsert.length > 0) {
+          const { error: fieldsError } = await supabase
+            .from('form_fields')
+            .insert(fieldsToInsert);
 
-        if (fieldsError) throw fieldsError;
+          if (fieldsError) throw fieldsError;
+        }
       }
 
       toast({
