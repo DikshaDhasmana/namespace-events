@@ -61,7 +61,9 @@ export type Database = {
           prizes: string | null
           prizes_and_tracks: Json | null
           refreshments: string | null
+          registration_end: string | null
           registration_form_id: string | null
+          registration_start: string | null
           rules: string | null
           short_id: string
           speaker: string | null
@@ -102,7 +104,9 @@ export type Database = {
           prizes?: string | null
           prizes_and_tracks?: Json | null
           refreshments?: string | null
+          registration_end?: string | null
           registration_form_id?: string | null
+          registration_start?: string | null
           rules?: string | null
           short_id: string
           speaker?: string | null
@@ -143,7 +147,9 @@ export type Database = {
           prizes?: string | null
           prizes_and_tracks?: Json | null
           refreshments?: string | null
+          registration_end?: string | null
           registration_form_id?: string | null
+          registration_start?: string | null
           rules?: string | null
           short_id?: string
           speaker?: string | null

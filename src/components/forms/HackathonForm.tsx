@@ -263,15 +263,44 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="team_size">Team Size</Label>
+        <Label htmlFor="team_size">Maximum Team Size</Label>
         <Input
           id="team_size"
           name="team_size"
           type="number"
-          value={formData.team_size || ''}
+          min="1"
+          value={formData.team_size}
           onChange={onInputChange}
-          placeholder="e.g., 4"
+          placeholder="Enter maximum team size"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="submission_start">Project Submission Start *</Label>
+          <Input
+            id="submission_start"
+            name="submission_start"
+            type="datetime-local"
+            value={formData.submission_start}
+            onChange={onInputChange}
+            required
+          />
+          <p className="text-xs text-muted-foreground">When project submission opens</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="submission_end">Project Submission End *</Label>
+          <Input
+            id="submission_end"
+            name="submission_end"
+            type="datetime-local"
+            value={formData.submission_end}
+            onChange={onInputChange}
+            required
+          />
+          <p className="text-xs text-muted-foreground">When project submission closes</p>
+        </div>
       </div>
 
       <div className="space-y-4">

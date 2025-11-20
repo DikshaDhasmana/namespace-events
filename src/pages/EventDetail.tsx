@@ -46,6 +46,8 @@ interface Event {
   approval_enabled: boolean | null;
   confirmation_email_enabled: boolean | null;
   timezone: string;
+  registration_start: string | null;
+  registration_end: string | null;
   timeline?: TimelineEntry[];
   prizes_and_tracks?: PrizeTrack[];
   judges_and_mentors?: JudgeMentor[];
@@ -398,8 +400,15 @@ export default function EventDetail() {
     );
   }
 
-  // Check if event has ended (compare UTC timestamps)
+  // Check if registration is open
   const now = new Date();
+  const registrationStart = event.registration_start ? new Date(event.registration_start) : null;
+  const registrationEnd = event.registration_end ? new Date(event.registration_end) : null;
+  const isBeforeRegistration = registrationStart && now < registrationStart;
+  const isAfterRegistration = registrationEnd && now > registrationEnd;
+  const isRegistrationOpen = !isBeforeRegistration && !isAfterRegistration;
+
+  // Check if event has ended (compare UTC timestamps)
   const eventEndDate = event.end_date ? new Date(event.end_date) : new Date(event.date);
   const hasEnded = eventEndDate < now;
 
@@ -684,6 +693,27 @@ export default function EventDetail() {
                 >
                   Event Ended
                 </Button>
+              ) : !isRegistrationOpen && isBeforeRegistration ? (
+                <div className="space-y-2">
+                  <Button 
+                    disabled
+                    className="w-full"
+                    variant="secondary"
+                  >
+                    Registration Opens Soon
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Registration opens on {registrationStart?.toLocaleString()}
+                  </p>
+                </div>
+              ) : !isRegistrationOpen && isAfterRegistration ? (
+                <Button 
+                  disabled
+                  className="w-full"
+                  variant="secondary"
+                >
+                  Registration Closed
+                </Button>
               ) : isRegistered ? (
                 <div className="space-y-3">
                   {registrationStatus === 'pending' ? (
@@ -715,6 +745,7 @@ export default function EventDetail() {
                 <Button 
                   onClick={handleRegister}
                   className="w-full bg-primary hover:bg-primary/90"
+                  disabled={!isRegistrationOpen}
                 >
                   {user ? 'Register Now' : 'Sign in to Register'}
                 </Button>
@@ -778,6 +809,34 @@ export default function EventDetail() {
                   <div className="text-sm text-muted-foreground">{event.venue}</div>
                 </div>
               </div>
+
+              {(event.registration_start || event.registration_end) && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    {event.registration_start && (
+                      <div className="flex items-start space-x-3">
+                        <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div className="flex-1">
+                          <div className="font-medium">Registration Opens</div>
+                          <div className="text-sm text-muted-foreground">{formatDate(event.registration_start)}</div>
+                          <div className="text-sm text-muted-foreground">{formatTime(event.registration_start)}</div>
+                        </div>
+                      </div>
+                    )}
+                    {event.registration_end && (
+                      <div className="flex items-start space-x-3">
+                        <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div className="flex-1">
+                          <div className="font-medium">Registration Closes</div>
+                          <div className="text-sm text-muted-foreground">{formatDate(event.registration_end)}</div>
+                          <div className="text-sm text-muted-foreground">{formatTime(event.registration_end)}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
               
               {event.max_participants && (
                 <>
