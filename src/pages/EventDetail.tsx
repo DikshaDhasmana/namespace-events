@@ -725,7 +725,7 @@ export default function EventDetail() {
                       ✓ Registered
                     </div>
                   )}
-                  {event.event_type === 'hackathon' && registrationStatus === 'approved' && (
+                  {event.event_type === 'hackathon' && (
                     <Button 
                       onClick={() => navigate(`/hackathon-dashboard/${event.id}`)}
                       className="w-full bg-primary hover:bg-primary/90"

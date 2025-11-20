@@ -22,6 +22,8 @@ interface Event {
   venue: string;
   banner_url: string | null;
   team_size: number | null;
+  registration_start: string | null;
+  registration_end: string | null;
   submission_start: string | null;
   submission_end: string | null;
 }
@@ -655,83 +657,128 @@ export default function HackathonDashboard() {
                     </div>
                   </div>
                   
-                  <Button
-                    variant="outline"
-                    className="w-full gap-2 text-destructive hover:text-destructive"
-                    onClick={handleLeaveTeam}
-                    disabled={submitting}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Leave Team
-                  </Button>
+                  {(() => {
+                    const now = new Date();
+                    const registrationStart = event?.registration_start ? new Date(event.registration_start) : null;
+                    const registrationEnd = event?.registration_end ? new Date(event.registration_end) : null;
+                    const isBeforeRegistration = registrationStart && now < registrationStart;
+                    const isAfterRegistration = registrationEnd && now > registrationEnd;
+                    const canLeaveTeam = !isBeforeRegistration && !isAfterRegistration;
+
+                    return (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 text-destructive hover:text-destructive"
+                          onClick={handleLeaveTeam}
+                          disabled={submitting || !canLeaveTeam}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Leave Team
+                        </Button>
+                        {!canLeaveTeam && (
+                          <p className="text-xs text-muted-foreground text-center">
+                            {isBeforeRegistration 
+                              ? `You can leave the team starting ${registrationStart?.toLocaleString()}`
+                              : `Team leaving closed on ${registrationEnd?.toLocaleString()}`
+                            }
+                          </p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </>
             ) : (
               <>
-                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full">Create New Team</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create a New Team</DialogTitle>
-                      <DialogDescription>
-                        Give your team a name. A unique referral code will be generated for others to join.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="teamName">Team Name</Label>
-                        <Input
-                          id="teamName"
-                          placeholder="Enter team name"
-                          value={teamName}
-                          onChange={(e) => setTeamName(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        onClick={handleCreateTeam}
-                        disabled={submitting || !teamName.trim()}
-                        className="w-full"
-                      >
-                        {submitting ? 'Creating...' : 'Create Team'}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {(() => {
+                  const now = new Date();
+                  const registrationStart = event?.registration_start ? new Date(event.registration_start) : null;
+                  const registrationEnd = event?.registration_end ? new Date(event.registration_end) : null;
+                  const isBeforeRegistration = registrationStart && now < registrationStart;
+                  const isAfterRegistration = registrationEnd && now > registrationEnd;
+                  const canManageTeam = !isBeforeRegistration && !isAfterRegistration;
 
-                <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">Join Existing Team</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Join a Team</DialogTitle>
-                      <DialogDescription>
-                        Enter the referral code shared by your team leader.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="referralCode">Referral Code</Label>
-                        <Input
-                          id="referralCode"
-                          placeholder="Enter 8-character code"
-                          value={referralCode}
-                          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                          maxLength={8}
-                        />
-                      </div>
-                      <Button
-                        onClick={handleJoinTeam}
-                        disabled={submitting || !referralCode.trim()}
-                        className="w-full"
-                      >
-                        {submitting ? 'Joining...' : 'Join Team'}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                  return (
+                    <>
+                      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button className="w-full" disabled={!canManageTeam}>Create New Team</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Create a New Team</DialogTitle>
+                            <DialogDescription>
+                              Give your team a name. A unique referral code will be generated for others to join.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="teamName">Team Name</Label>
+                              <Input
+                                id="teamName"
+                                placeholder="Enter team name"
+                                value={teamName}
+                                onChange={(e) => setTeamName(e.target.value)}
+                              />
+                            </div>
+                            <Button
+                              onClick={handleCreateTeam}
+                              disabled={submitting || !teamName.trim()}
+                              className="w-full"
+                            >
+                              {submitting ? 'Creating...' : 'Create Team'}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full" disabled={!canManageTeam}>Join Existing Team</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Join a Team</DialogTitle>
+                            <DialogDescription>
+                              Enter the referral code shared by your team leader.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="referralCode">Referral Code</Label>
+                              <Input
+                                id="referralCode"
+                                placeholder="Enter 8-character code"
+                                value={referralCode}
+                                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                                maxLength={8}
+                              />
+                            </div>
+                            <Button
+                              onClick={handleJoinTeam}
+                              disabled={submitting || !referralCode.trim()}
+                              className="w-full"
+                            >
+                              {submitting ? 'Joining...' : 'Join Team'}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      {isBeforeRegistration && (
+                        <p className="text-xs text-muted-foreground text-center mt-2">
+                          Team creation/joining opens on {registrationStart?.toLocaleString()}
+                        </p>
+                      )}
+                      {isAfterRegistration && (
+                        <p className="text-xs text-destructive text-center mt-2">
+                          Team creation/joining closed on {registrationEnd?.toLocaleString()}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </>
             )}
           </CardContent>
