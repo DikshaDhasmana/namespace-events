@@ -425,29 +425,6 @@ export default function EventDetail() {
         </Button>
       </div>
 
-      {/* Hackathon Dashboard Button - Prominent for registered participants */}
-      {isRegistered && event.event_type === 'hackathon' && (
-        <Card className="mb-6 border-primary/50 bg-gradient-to-r from-primary/5 to-purple-500/5">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-4 flex-col sm:flex-row">
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-lg font-semibold mb-1">You're Registered! 🎉</h3>
-                <p className="text-sm text-muted-foreground">
-                  Access your hackathon dashboard to manage your team and submit projects
-                </p>
-              </div>
-              <Button 
-                onClick={() => navigate(`/hackathon-dashboard/${event.id}`)}
-                className="bg-primary hover:bg-primary/90 whitespace-nowrap"
-                size="lg"
-              >
-                Go to Hackathon Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {/* Event Banner - 3:1 aspect ratio */}
