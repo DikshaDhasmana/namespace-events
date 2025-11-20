@@ -37,6 +37,10 @@ const CreateEvent = () => {
     timezone: 'Asia/Kolkata',
     // Additional fields for different event types
     end_date: '',
+    registration_start: '',
+    registration_end: '',
+    submission_start: '',
+    submission_end: '',
     speaker: '',
     prerequisites: '',
     prizes: '',
@@ -184,6 +188,10 @@ const CreateEvent = () => {
           approval_enabled: data.approval_enabled || false,
           timezone: eventTimezone,
           end_date: data.end_date ? convertUTCToLocal(data.end_date, eventTimezone) : '',
+          registration_start: data.registration_start ? convertUTCToLocal(data.registration_start, eventTimezone) : '',
+          registration_end: data.registration_end ? convertUTCToLocal(data.registration_end, eventTimezone) : '',
+          submission_start: data.submission_start ? convertUTCToLocal(data.submission_start, eventTimezone) : '',
+          submission_end: data.submission_end ? convertUTCToLocal(data.submission_end, eventTimezone) : '',
           speaker: data.speaker || '',
           prerequisites: data.prerequisites || '',
           prizes: data.prizes || '',
@@ -354,6 +362,40 @@ const CreateEvent = () => {
     setLoading(true);
 
     try {
+      // Validate registration window
+      if (formData.registration_end && formData.end_date) {
+        const regEnd = new Date(formData.registration_end);
+        const eventEnd = new Date(formData.end_date);
+        
+        if (regEnd > eventEnd) {
+          toast({
+            title: "Validation Error",
+            description: "Registration end time cannot be after event end time",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Validate submission window for hackathons
+      if (formData.event_type === 'hackathon') {
+        if (formData.submission_start && formData.submission_end) {
+          const subStart = new Date(formData.submission_start);
+          const subEnd = new Date(formData.submission_end);
+          
+          if (subStart >= subEnd) {
+            toast({
+              title: "Validation Error",
+              description: "Submission start time must be before submission end time",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       let formId = null;
 
       if (isEditMode && eventId) {
@@ -467,6 +509,11 @@ const CreateEvent = () => {
         description: formData.description,
         event_type: formData.event_type as any,
         date: formData.date ? convertLocalToUTC(formData.date, formData.timezone) : null,
+        end_date: formData.end_date ? convertLocalToUTC(formData.end_date, formData.timezone) : null,
+        registration_start: formData.registration_start ? convertLocalToUTC(formData.registration_start, formData.timezone) : null,
+        registration_end: formData.registration_end ? convertLocalToUTC(formData.registration_end, formData.timezone) : null,
+        submission_start: formData.submission_start ? convertLocalToUTC(formData.submission_start, formData.timezone) : null,
+        submission_end: formData.submission_end ? convertLocalToUTC(formData.submission_end, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         mode: formData.mode || null,
@@ -641,6 +688,33 @@ const CreateEvent = () => {
                   <Label htmlFor="confirmation_email_enabled" className="cursor-pointer">
                     Send confirmation email to applicants
                   </Label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="registration_start">Registration Start Time</Label>
+                    <Input
+                      id="registration_start"
+                      name="registration_start"
+                      type="datetime-local"
+                      value={formData.registration_start}
+                      onChange={handleInputChange}
+                    />
+                    <p className="text-xs text-muted-foreground">When registration opens</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="registration_end">Registration End Time *</Label>
+                    <Input
+                      id="registration_end"
+                      name="registration_end"
+                      type="datetime-local"
+                      value={formData.registration_end}
+                      onChange={handleInputChange}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">When registration closes (must be before event end)</p>
+                  </div>
                 </div>
 
                 {formData.event_type && (

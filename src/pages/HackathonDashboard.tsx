@@ -22,6 +22,8 @@ interface Event {
   venue: string;
   banner_url: string | null;
   team_size: number | null;
+  submission_start: string | null;
+  submission_end: string | null;
 }
 
 interface Team {
@@ -414,6 +416,31 @@ export default function HackathonDashboard() {
       return;
     }
 
+    // Check if within submission window
+    if (event?.submission_start && event?.submission_end) {
+      const now = new Date();
+      const submissionStart = new Date(event.submission_start);
+      const submissionEnd = new Date(event.submission_end);
+
+      if (now < submissionStart) {
+        toast({
+          variant: 'destructive',
+          title: 'Submission not open',
+          description: `Project submission opens on ${submissionStart.toLocaleString()}`,
+        });
+        return;
+      }
+
+      if (now > submissionEnd) {
+        toast({
+          variant: 'destructive',
+          title: 'Submission closed',
+          description: 'Project submission period has ended',
+        });
+        return;
+      }
+    }
+
     setShowProjectForm(true);
   };
 
@@ -763,16 +790,42 @@ export default function HackathonDashboard() {
               <>
                 {team ? (
                   <>
-                    <Button 
-                      className="w-full gap-2"
-                      onClick={handleCreateProject}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Submit Project
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center">
-                      All team members will be added as project owners
-                    </p>
+                    {(() => {
+                      const now = new Date();
+                      const submissionStart = event?.submission_start ? new Date(event.submission_start) : null;
+                      const submissionEnd = event?.submission_end ? new Date(event.submission_end) : null;
+                      const isBeforeSubmission = submissionStart && now < submissionStart;
+                      const isAfterSubmission = submissionEnd && now > submissionEnd;
+                      const canSubmit = !isBeforeSubmission && !isAfterSubmission;
+
+                      return (
+                        <>
+                          <Button 
+                            className="w-full gap-2"
+                            onClick={handleCreateProject}
+                            disabled={!canSubmit}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Submit Project
+                          </Button>
+                          {isBeforeSubmission && (
+                            <p className="text-xs text-muted-foreground text-center">
+                              Submission opens on {submissionStart?.toLocaleString()}
+                            </p>
+                          )}
+                          {isAfterSubmission && (
+                            <p className="text-xs text-destructive text-center">
+                              Submission closed on {submissionEnd?.toLocaleString()}
+                            </p>
+                          )}
+                          {canSubmit && (
+                            <p className="text-xs text-muted-foreground text-center">
+                              All team members will be added as project owners
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </>
                 ) : (
                   <div className="p-4 border rounded-lg bg-muted/50">
