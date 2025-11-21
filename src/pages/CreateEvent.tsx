@@ -421,18 +421,27 @@ const CreateEvent = () => {
           if (formUpdateError) throw formUpdateError;
 
           // Get existing field IDs to preserve submission data
-          const { data: existingFields } = await supabase
+          const { data: existingFields, error: fetchFieldsError } = await supabase
             .from('form_fields')
             .select('id')
             .eq('form_id', formId);
 
+          if (fetchFieldsError) throw fetchFieldsError;
+
           const existingFieldIds = existingFields?.map(f => f.id) || [];
-          const currentFieldIds = registrationFormFields.filter(f => !f.id.startsWith('temp-') && !f.id.startsWith('default-')).map(f => f.id);
+          
+          // Current fields that have real UUIDs (not temp or default IDs)
+          const currentFieldsWithUUIDs = registrationFormFields.filter(f => {
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(f.id);
+            return isUUID;
+          });
+          const currentFieldIds = currentFieldsWithUUIDs.map(f => f.id);
           
           // Delete only removed fields (preserve existing ones to keep submission data)
           const fieldsToDelete = existingFieldIds.filter(id => !currentFieldIds.includes(id));
           
           if (fieldsToDelete.length > 0) {
+            console.log('Deleting fields:', fieldsToDelete);
             const { error: deleteFieldsError } = await supabase
               .from('form_fields')
               .delete()
@@ -444,33 +453,43 @@ const CreateEvent = () => {
           // Update existing fields and insert new ones
           for (let index = 0; index < registrationFormFields.length; index++) {
             const field = registrationFormFields[index];
+            const isExistingField = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(field.id);
+            
             const fieldData = {
               form_id: formId,
               field_type: field.field_type,
               label: field.label,
-              description: field.description,
-              placeholder: field.placeholder,
+              description: field.description || null,
+              placeholder: field.placeholder || null,
               required: field.required,
               options: field.options.length > 0 ? field.options : null,
               order_index: index,
               profile_field: field.profile_field || null
             };
 
-            if (field.id.startsWith('temp-') || field.id.startsWith('default-')) {
-              // Insert new field
-              const { error: insertError } = await supabase
-                .from('form_fields')
-                .insert(fieldData);
-
-              if (insertError) throw insertError;
-            } else {
+            if (isExistingField && existingFieldIds.includes(field.id)) {
               // Update existing field (preserve ID to maintain submission data)
+              console.log('Updating field:', field.id, field.label);
               const { error: updateError } = await supabase
                 .from('form_fields')
                 .update(fieldData)
                 .eq('id', field.id);
 
-              if (updateError) throw updateError;
+              if (updateError) {
+                console.error('Error updating field:', field.id, updateError);
+                throw updateError;
+              }
+            } else {
+              // Insert new field
+              console.log('Inserting new field:', field.label);
+              const { error: insertError } = await supabase
+                .from('form_fields')
+                .insert(fieldData);
+
+              if (insertError) {
+                console.error('Error inserting field:', insertError);
+                throw insertError;
+              }
             }
           }
         }
