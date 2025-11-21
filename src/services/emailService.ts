@@ -147,25 +147,19 @@ export class EmailService {
       margin-top: 16px;
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
     .social-link {
       display: inline-block;
-      color: #8100C4;
       text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 8px 12px;
-      border: 1px solid #8100C4;
-      border-radius: 6px;
-      transition: all 0.3s ease;
     }
 
-    .social-link:hover {
-      background: #8100C4;
-      color: #fff;
+    .social-icon {
+      width: 32px;
+      height: 32px;
+      display: block;
     }
   </style>
 </head>
@@ -197,11 +191,21 @@ export class EmailService {
       <p>NAMESPACE is building a global human-centric tech ecosystem and empowering 50,000+ builders through hackathons, fellowships, bootcamps, workshops, open-source fests and other tech events.</p>
       
       <div class="social-links">
-        <a href="https://www.linkedin.com/company/namespaceworld/" class="social-link">LinkedIn</a>
-        <a href="https://x.com/namespaceworld" class="social-link">X</a>
-        <a href="https://www.instagram.com/namespaceworld/" class="social-link">Instagram</a>
-        <a href="https://www.youtube.com/@namespaceworld" class="social-link">YouTube</a>
-        <a href="https://namespace.world" class="social-link">Website</a>
+        <a href="https://www.linkedin.com/company/namespaceworld/" class="social-link">
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/linkedin-icon.png" alt="LinkedIn" class="social-icon" />
+        </a>
+        <a href="https://x.com/namespaceworld" class="social-link">
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/x-icon.png" alt="X" class="social-icon" />
+        </a>
+        <a href="https://www.instagram.com/namespaceworld/" class="social-link">
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/instagram-icon.png" alt="Instagram" class="social-icon" />
+        </a>
+        <a href="https://www.youtube.com/@namespaceworld" class="social-link">
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/youtube-icon.png" alt="YouTube" class="social-icon" />
+        </a>
+        <a href="https://namespace.world" class="social-link">
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/website-icon.png" alt="Website" class="social-icon" />
+        </a>
       </div>
     </div>
   </div>
