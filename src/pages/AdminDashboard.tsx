@@ -92,16 +92,16 @@ const AdminDashboard = () => {
       // List of all email assets to upload
       const assets = [
         { path: '/logos/email-logo-white.png', name: 'email-logo-white.png' },
-        { path: '/logos/social/linkedin-icon.png', name: 'linkedin-icon.png' },
-        { path: '/logos/social/x-icon.png', name: 'x-icon.png' },
-        { path: '/logos/social/instagram-icon.png', name: 'instagram-icon.png' },
-        { path: '/logos/social/youtube-icon.png', name: 'youtube-icon.png' },
-        { path: '/logos/social/website-icon.png', name: 'website-icon.png' },
-        { path: '/logos/social/whatsapp-icon.png', name: 'whatsapp-icon.png' },
-        { path: '/logos/social/discord-icon.png', name: 'discord-icon.png' },
-        { path: '/logos/social/telegram-icon.png', name: 'telegram-icon.png' },
-        { path: '/logos/social/email-icon.png', name: 'email-icon.png' },
-        { path: '/logos/social/newsletter-icon.png', name: 'newsletter-icon.png' },
+        { path: '/logos/social/linkedin-icon-v2.png', name: 'linkedin-icon-v2.png' },
+        { path: '/logos/social/x-icon-v2.png', name: 'x-icon-v2.png' },
+        { path: '/logos/social/instagram-icon-v2.png', name: 'instagram-icon-v2.png' },
+        { path: '/logos/social/youtube-icon-v2.png', name: 'youtube-icon-v2.png' },
+        { path: '/logos/social/website-icon-v2.png', name: 'website-icon-v2.png' },
+        { path: '/logos/social/whatsapp-icon-v2.png', name: 'whatsapp-icon-v2.png' },
+        { path: '/logos/social/discord-icon-v2.png', name: 'discord-icon-v2.png' },
+        { path: '/logos/social/telegram-icon-v2.png', name: 'telegram-icon-v2.png' },
+        { path: '/logos/social/email-icon-v2.png', name: 'email-icon-v2.png' },
+        { path: '/logos/social/newsletter-icon-v2.png', name: 'newsletter-icon-v2.png' },
       ];
 
       // Upload all assets
