@@ -89,26 +89,37 @@ const AdminDashboard = () => {
   const handleUploadEmailAssets = async () => {
     setUploadingAssets(true);
     try {
-      // Fetch the logo from the public folder
-      const response = await fetch('/logos/email-logo-white.png');
-      if (!response.ok) throw new Error('Logo file not found');
-      
-      const blob = await response.blob();
-      const file = new File([blob], 'email-logo-white.png', { type: 'image/png' });
+      // List of all email assets to upload
+      const assets = [
+        { path: '/logos/email-logo-white.png', name: 'email-logo-white.png' },
+        { path: '/logos/social/linkedin-icon.png', name: 'linkedin-icon.png' },
+        { path: '/logos/social/x-icon.png', name: 'x-icon.png' },
+        { path: '/logos/social/instagram-icon.png', name: 'instagram-icon.png' },
+        { path: '/logos/social/youtube-icon.png', name: 'youtube-icon.png' },
+        { path: '/logos/social/website-icon.png', name: 'website-icon.png' },
+      ];
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('public-assets')
-        .upload('email-logo-white.png', file, {
-          upsert: true,
-          contentType: 'image/png'
-        });
+      // Upload all assets
+      for (const asset of assets) {
+        const response = await fetch(asset.path);
+        if (!response.ok) throw new Error(`${asset.name} file not found`);
+        
+        const blob = await response.blob();
+        const file = new File([blob], asset.name, { type: 'image/png' });
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('public-assets')
+          .upload(asset.name, file, {
+            upsert: true,
+            contentType: 'image/png'
+          });
+
+        if (uploadError) throw uploadError;
+      }
 
       toast({
         title: "Success",
-        description: "Email assets uploaded successfully! Logo is now ready for use.",
+        description: "All email assets uploaded successfully! Logo and social icons are now ready.",
       });
     } catch (error) {
       console.error('Error uploading email assets:', error);
@@ -239,7 +250,7 @@ const AdminDashboard = () => {
                 {uploadingAssets ? 'Uploading...' : 'Setup Email Assets'}
               </Button>
               <p className="text-sm text-muted-foreground flex items-center">
-                Click to automatically upload the logo to Supabase Storage
+                Click to automatically upload the logo and social icons to Supabase Storage
               </p>
             </div>
             <div className="flex gap-4">
