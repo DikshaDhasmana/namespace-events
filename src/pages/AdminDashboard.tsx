@@ -89,32 +89,53 @@ const AdminDashboard = () => {
   const handleUploadEmailAssets = async () => {
     setUploadingAssets(true);
     try {
-      // Fetch the logo from the public folder
-      const response = await fetch('/logos/email-logo-white.png');
-      if (!response.ok) throw new Error('Logo file not found');
-      
-      const blob = await response.blob();
-      const file = new File([blob], 'email-logo-white.png', { type: 'image/png' });
+      // List of all email assets to upload
+      const assets = [
+        { path: '/logos/email-logo-white.png', name: 'email-logo-white.png' },
+        { path: '/logos/social/linkedin-icon.png', name: 'linkedin-icon.png' },
+        { path: '/logos/social/x-icon.png', name: 'x-icon.png' },
+        { path: '/logos/social/instagram-icon.png', name: 'instagram-icon.png' },
+        { path: '/logos/social/youtube-icon.png', name: 'youtube-icon.png' },
+        { path: '/logos/social/website-icon.png', name: 'website-icon.png' },
+        { path: '/logos/social/whatsapp-icon.png', name: 'whatsapp-icon.png' },
+        { path: '/logos/social/discord-icon.png', name: 'discord-icon.png' },
+        { path: '/logos/social/telegram-icon.png', name: 'telegram-icon.png' },
+        { path: '/logos/social/email-icon.png', name: 'email-icon.png' },
+        { path: '/logos/social/newsletter-icon.png', name: 'newsletter-icon.png' },
+      ];
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('public-assets')
-        .upload('email-logo-white.png', file, {
-          upsert: true,
-          contentType: 'image/png'
-        });
+      // Upload all assets
+      for (const asset of assets) {
+        const response = await fetch(asset.path);
+        if (!response.ok) {
+          console.warn(`${asset.name} not found, skipping`);
+          continue;
+        }
+        
+        const blob = await response.blob();
+        const file = new File([blob], asset.name, { type: 'image/png' });
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('public-assets')
+          .upload(asset.name, file, {
+            upsert: true,
+            contentType: 'image/png'
+          });
+
+        if (uploadError) {
+          console.warn(`Failed to upload ${asset.name}:`, uploadError);
+        }
+      }
 
       toast({
         title: "Success",
-        description: "Email logo uploaded successfully! Emails are now ready to be sent.",
+        description: "All email assets uploaded successfully! Emails are ready to be sent.",
       });
     } catch (error) {
       console.error('Error uploading email assets:', error);
       toast({
         title: "Error",
-        description: "Failed to upload email logo. Make sure the public-assets bucket exists.",
+        description: "Failed to upload some assets. Make sure the public-assets bucket exists.",
         variant: "destructive",
       });
     } finally {
@@ -227,7 +248,7 @@ const AdminDashboard = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Email Template Preview</CardTitle>
-            <CardDescription>Setup email logo and send test emails to preview the registration template</CardDescription>
+            <CardDescription>Upload all email assets (logo + 10 social icons) to Supabase Storage</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4">
@@ -236,10 +257,10 @@ const AdminDashboard = () => {
                 disabled={uploadingAssets}
                 variant="outline"
               >
-                {uploadingAssets ? 'Uploading...' : 'Setup Email Logo'}
+                {uploadingAssets ? 'Uploading...' : 'Setup Email Assets'}
               </Button>
               <p className="text-sm text-muted-foreground flex items-center">
-                Click to automatically upload the logo to Supabase Storage (social icons are inline SVGs)
+                One-click upload of logo and all social media icons
               </p>
             </div>
             <div className="flex gap-4">
