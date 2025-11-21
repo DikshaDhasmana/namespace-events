@@ -4,10 +4,12 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Calendar, UserCheck, LogOut, Plus, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, Calendar, UserCheck, LogOut, Plus, RefreshCw, AlertCircle, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { EmailService } from '@/services/emailService';
 
 interface Stats {
   totalUsers: number;
@@ -19,6 +21,8 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalEvents: 0, totalRegistrations: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [testEmail, setTestEmail] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
   const { isAdminAuthenticated, adminLogout } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -81,6 +85,57 @@ const AdminDashboard = () => {
     navigate('/admin/login');
   };
 
+  const handleSendTestEmail = async () => {
+    if (!testEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSendingEmail(true);
+      
+      const emailHtml = EmailService.generateEventEmailTemplate({
+        eventName: "Sample Event - Email Template Preview",
+        applicantName: "Admin",
+        message: "This is a preview of the email template that will be sent to users when they register for events. The template includes the event details, registration information, and links to NAMESPACE social media channels.",
+        eventDate: new Date().toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        eventVenue: "Sample Venue Location",
+        subject: "Email Template Preview"
+      });
+
+      await EmailService.sendEmail({
+        to: testEmail,
+        subject: "NAMESPACE - Email Template Preview",
+        html: emailHtml,
+      });
+
+      toast({
+        title: "Success",
+        description: `Test email sent to ${testEmail}`,
+      });
+      
+      setTestEmail('');
+    } catch (error) {
+      console.error('Failed to send test email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send test email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   if (!isAdminAuthenticated) {
     return null;
   }
@@ -130,6 +185,32 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Test Email Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Email Template Preview</CardTitle>
+            <CardDescription>Send a test email to preview the registration email template</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <Input
+                type="email"
+                placeholder="Enter email address"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendTestEmail}
+                disabled={sendingEmail || !testEmail}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                {sendingEmail ? 'Sending...' : 'Send Test Email'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
         <Card>
