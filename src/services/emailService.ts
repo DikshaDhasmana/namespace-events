@@ -139,14 +139,42 @@ export class EmailService {
     }
 
     .footer p {
-      margin: 6px 0;
+      margin: 12px 0;
+      line-height: 1.5;
+    }
+
+    .social-links {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      display: inline-block;
+      color: #8100C4;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border: 1px solid #8100C4;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: #8100C4;
+      color: #fff;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>NAMESPACE Ecosystem</h1>
+      <a href="https://namespace.world" style="display: inline-block;">
+        <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/email-logo-white.png" alt="NAMESPACE" style="height: 40px; width: auto;" />
+      </a>
     </div>
 
     <div class="content">
@@ -166,8 +194,15 @@ export class EmailService {
     </div>
 
     <div class="footer">
-      <p>You are receiving this email because you registered for an event on NAMESPACE.</p>
-      <p>If you have any questions, please contact our support team.</p>
+      <p>NAMESPACE is building a global human-centric tech ecosystem and empowering 50,000+ builders through hackathons, fellowships, bootcamps, workshops, open-source fests and other tech events.</p>
+      
+      <div class="social-links">
+        <a href="https://www.linkedin.com/company/namespaceworld/" class="social-link">LinkedIn</a>
+        <a href="https://x.com/namespaceworld" class="social-link">X</a>
+        <a href="https://www.instagram.com/namespaceworld/" class="social-link">Instagram</a>
+        <a href="https://www.youtube.com/@namespaceworld" class="social-link">YouTube</a>
+        <a href="https://namespace.world" class="social-link">Website</a>
+      </div>
     </div>
   </div>
 </body>
