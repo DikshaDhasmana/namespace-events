@@ -23,6 +23,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [uploadingAssets, setUploadingAssets] = useState(false);
   const { isAdminAuthenticated, adminLogout } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -83,6 +84,42 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     adminLogout();
     navigate('/admin/login');
+  };
+
+  const handleUploadEmailAssets = async () => {
+    setUploadingAssets(true);
+    try {
+      // Fetch the logo from the public folder
+      const response = await fetch('/logos/email-logo-white.png');
+      if (!response.ok) throw new Error('Logo file not found');
+      
+      const blob = await response.blob();
+      const file = new File([blob], 'email-logo-white.png', { type: 'image/png' });
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload('email-logo-white.png', file, {
+          upsert: true,
+          contentType: 'image/png'
+        });
+
+      if (uploadError) throw uploadError;
+
+      toast({
+        title: "Success",
+        description: "Email assets uploaded successfully! Logo is now ready for use.",
+      });
+    } catch (error) {
+      console.error('Error uploading email assets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload email assets. Make sure the public-assets bucket exists.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingAssets(false);
+    }
   };
 
   const handleSendTestEmail = async () => {
@@ -190,9 +227,21 @@ const AdminDashboard = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Email Template Preview</CardTitle>
-            <CardDescription>Send a test email to preview the registration email template</CardDescription>
+            <CardDescription>Setup email assets and send test emails to preview the registration template</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleUploadEmailAssets}
+                disabled={uploadingAssets}
+                variant="outline"
+              >
+                {uploadingAssets ? 'Uploading...' : 'Setup Email Assets'}
+              </Button>
+              <p className="text-sm text-muted-foreground flex items-center">
+                Click to automatically upload the logo to Supabase Storage
+              </p>
+            </div>
             <div className="flex gap-4">
               <Input
                 type="email"
