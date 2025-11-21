@@ -40,6 +40,9 @@ export class EmailService {
   }
 
   static generateEventEmailTemplate(data: EmailTemplateData & { subject?: string }): string {
+    // Cache-busting parameter to force email clients to load new images
+    const cacheBuster = `?v=${Date.now()}`;
+    
     return `
 <!DOCTYPE html>
 <html>
@@ -167,7 +170,7 @@ export class EmailService {
   <div class="container">
     <div class="header">
       <a href="https://namespace.world" style="display: inline-block;">
-        <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/email-logo-white.png" alt="NAMESPACE" style="height: 40px; width: auto;" />
+        <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/email-logo-white.png${cacheBuster}" alt="NAMESPACE" style="height: 40px; width: auto;" />
       </a>
     </div>
 
@@ -192,34 +195,34 @@ export class EmailService {
       
       <div class="social-links">
         <a href="https://www.linkedin.com/company/namespaceworld/" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/linkedin-icon.png" alt="LinkedIn" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/linkedin-icon.png${cacheBuster}" alt="LinkedIn" class="social-icon" />
         </a>
         <a href="https://www.instagram.com/namespaceworld/" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/instagram-icon.png" alt="Instagram" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/instagram-icon.png${cacheBuster}" alt="Instagram" class="social-icon" />
         </a>
         <a href="https://x.com/namespaceworld" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/x-icon.png" alt="X" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/x-icon.png${cacheBuster}" alt="X" class="social-icon" />
         </a>
         <a href="https://www.whatsapp.com/channel/0029VabtgrVKLaHjzSXEL52f" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/whatsapp-icon.png" alt="WhatsApp" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/whatsapp-icon.png${cacheBuster}" alt="WhatsApp" class="social-icon" />
         </a>
         <a href="https://www.youtube.com/@namespaceworld" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/youtube-icon.png" alt="YouTube" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/youtube-icon.png${cacheBuster}" alt="YouTube" class="social-icon" />
         </a>
         <a href="https://discord.com/invite/z2fTnXjKMm" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/discord-icon.png" alt="Discord" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/discord-icon.png${cacheBuster}" alt="Discord" class="social-icon" />
         </a>
         <a href="https://t.me/+11ngnAGsGYg4YTE1" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/telegram-icon.png" alt="Telegram" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/telegram-icon.png${cacheBuster}" alt="Telegram" class="social-icon" />
         </a>
         <a href="mailto:contact@namespacecomm.in" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/email-icon.png" alt="Email" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/email-icon.png${cacheBuster}" alt="Email" class="social-icon" />
         </a>
         <a href="https://namespacecomm.in" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/website-icon.png" alt="Website" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/website-icon.png${cacheBuster}" alt="Website" class="social-icon" />
         </a>
         <a href="https://namespacecomm.substack.com/" class="social-link">
-          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/newsletter-icon.png" alt="Newsletter" class="social-icon" />
+          <img src="https://gvwkdvpdmjagdbincqmu.supabase.co/storage/v1/object/public/public-assets/newsletter-icon.png${cacheBuster}" alt="Newsletter" class="social-icon" />
         </a>
       </div>
     </div>
