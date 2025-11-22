@@ -56,6 +56,7 @@ const CreateEvent = () => {
     eligibility: '',
     submission_format: '',
     confirmation_email_enabled: true,
+    custom_email_text: '',
     // Hackathon-specific dynamic fields
     timeline: [] as any[],
     prizes_and_tracks: [] as any[],
@@ -207,6 +208,7 @@ const CreateEvent = () => {
           eligibility: data.eligibility || '',
           submission_format: data.submission_format || '',
           confirmation_email_enabled: data.confirmation_email_enabled ?? true,
+          custom_email_text: data.custom_email_text || '',
           timeline: Array.isArray(data.timeline) ? data.timeline : [],
           prizes_and_tracks: Array.isArray(data.prizes_and_tracks) ? data.prizes_and_tracks : [],
           judges_and_mentors: Array.isArray(data.judges_and_mentors) ? data.judges_and_mentors : []
@@ -584,6 +586,7 @@ const CreateEvent = () => {
         eligibility: formData.eligibility || null,
         submission_format: formData.submission_format || null,
         confirmation_email_enabled: formData.confirmation_email_enabled ?? true,
+        custom_email_text: formData.custom_email_text || null,
         timeline: formData.timeline || [],
         prizes_and_tracks: formData.prizes_and_tracks || [],
         judges_and_mentors: formData.judges_and_mentors || []
