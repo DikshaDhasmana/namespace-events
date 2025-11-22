@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EmailService } from '@/services/emailService';
 import LeaderboardModal from '@/components/LeaderboardModal';
 import EventRegistrationModal from '@/components/EventRegistrationModal';
+import { RegistrationCountdown } from '@/components/RegistrationCountdown';
 
 interface TimelineEntry {
   label: string;
@@ -810,13 +811,18 @@ export default function EventDetail() {
                   </Button>
                 </div>
               ) : (
-                <Button 
-                  onClick={handleRegister}
-                  className="w-full bg-primary hover:bg-primary/90"
-                  disabled={!isRegistrationOpen}
-                >
-                  {user ? 'Register Now' : 'Sign in to Register'}
-                </Button>
+                <>
+                  <Button 
+                    onClick={handleRegister}
+                    className="w-full bg-primary hover:bg-primary/90"
+                    disabled={!isRegistrationOpen}
+                  >
+                    {user ? 'Register Now' : 'Sign in to Register'}
+                  </Button>
+                  {event.registration_end && isRegistrationOpen && (
+                    <RegistrationCountdown targetDate={event.registration_end} />
+                  )}
+                </>
               )}
               
               <div className="text-sm text-muted-foreground">
