@@ -68,7 +68,7 @@ export default function Events() {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: false });
+        .order('date', { ascending: true });
 
       if (error) throw error;
       
@@ -208,12 +208,12 @@ export default function Events() {
       if (type && type !== 'all') {
         filtered = eventsList.filter(event => event.event_type === type);
       }
-      // Sort by date (most recent first), then by event type (hackathons first)
+      // Sort by date (chronological order - oldest first), then by event type (hackathons first)
       return filtered.sort((a, b) => {
-        // First, compare dates (most recent first)
+        // First, compare dates (oldest first)
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
-        if (dateA !== dateB) return dateB - dateA;
+        if (dateA !== dateB) return dateA - dateB;
         
         // If dates are equal, prioritize hackathons
         if (a.event_type === 'hackathon' && b.event_type !== 'hackathon') return -1;
