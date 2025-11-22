@@ -190,14 +190,14 @@ export class EmailService {
     <div class="content">
       <h2>Hello ${data.applicantName},</h2>
 
-      <div class="custom-message">
-        ${customText}
-      </div>
-
       <div class="event-info">
         <h3>${data.eventName}</h3>
         ${data.eventDate ? `<p><strong>Date:</strong> ${data.eventDate}</p>` : ''}
         ${data.eventVenue ? `<p><strong>Venue:</strong> ${data.eventVenue}</p>` : ''}
+      </div>
+
+      <div class="custom-message">
+        ${customText}
       </div>
 
       <div class="message">
