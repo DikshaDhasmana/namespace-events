@@ -168,11 +168,12 @@ export default function HackathonDashboard() {
   const fetchTeamData = async () => {
     if (!user || !eventId) return;
 
-    // Check if user is already in a team for this event
+    // Check if user is already in a team for this specific event
     const { data: memberData } = await supabase
       .from('team_members')
-      .select('team_id')
+      .select('team_id, teams!inner(event_id)')
       .eq('user_id', user.id)
+      .eq('teams.event_id', eventId)
       .maybeSingle();
 
     if (memberData?.team_id) {
@@ -181,7 +182,6 @@ export default function HackathonDashboard() {
         .from('teams')
         .select('*')
         .eq('id', memberData.team_id)
-        .eq('event_id', eventId)
         .single();
 
       if (teamData) {
