@@ -33,6 +33,7 @@ const CreateEvent = () => {
     max_participants: '',
     mode: '',
     team_size: '',
+    min_team_size: '',
     approval_enabled: false,
     timezone: 'Asia/Kolkata',
     // Additional fields for different event types
@@ -186,6 +187,7 @@ const CreateEvent = () => {
           max_participants: data.max_participants?.toString() || '',
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
+          min_team_size: data.min_team_size?.toString() || '',
           approval_enabled: data.approval_enabled || false,
           timezone: eventTimezone,
           end_date: data.end_date ? convertUTCToLocal(data.end_date, eventTimezone) : '',
