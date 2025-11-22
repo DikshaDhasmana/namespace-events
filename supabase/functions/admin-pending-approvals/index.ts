@@ -23,6 +23,7 @@ interface PendingRegistrationResponse {
   event_date: string
   event_venue: string
   event_confirmation_email_enabled: boolean | null
+  event_custom_email_text: string | null
   user_name: string
   user_email: string
   user_phone: string
@@ -68,7 +69,7 @@ Deno.serve(async (req) => {
     const userIds = Array.from(new Set(registrations.map((r) => r.user_id)))
 
     const [eventsRes, profilesRes] = await Promise.all([
-      supabase.from('events').select('id, name, date, venue, confirmation_email_enabled').in('id', eventIds),
+      supabase.from('events').select('id, name, date, venue, confirmation_email_enabled, custom_email_text').in('id', eventIds),
       supabase
         .from('profiles')
         .select('id, full_name, email, phone_number, college, degree, graduation_year, skills, github_url, linkedin_url, leetcode_url')
@@ -103,6 +104,7 @@ Deno.serve(async (req) => {
       event_date: eventsMap.get(reg.event_id)?.date ?? '',
       event_venue: eventsMap.get(reg.event_id)?.venue ?? '',
       event_confirmation_email_enabled: eventsMap.get(reg.event_id)?.confirmation_email_enabled ?? true,
+      event_custom_email_text: eventsMap.get(reg.event_id)?.custom_email_text ?? null,
       user_name: profilesMap.get(reg.user_id)?.full_name ?? 'Unknown User',
       user_email: profilesMap.get(reg.user_id)?.email ?? '',
       user_phone: profilesMap.get(reg.user_id)?.phone_number ?? '',
