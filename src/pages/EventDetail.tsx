@@ -598,6 +598,11 @@ export default function EventDetail() {
                         allTimelineEntries.push(...event.timeline);
                       }
                       
+                      // Sort entries chronologically by datetime
+                      allTimelineEntries.sort((a, b) => {
+                        return new Date(a.datetime).getTime() - new Date(b.datetime).getTime();
+                      });
+                      
                       return allTimelineEntries.length > 0 ? (
                         <div className="space-y-4">
                           {allTimelineEntries.map((entry, index) => (
