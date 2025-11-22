@@ -22,6 +22,7 @@ interface Event {
   venue: string;
   banner_url: string | null;
   team_size: number | null;
+  min_team_size: number | null;
   registration_start: string | null;
   registration_end: string | null;
   submission_start: string | null;
@@ -418,6 +419,29 @@ export default function HackathonDashboard() {
       return;
     }
 
+    // Check team size eligibility
+    const currentTeamSize = teamMembers.length;
+    const minTeamSize = event?.min_team_size || 1;
+    const maxTeamSize = event?.team_size || Infinity;
+    
+    if (currentTeamSize < minTeamSize) {
+      toast({
+        variant: 'destructive',
+        title: 'Team too small',
+        description: `Your team must have at least ${minTeamSize} member${minTeamSize > 1 ? 's' : ''} to submit a project`,
+      });
+      return;
+    }
+    
+    if (currentTeamSize > maxTeamSize) {
+      toast({
+        variant: 'destructive',
+        title: 'Team too large',
+        description: `Your team exceeds the maximum size of ${maxTeamSize} members`,
+      });
+      return;
+    }
+
     // Check if within submission window
     if (event?.submission_start && event?.submission_end) {
       const now = new Date();
@@ -591,7 +615,8 @@ export default function HackathonDashboard() {
             </div>
             <CardDescription>
               {team ? 'Your team for this hackathon' : 'Create a new team or join an existing team'}
-              {event.team_size && ` (Max ${event.team_size} members per team)`}
+              {event.min_team_size && event.team_size && ` (${event.min_team_size}-${event.team_size} members required)`}
+              {!event.min_team_size && event.team_size && ` (Max ${event.team_size} members per team)`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -835,7 +860,7 @@ export default function HackathonDashboard() {
               </>
             ) : (
               <>
-                {team ? (
+                 {team ? (
                   <>
                     {(() => {
                       const now = new Date();
@@ -843,7 +868,14 @@ export default function HackathonDashboard() {
                       const submissionEnd = event?.submission_end ? new Date(event.submission_end) : null;
                       const isBeforeSubmission = submissionStart && now < submissionStart;
                       const isAfterSubmission = submissionEnd && now > submissionEnd;
-                      const canSubmit = !isBeforeSubmission && !isAfterSubmission;
+                      
+                      // Check team size eligibility
+                      const currentTeamSize = teamMembers.length;
+                      const minTeamSize = event?.min_team_size || 1;
+                      const maxTeamSize = event?.team_size || Infinity;
+                      const isTeamSizeValid = currentTeamSize >= minTeamSize && currentTeamSize <= maxTeamSize;
+                      
+                      const canSubmit = !isBeforeSubmission && !isAfterSubmission && isTeamSizeValid;
 
                       return (
                         <>
@@ -855,6 +887,16 @@ export default function HackathonDashboard() {
                             <Plus className="h-4 w-4" />
                             Submit Project
                           </Button>
+                          {!isTeamSizeValid && (
+                            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                              <p className="text-xs text-destructive text-center">
+                                {currentTeamSize < minTeamSize 
+                                  ? `Team must have at least ${minTeamSize} member${minTeamSize > 1 ? 's' : ''} to submit (currently ${currentTeamSize})`
+                                  : `Team exceeds maximum size of ${maxTeamSize} members`
+                                }
+                              </p>
+                            </div>
+                          )}
                           {isBeforeSubmission && (
                             <p className="text-xs text-muted-foreground text-center">
                               Submission opens on {submissionStart?.toLocaleString()}
