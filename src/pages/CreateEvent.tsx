@@ -341,10 +341,10 @@ const CreateEvent = () => {
   const handleNext = () => {
     if (currentStep === 1) {
       // Validate step 1
-      if (!formData.name.trim() || !formData.event_type) {
+      if (!formData.name.trim() || !formData.event_type || !formData.custom_email_text.trim()) {
         toast({
           title: "Validation Error",
-          description: "Please fill in all required fields",
+          description: "Please fill in all required fields including the email message",
           variant: "destructive",
         });
         return;
