@@ -566,6 +566,7 @@ const CreateEvent = () => {
         submission_end: formData.submission_end ? convertLocalToUTC(formData.submission_end, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        min_team_size: formData.min_team_size ? parseInt(formData.min_team_size) : null,
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
         approval_enabled: formData.approval_enabled,
