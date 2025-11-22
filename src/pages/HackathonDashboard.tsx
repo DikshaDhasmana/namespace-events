@@ -246,11 +246,12 @@ export default function HackathonDashboard() {
 
     setSubmitting(true);
 
-    // Check if user is already in a team
+    // Check if user is already in a team for this specific hackathon
     const { data: existingMember } = await supabase
       .from('team_members')
-      .select('id')
+      .select('id, teams!inner(event_id)')
       .eq('user_id', user.id)
+      .eq('teams.event_id', eventId)
       .maybeSingle();
 
     if (existingMember) {
@@ -326,11 +327,12 @@ export default function HackathonDashboard() {
 
     setSubmitting(true);
 
-    // Check if user is already in a team
+    // Check if user is already in a team for this specific hackathon
     const { data: existingMember } = await supabase
       .from('team_members')
-      .select('id')
+      .select('id, teams!inner(event_id)')
       .eq('user_id', user.id)
+      .eq('teams.event_id', eventId)
       .maybeSingle();
 
     if (existingMember) {
