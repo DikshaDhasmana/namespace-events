@@ -48,6 +48,8 @@ interface Event {
   timezone: string;
   registration_start: string | null;
   registration_end: string | null;
+  submission_start: string | null;
+  submission_end: string | null;
   timeline?: TimelineEntry[];
   prizes_and_tracks?: PrizeTrack[];
   judges_and_mentors?: JudgeMentor[];
@@ -559,25 +561,63 @@ export default function EventDetail() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {event.timeline && event.timeline.length > 0 ? (
-                      <div className="space-y-4">
-                        {event.timeline.map((entry, index) => (
-                          <div key={index} className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                              {index + 1}
+                    {(() => {
+                      // Build combined timeline with registration and submission dates
+                      const allTimelineEntries = [];
+                      
+                      // Add registration dates
+                      if (event.registration_start) {
+                        allTimelineEntries.push({
+                          label: 'Registration Opens',
+                          datetime: event.registration_start
+                        });
+                      }
+                      if (event.registration_end) {
+                        allTimelineEntries.push({
+                          label: 'Registration Closes',
+                          datetime: event.registration_end
+                        });
+                      }
+                      
+                      // Add submission dates
+                      if (event.submission_start) {
+                        allTimelineEntries.push({
+                          label: 'Project Submission Opens',
+                          datetime: event.submission_start
+                        });
+                      }
+                      if (event.submission_end) {
+                        allTimelineEntries.push({
+                          label: 'Project Submission Closes',
+                          datetime: event.submission_end
+                        });
+                      }
+                      
+                      // Add custom timeline entries
+                      if (event.timeline && event.timeline.length > 0) {
+                        allTimelineEntries.push(...event.timeline);
+                      }
+                      
+                      return allTimelineEntries.length > 0 ? (
+                        <div className="space-y-4">
+                          {allTimelineEntries.map((entry, index) => (
+                            <div key={index} className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 pb-4 border-b last:border-b-0">
+                                <h4 className="font-semibold mb-1">{entry.label}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {formatDate(entry.datetime)} at {formatTime(entry.datetime)}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1 pb-4 border-b last:border-b-0">
-                              <h4 className="font-semibold mb-1">{entry.label}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {formatDate(entry.datetime)} at {formatTime(entry.datetime)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">No timeline information available.</p>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">No timeline information available.</p>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </TabsContent>
