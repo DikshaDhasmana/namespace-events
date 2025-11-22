@@ -385,7 +385,7 @@ const HackathonForm: React.FC<HackathonFormProps> = ({ formData, onInputChange, 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="custom_email_text">Custom Email Message (Optional)</Label>
+        <Label htmlFor="custom_email_text">Custom Email Message *</Label>
         <p className="text-sm text-muted-foreground">
           This text will be included in confirmation/approval emails sent to participants.
         </p>

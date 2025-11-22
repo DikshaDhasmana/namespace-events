@@ -43,8 +43,7 @@ export class EmailService {
   static generateEventEmailTemplate(data: EmailTemplateData & { subject?: string }): string {
     // Cache-busting parameter to force email clients to load new images
     const cacheBuster = `?v=${Date.now()}`;
-    const defaultCustomText = "We're excited to have you join us!";
-    const customText = data.customEmailText || defaultCustomText;
+    const customText = data.customEmailText || "We're excited to have you join us!";
     
     return `
 <!DOCTYPE html>
@@ -198,10 +197,6 @@ export class EmailService {
 
       <div class="custom-message">
         ${customText}
-      </div>
-
-      <div class="message">
-        ${data.message}
       </div>
 
       <p class="signature">Best regards,<br>Team NAMESPACE</p>
