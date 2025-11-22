@@ -177,6 +177,7 @@ const CreateEvent = () => {
       if (error) throw error;
 
       if (data) {
+        console.log('Fetched event data min_team_size:', data.min_team_size);
         const eventTimezone = data.timezone || 'Asia/Kolkata';
         setFormData({
           name: data.name || '',
@@ -594,6 +595,9 @@ const CreateEvent = () => {
         prizes_and_tracks: formData.prizes_and_tracks || [],
         judges_and_mentors: formData.judges_and_mentors || []
       };
+
+      console.log('Saving event with min_team_size:', eventData.min_team_size);
+
 
       // Only set short_id for new events
       if (!isEditMode) {
