@@ -55,7 +55,6 @@ export type Database = {
           judges_and_mentors: Json | null
           judging_criteria: string | null
           max_participants: number | null
-          min_team_size: number | null
           mode: string | null
           name: string
           networking: string | null
@@ -100,7 +99,6 @@ export type Database = {
           judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
-          min_team_size?: number | null
           mode?: string | null
           name: string
           networking?: string | null
@@ -145,7 +143,6 @@ export type Database = {
           judges_and_mentors?: Json | null
           judging_criteria?: string | null
           max_participants?: number | null
-          min_team_size?: number | null
           mode?: string | null
           name?: string
           networking?: string | null

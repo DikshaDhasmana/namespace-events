@@ -33,7 +33,6 @@ const CreateEvent = () => {
     max_participants: '',
     mode: '',
     team_size: '',
-    min_team_size: '',
     approval_enabled: false,
     timezone: 'Asia/Kolkata',
     // Additional fields for different event types
@@ -177,7 +176,6 @@ const CreateEvent = () => {
       if (error) throw error;
 
       if (data) {
-        console.log('Fetched event data min_team_size:', data.min_team_size);
         const eventTimezone = data.timezone || 'Asia/Kolkata';
         setFormData({
           name: data.name || '',
@@ -188,7 +186,6 @@ const CreateEvent = () => {
           max_participants: data.max_participants?.toString() || '',
           mode: data.mode || '',
           team_size: data.team_size?.toString() || '',
-          min_team_size: data.min_team_size?.toString() || '',
           approval_enabled: data.approval_enabled || false,
           timezone: eventTimezone,
           end_date: data.end_date ? convertUTCToLocal(data.end_date, eventTimezone) : '',
@@ -567,7 +564,6 @@ const CreateEvent = () => {
         submission_end: formData.submission_end ? convertLocalToUTC(formData.submission_end, formData.timezone) : null,
         venue: formData.venue || (formData.mode === 'online' ? 'Online' : ''),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        min_team_size: formData.min_team_size ? parseInt(formData.min_team_size) : null,
         mode: formData.mode || null,
         team_size: formData.team_size ? parseInt(formData.team_size) : null,
         approval_enabled: formData.approval_enabled,
@@ -595,9 +591,6 @@ const CreateEvent = () => {
         prizes_and_tracks: formData.prizes_and_tracks || [],
         judges_and_mentors: formData.judges_and_mentors || []
       };
-
-      console.log('Saving event with min_team_size:', eventData.min_team_size);
-
 
       // Only set short_id for new events
       if (!isEditMode) {
