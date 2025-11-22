@@ -42,6 +42,7 @@ export type Database = {
           confirmation_email_enabled: boolean | null
           contest_type: string | null
           created_at: string
+          custom_email_text: string | null
           date: string
           description: string | null
           display_image_url: string | null
@@ -85,6 +86,7 @@ export type Database = {
           confirmation_email_enabled?: boolean | null
           contest_type?: string | null
           created_at?: string
+          custom_email_text?: string | null
           date: string
           description?: string | null
           display_image_url?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           confirmation_email_enabled?: boolean | null
           contest_type?: string | null
           created_at?: string
+          custom_email_text?: string | null
           date?: string
           description?: string | null
           display_image_url?: string | null

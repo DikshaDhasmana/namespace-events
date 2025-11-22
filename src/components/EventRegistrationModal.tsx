@@ -235,7 +235,7 @@ const EventRegistrationModal = ({
       // First get the event to find the registration form
       const { data: event, error: eventError } = await supabase
         .from('events')
-        .select('registration_form_id, date, venue')
+        .select('registration_form_id, date, venue, custom_email_text')
         .eq('id', eventId)
         .single();
 
@@ -353,7 +353,7 @@ const EventRegistrationModal = ({
         if (approvalEnabled) {
           await sendPendingEmail(event.date, event.venue);
         } else {
-          await sendConfirmationEmail(event.date, event.venue);
+          await sendConfirmationEmail(event.date, event.venue, event.custom_email_text || undefined);
         }
       }
 
@@ -408,7 +408,7 @@ const EventRegistrationModal = ({
     }
   };
 
-  const sendConfirmationEmail = async (eventDate: string, eventVenue: string) => {
+  const sendConfirmationEmail = async (eventDate: string, eventVenue: string, customEmailText?: string) => {
     if (!user) return;
 
     try {
@@ -424,6 +424,7 @@ const EventRegistrationModal = ({
         message: `Thank you for registering for ${eventName}! We're excited to have you join us.`,
         eventDate: formatDate(eventDate),
         eventVenue,
+        customEmailText,
         subject: `Registration Confirmed: ${eventName}`
       });
 

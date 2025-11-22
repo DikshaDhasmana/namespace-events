@@ -96,6 +96,20 @@ const MeetupForm: React.FC<MeetupFormProps> = ({ formData, onInputChange, onSele
           placeholder="e.g., 50"
         />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="custom_email_text">Custom Email Message (Optional)</Label>
+        <p className="text-sm text-muted-foreground">
+          This text will be included in confirmation/approval emails sent to participants.
+        </p>
+        <ReactQuill
+          theme="snow"
+          value={formData.custom_email_text || ''}
+          onChange={(value) => onInputChange({ target: { name: 'custom_email_text', value } } as any)}
+          placeholder="Enter custom message for email notifications (leave empty to use default)"
+          className="bg-background"
+        />
+      </div>
     </div>
   );
 };

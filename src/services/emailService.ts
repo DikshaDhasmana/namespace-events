@@ -13,6 +13,7 @@ export interface EmailTemplateData {
   message: string;
   eventDate?: string;
   eventVenue?: string;
+  customEmailText?: string;
 }
 
 export class EmailService {
@@ -42,6 +43,8 @@ export class EmailService {
   static generateEventEmailTemplate(data: EmailTemplateData & { subject?: string }): string {
     // Cache-busting parameter to force email clients to load new images
     const cacheBuster = `?v=${Date.now()}`;
+    const defaultCustomText = "We're excited to have you join us!";
+    const customText = data.customEmailText || defaultCustomText;
     
     return `
 <!DOCTYPE html>
@@ -95,6 +98,16 @@ export class EmailService {
       font-size: 20px;
       margin-bottom: 16px;
       color: #8100C4;
+    }
+
+    .custom-message {
+      background: #F9F5FF;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 5px solid #8100C4;
+      font-size: 15px;
+      line-height: 1.6;
     }
 
     .event-info {
@@ -176,6 +189,10 @@ export class EmailService {
 
     <div class="content">
       <h2>Hello ${data.applicantName},</h2>
+
+      <div class="custom-message">
+        ${customText}
+      </div>
 
       <div class="event-info">
         <h3>${data.eventName}</h3>

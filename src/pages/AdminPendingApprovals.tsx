@@ -19,6 +19,7 @@ interface PendingRegistration {
   event_date: string;
   event_venue: string;
   event_confirmation_email_enabled: boolean | null;
+  event_custom_email_text: string | null;
   user_name: string;
   user_email: string;
   user_phone: string;
@@ -88,6 +89,7 @@ export default function AdminPendingApprovals() {
             day: 'numeric',
           }),
           eventVenue: registration.event_venue,
+          customEmailText: registration.event_custom_email_text || undefined,
           subject: `Registration Approved: ${registration.event_name}`
         });
 
