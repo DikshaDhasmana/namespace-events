@@ -2,11 +2,11 @@ import { Trophy, Award, Medal, Crown } from 'lucide-react';
 
 const HackHazardsPrizes = () => {
   const topPrizes = [
-    { rank: 1, amount: "50,000", icon: Crown },
-    { rank: 2, amount: "40,000", icon: Trophy },
-    { rank: 3, amount: "30,000", icon: Medal },
-    { rank: 4, amount: "20,000", icon: Award },
-    { rank: 5, amount: "10,000", icon: Award },
+    { rank: 1, amount: "100,000", icon: Crown },
+    { rank: 2, amount: "80,000", icon: Trophy },
+    { rank: 3, amount: "60,000", icon: Medal },
+    { rank: 4, amount: "40,000", icon: Award },
+    { rank: 5, amount: "20,000", icon: Award },
   ];
 
   const rankPrizes = [
@@ -64,7 +64,7 @@ const HackHazardsPrizes = () => {
                       <IconComponent className={`h-8 w-8 ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : index === 2 ? 'text-amber-600' : 'text-primary'}`} />
                     </div>
                     <div className="text-lg font-bold text-foreground mb-1">Rank {prize.rank}</div>
-                    <div className="text-xl font-black text-primary">₹{prize.amount} Cash</div>
+                    <div className="text-2xl font-black text-primary">₹{prize.amount} Cash</div>
                   </div>
                 );
               })}
@@ -79,8 +79,8 @@ const HackHazardsPrizes = () => {
                 className="p-6 rounded-xl bg-gradient-to-br from-muted/5 to-muted/10 border border-border text-center hover:scale-105 transition-transform duration-300"
               >
                 <div className="text-lg font-bold text-foreground mb-2">Rank {prize.ranks}</div>
-                <div className="text-xl font-black text-primary mb-1">₹{prize.amount} Cash</div>
-                <div className="text-sm text-muted-foreground">each ({prize.count})</div>
+                <div className="text-2xl font-black text-primary mb-1">₹{prize.amount} Cash</div>
+                <div className="text-md text-muted-foreground">each ({prize.count})</div>
               </div>
             ))}
           </div>
@@ -92,8 +92,8 @@ const HackHazardsPrizes = () => {
             <h3 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">
               Track Prizes for Sponsored Tracks
             </h3>
-            <p className="text-xl font-semibold text-primary mb-2">Over USD 10,000+ in cash prizes</p>
-            <p className="text-muted-foreground">
+            <p className="text-3xl font-semibold text-primary mb-2">Over USD 10,000+ in cash prizes</p>
+            <p className="text-muted-foreground text-lg">
               Across multiple tracks (all tracks to be announced closer to the hackathon date)
             </p>
           </div>

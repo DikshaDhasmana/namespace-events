@@ -24,7 +24,7 @@ export const HackHazardsHero = () => {
         {/* Date */}
         <div className="mb-12">
           <p className="text-lg md:text-xl font-sora font-semibold text-namespace-purple">
-            February '26
+            April '26
           </p>
         </div>
 
